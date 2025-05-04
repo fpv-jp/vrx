@@ -1,0 +1,249 @@
+body {
+  margin: 0;
+  height: 100vh;
+  background: rgba(50, 50, 50, 1);
+  color: rgba(0, 255, 0, 1);
+}
+
+#Helion10 {
+  position: absolute;
+  top: 5.3%;
+  right: 0px;
+  width: 10%;
+  opacity: 0.5;
+  filter: /* brightness(0.8) */ sepia(1) hue-rotate(60deg) saturate(2.5);
+  visibility: hidden;
+  z-index: 10;
+}
+
+.receiver-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#RemoteVideoContainer {
+  position: relative;
+  display: inline-block;
+}
+
+#RemoteVideoContainer canvas {
+  position: absolute;
+  display: block;
+}
+
+#RemoteVideo {
+  z-index: 1;
+}
+
+#HeadUpDisplay {
+  z-index: 10;
+  pointer-events: none;
+}
+
+#HeadUpDisplayNoneRetina {
+  display: none;
+}
+
+#RecordingCanvas {
+  display: none;
+}
+
+#AudioVisualizer {
+  z-index: 10;
+  bottom: 0;
+  pointer-events: none;
+}
+
+#NetworkMonitoring {
+  position: absolute;
+  display: block;
+  z-index: 10;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+#RecordingCanvas {
+  visibility: hidden;
+  z-index: 0;
+}
+
+#WebrtcReport {
+  visibility: hidden;
+  position: absolute;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.8);
+  top: 0px;
+  left: 50%;
+  width: 50%;
+  height: 90%;
+  transform: translate(-50%, 0%);
+  z-index: 20;
+}
+
+#SearchRadarCanvas {
+  visibility: hidden;
+  position: absolute;
+  overflow: auto;
+  opacity: 0.8;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+}
+
+#TelemetryDataDisplay {
+  position: absolute;
+  top: 50%;
+  padding: 0px 5px;
+  /* background: rgba(0, 0, 0, 0.3); */
+  z-index: 10;
+}
+
+#NetworkStatus {
+  position: absolute;
+  top: 50%;
+  right: 0px;
+  transform: translateY(-50%);
+  padding: 0px 10px;
+  /* background: rgba(0, 0, 0, 0.3); */
+  /* font-family: sans-serif;
+    font-size: 11px; */
+  z-index: 10;
+}
+
+#TweakpaneMenu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 30;
+}
+
+#VideoReplayContainer {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80vw;
+  height: 45vw;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  background: black;
+  overflow: hidden;
+}
+
+#VideoReplayContainer video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+  /* pointer-events: none; */
+}
+
+/*
+------------------------------------ 
+  Menu
+------------------------------------
+*/
+
+.tp-lblv_l {
+  white-space: nowrap;
+}
+
+.swal2-popup {
+  font-family:
+    Roboto Mono,
+    Source Code Pro,
+    Menlo,
+    Courier,
+    monospace !important;
+  font-size: 13px !important;
+  padding: 1em 1.5em !important;
+  border-radius: 6px !important;
+  background: #2c2c2c !important;
+  color: #eee !important;
+  width: auto !important;
+  min-width: 300px !important;
+  max-width: 90vw !important;
+}
+
+.swal2-styled {
+  font-size: 13px !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  background-color: #444 !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: background 0.2s !important;
+}
+
+.swal2-styled:hover {
+  background-color: #555 !important;
+}
+
+/*
+  ------------------------------------ 
+  Realtime chart
+  ------------------------------------
+*/
+
+svg {
+  font: 10px sans-serif;
+  fill: rgba(0, 255, 0, 1);
+  /* background: rgba(0, 0, 0, 0.3); */
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: rgba(0, 255, 0, 1);
+  shape-rendering: crispEdges;
+}
+
+.x.axis line {
+  shape-rendering: auto;
+}
+
+.line {
+  fill: none;
+  stroke: rgba(0, 255, 0, 0.8);
+  stroke-width: 0.8px;
+}
+
+.bar {
+  fill: rgba(0, 255, 0, 0.6);
+}
+
+.area {
+  fill: rgba(0, 255, 0, 0.4);
+}
+
+.grid-x {
+  stroke: rgba(0, 255, 0, 0.5);
+  stroke-width: 0.5;
+  stroke-dasharray: 3, 6;
+}
+
+.grid-y {
+  stroke: rgba(0, 255, 0, 0.8);
+  stroke-width: 0.5;
+}
+
+.chart-label {
+  font-size: 11px;
+}
+
+.left-label {
+  text-anchor: start;
+}
+
+.right-label {
+  text-anchor: end;
+}

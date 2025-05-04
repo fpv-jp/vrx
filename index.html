@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>webrtc demo</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <link href="src/main.css" rel="stylesheet" />
+    <script type="module">
+      import { SignalingManager } from './src/main.js'
+      let protocol = new URLSearchParams(window.location.search).get('p')
+      SignalingManager.init(protocol)
+    </script>
+  </head>
+
+  <body>
+    <div id="SenderContainer" class="sender-container">
+      <span id="SenderId" class="id"></span>
+    </div>
+
+    <div id="ReceiverContainer" class="receiver-container">
+      <div id="TweakpaneMenu"></div>
+      <div id="RemoteVideoContainer">
+        <canvas id="RemoteVideo"></canvas>
+        <canvas id="HeadUpDisplay"></canvas>
+        <canvas id="HeadUpDisplayNoneRetina"></canvas>
+        <img id="Helion10" src="src/Helion10-O4P-6.jpg" />
+        <canvas id="AudioVisualizer"></canvas>
+        <div id="NetworkMonitoring"></div>
+        <pre id="WebrtcReport"></pre>
+        <canvas id="SearchRadarCanvas"></canvas>
+        <pre id="TelemetryDataDisplay" class="telemetry-data-gisplay"></pre>
+        <pre id="NetworkStatus"></pre>
+        <div id="VideoReplayContainer">
+          <video id="SourceRecorderVideo" controls playsinline loop></video>
+          <video id="OverlayRecorderVideo" controls playsinline loop></video>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
