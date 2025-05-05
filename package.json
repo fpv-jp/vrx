@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "vite",
-    "pre": "vite preview",
+    "pre": "vite preview --host",
     "build": "vite build",
     "server": "node server-local.js",
     "fmt": "prettier --write \"./**/*.{js,css,html}\""
