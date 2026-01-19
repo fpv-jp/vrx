@@ -1,0 +1,50 @@
+{
+  "name": "vrx",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "main.js",
+  "author": "hexaforce",
+  "license": "MIT",
+  "description": "video and telemetry visualization using webrtc",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fpv-jp/vrx"
+  },
+  "keywords": [
+    "fpv",
+    "vtx",
+    "vrx",
+    "drone",
+    "japan"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:production && npm run build:development",
+    "build:production": "vite build --mode production",
+    "build:development": "vite build --mode development",
+    "preview": "vite preview --host",
+    "fmt": "prettier --write \"./**/*.{js,css,html}\""
+  },
+  "dependencies": {
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "tweakpane": "^4.0.5"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.0",
+    "vite": "^7.3.1",
+    "vite-plugin-static-copy": "^3.1.4"
+  },
+  "prettier": {
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "printWidth": 256,
+    "htmlWhitespaceSensitivity": "ignore"
+  }
+}

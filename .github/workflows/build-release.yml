@@ -1,0 +1,54 @@
+name: Build and Create Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Create timestamp tag
+        id: timestamp
+        run: |
+          TAG="release-$(date +'%Y%m%d-%H%M%S')"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Archive dist directory
+        run: |
+          cd vrx
+          tar -czf ../dist.tar.gz .
+          cd ..
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.timestamp.outputs.tag }}
+          name: Release ${{ steps.timestamp.outputs.tag }}
+          body: |
+            Automated build from commit ${{ github.sha }}
+            Branch: ${{ github.ref_name }}
+          files: dist.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
