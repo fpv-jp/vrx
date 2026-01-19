@@ -13,17 +13,17 @@ curl -L -o server-cert.pem https://raw.githubusercontent.com/fpv-jp/app/refs/hea
 curl -L -o server-key.pem https://raw.githubusercontent.com/fpv-jp/app/refs/heads/main/certificate/server-key.pem
 ```
 
-2. Add DNS entry
+2. Add vtx DNS entry
 ``` bash
 sudo vim /etc/hosts
 
 # /etc/hosts
-127.0.0.1       localhost fpv
+192.168.???.??? fpv
 ```
 
 3. Install the CA certificate in the OS or browser
 ```sh
-curl -L -o https://raw.githubusercontent.com/fpv-jp/app/refs/heads/main/certificate/server-ca-cert.pem
+curl -L -o server-ca-cert.pem https://raw.githubusercontent.com/fpv-jp/app/refs/heads/main/certificate/server-ca-cert.pem
 ```
 
 4. Start the web app

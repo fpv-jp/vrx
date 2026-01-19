@@ -51,8 +51,13 @@ export async function buildPayload() {
   }
 
   let network_interface = P.network_interface
+  
+  let flight_controller = P.flight_controller
+
   let video_pipeline = await builder.buildVidePipeline(P)
+
   video_pipeline = video_pipeline.replaceAll('\n', '')//.replaceAll('(', '\\(').replaceAll(')', '\\)')
+  
   let audio_pipeline = builder.buildAudioPipeline(P).replaceAll('\n', '')//.replaceAll('(', '\\(').replaceAll(')', '\\)')
 
   // Check browser's H264 profile support
@@ -66,6 +71,7 @@ export async function buildPayload() {
 
   return {
     network_interface,
+    flight_controller,
     video_pipeline,
     audio_pipeline,
     video_priority,
