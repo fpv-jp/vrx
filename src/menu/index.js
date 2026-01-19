@@ -5,6 +5,7 @@ import * as Sub from './sub-control.js'
 
 import { setSenderEntryList } from './sender'
 import { initNetworkList } from './network'
+import { initBordList } from './bord'
 import { initDeviceList } from './device'
 import { initVideoList } from './video'
 import { initAudioList } from './audio'
@@ -21,7 +22,7 @@ const SenderDifferentComponent = [
 
 // setMediaDeviceList -----------------------------------------------
 function setMediaDeviceList(message) {
-  console.log('message:', message)
+  // console.log('message:', message)
 
   if (message.source === 'gstreamer') {
     for (let codec of message.codecs.video) {
@@ -74,13 +75,16 @@ function setMediaDeviceList(message) {
   }
 
   C.MenuParams.message = message
-  console.log('filter message:', C.MenuParams.message)
+  console.log('message:', C.MenuParams.message)
 
   if (message.source === 'gstreamer') {
     // Network Device
     initNetworkList()
-
     U.showComponent(C.Network)
+
+    // Bord Device
+    initBordList()
+    U.showComponent(C.Bord)
   }
 
   // Camera / Microphone
@@ -114,6 +118,8 @@ const ParameterEditorComponent = [
   C.SenderEntryList,
   //
   C.NetworkDeviceList,
+  //
+  C.BordDeviceList,
   //
   C.VideoCodecList,
   C.VideoDeviceList,
@@ -153,6 +159,7 @@ function initialize() {
   U.resetLists(
     //
     C.NetworkDeviceList,
+    C.BordDeviceList,
     C.VideoDeviceList,
     C.VideoCodecList,
     C.VideoCaptureList,
@@ -163,6 +170,7 @@ function initialize() {
   U.hideComponent(
     //
     C.Network,
+    C.Bord,
     C.Video,
     C.Audio,
     C.ConnectionButton,

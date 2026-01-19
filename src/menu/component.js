@@ -18,6 +18,7 @@ export const MenuParams = {
   sender: 'none',
 
   network_interface: 'none',
+  flight_controller: 'none',
 
   video_device: 'none',
   video_codec: 'none',
@@ -51,10 +52,10 @@ export const SenderEntryList = ConnectionMenu.addBinding(MenuParams, 'sender', {
   options: defaultOption,
 })
 
-// Network Entry -----------------------------------------------
+// Network Interface -----------------------------------------------
 
 export const Network = ConnectionMenu.addFolder({
-  title: 'Network setting',
+  title: 'Network interface',
   expanded: true,
   hidden: true,
 })
@@ -65,10 +66,24 @@ export const NetworkDeviceList = Network.addBinding(MenuParams, 'network_interfa
   options: defaultOption,
 })
 
+// Flight controller -----------------------------------------------
+
+export const Bord = ConnectionMenu.addFolder({
+  title: 'Flight controller',
+  expanded: true,
+  hidden: true,
+})
+
+export const BordDeviceList = Bord.addBinding(MenuParams, 'flight_controller', {
+  label: 'Device',
+  view: 'list',
+  options: defaultOption,
+})
+
 // Video Main --------------------------------
 
 export const Video = ConnectionMenu.addFolder({
-  title: 'Video setting',
+  title: 'Video camera',
   expanded: true,
   hidden: true,
 })
@@ -202,7 +217,7 @@ export const VideoFramerateSlider = Video.addBinding(MenuParams, 'video_framerat
 
 // Audio Main --------------------------------
 export const Audio = ConnectionMenu.addFolder({
-  title: 'Audio setting',
+  title: 'Audio microphone',
   expanded: true,
   hidden: true,
 })
