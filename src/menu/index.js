@@ -33,16 +33,26 @@ function setMediaDeviceList(message) {
     }
 
     switch (message.platform) {
-      case 'INTEL_MAC':
+      case 'APPLE_MAC':
         //
         break
       case 'LINUX_X86':
         //
         break
-      case 'RPI4_V4L2':
+      case 'RASPBERRY_PI_4B':
+      case 'RASPBERRY_PI_4CM':
         //
         message.devices = message.devices.filter((d) => d.name != 'bcm2835-isp')
         message.codecs.video = message.codecs.video.filter((d) => d['interlace-mode'] !== 'alternate')
+        break
+      case 'RASPBERRY_PI_5':
+        //
+        message.devices = message.devices.map((d) => {
+          if (d.klass === 'Source/Video') {
+            d.caps = d.caps.filter((f) => f.startsWith('video/x-raw') && (f.includes('[') || f.includes('{')))
+          }
+          return d
+        })
         break
       case 'JETSON_NANO_2GB':
         //
@@ -56,18 +66,6 @@ function setMediaDeviceList(message) {
         break
       case 'RADXA_ROCK_5T':
         //
-        break
-      case 'RPI4_LIBCAM':
-        //
-        break
-      case 'RPI5_LIBCAM':
-        //
-        message.devices = message.devices.map((d) => {
-          if (d.klass === 'Source/Video') {
-            d.caps = d.caps.filter((f) => f.startsWith('video/x-raw') && (f.includes('[') || f.includes('{')))
-          }
-          return d
-        })
         break
       case 'UNKNOWN':
       default:

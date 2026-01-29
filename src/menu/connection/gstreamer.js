@@ -2,15 +2,14 @@ import * as C from '../component'
 import * as U from './pipeline/pipeline-utils.js'
 import * as Utils from '../../utils.js'
 
-import * as INTEL_MAC from './pipeline/INTEL_MAC'
+import * as APPLE_MAC from './pipeline/APPLE_MAC'
 import * as LINUX_X86 from './pipeline/LINUX_X86'
-import * as RPI4_V4L2 from './pipeline/RPI4_V4L2'
+import * as RASPBERRY_PI_4B from './pipeline/RASPBERRY_PI_4B'
+import * as RASPBERRY_PI_5 from './pipeline/RASPBERRY_PI_5'
 import * as JETSON_NANO_2GB from './pipeline/JETSON_NANO_2GB'
 import * as JETSON_ORIN_NANO_SUPER from './pipeline/JETSON_ORIN_NANO_SUPER'
 import * as RADXA_ROCK_5B from './pipeline/RADXA_ROCK_5B'
 import * as RADXA_ROCK_5T from './pipeline/RADXA_ROCK_5T'
-import * as RPI4_LIBCAM from './pipeline/RPI4_LIBCAM'
-import * as RPI5_LIBCAM from './pipeline/RPI5_LIBCAM'
 
 // buildPayload -------------------------------------------
 export async function buildPayload() {
@@ -19,14 +18,18 @@ export async function buildPayload() {
 
   let builder = null
   switch (platform) {
-    case 'INTEL_MAC':
-      builder = INTEL_MAC
+    case 'APPLE_MAC':
+      builder = APPLE_MAC
       break
     case 'LINUX_X86':
       builder = LINUX_X86
       break
-    case 'RPI4_V4L2':
-      builder = RPI4_V4L2
+    case 'RASPBERRY_PI_4B':
+    case 'RASPBERRY_PI_4CM':
+      builder = RASPBERRY_PI_4B
+      break
+    case 'RASPBERRY_PI_5':
+      builder = RASPBERRY_PI_5
       break
     case 'JETSON_NANO_2GB':
       builder = JETSON_NANO_2GB
@@ -39,12 +42,6 @@ export async function buildPayload() {
       break
     case 'RADXA_ROCK_5T':
       builder = RADXA_ROCK_5T
-      break
-    case 'RPI4_LIBCAM':
-      builder = RPI4_LIBCAM
-      break
-    case 'RPI5_LIBCAM':
-      builder = RPI5_LIBCAM
       break
     case 'UNKNOWN':
     default:
