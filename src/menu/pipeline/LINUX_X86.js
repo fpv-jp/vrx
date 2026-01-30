@@ -19,7 +19,6 @@ import * as U from './pipeline-utils.js'
 // buildVidePipeline -------------------------------------------
 export function buildVidePipeline(P) {
   let video_device = JSON.parse(P.video_device)
-  let video_codec = JSON.parse(P.video_codec)
 
   let video_launch = video_device.launch
   video_launch = video_launch.replace('v4l2src', 'v4l2src io-mode=dmabuf do-timestamp=true')
@@ -32,6 +31,8 @@ export function buildVidePipeline(P) {
   if (video_capture.startsWith('video/x-h265')) {
     return U.buildVidePipeline_H265(video_launch, video_capture)
   }
+
+  let video_codec = JSON.parse(P.video_codec)
 
   switch (video_codec.name) {
     // AMD AMF H.264 //////////////////////////////////

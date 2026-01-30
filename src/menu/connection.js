@@ -1,12 +1,12 @@
-import * as C from '../component'
-import * as B from './browser.js'
-import * as G from './gstreamer.js'
-import Constants from '../../constants.js'
-import ReceiverManager, { ReceiverState } from '../../receiver.js'
+import * as C from './component'
+import * as B from './connection-browser.js'
+import * as G from './connection-gstreamer.js'
+import Constants from '../constants.js'
+import ReceiverManager, { ReceiverState } from '../receiver.js'
 
-import * as Widgets from '../../widgets'
-import * as Menu from '../../menu'
-import * as Utils from '../../utils.js'
+import * as Widgets from '../widgets'
+import * as Menu from './index.js'
+import * as Utils from '../utils.js'
 
 const SENDER = Constants.SENDER
 const Command = Constants.Command

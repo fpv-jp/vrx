@@ -1,6 +1,6 @@
-import * as C from '../component'
+import * as C from './component'
 import * as U from './pipeline/pipeline-utils.js'
-import * as Utils from '../../utils.js'
+import * as Utils from '../utils.js'
 
 import * as APPLE_MAC from './pipeline/APPLE_MAC'
 import * as LINUX_X86 from './pipeline/LINUX_X86'

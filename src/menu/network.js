@@ -1,4 +1,5 @@
-import * as C from '../component'
+import * as C from './component'
+import { setListOptions } from './list-utils.js'
 
 export function initNetworkList() {
   const network = C.MenuParams.message.network
@@ -20,9 +21,5 @@ export function initNetworkList() {
     }
   })
 
-  options.unshift(C.Placeholder)
-
-  C.NetworkDeviceList.options = options
-  C.MenuParams.network_interface = options[options.length === 1 ? 0 : 1].value
-  C.NetworkDeviceList.refresh()
+  setListOptions(C.NetworkDeviceList, options)
 }

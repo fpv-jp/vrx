@@ -1,5 +1,5 @@
 import * as U from './pipeline-utils.js'
-import * as Utils from '../../../utils.js'
+import * as Utils from '../../utils.js'
 
 export const video_priority = 'high'
 export const audio_priority = 'high'

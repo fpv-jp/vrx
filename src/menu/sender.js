@@ -1,9 +1,9 @@
-import * as C from '../component'
-import Constants from '../../constants.js'
-import { ReceiverState } from '../../receiver.js'
+import * as C from './component'
+import Constants from '../constants.js'
+import { ReceiverState } from '../receiver.js'
 
-import * as Menu from '../../menu'
-import * as Utils from '../../utils.js'
+import * as Menu from './index.js'
+import * as Utils from '../utils.js'
 
 const SENDER = Constants.SENDER
 

@@ -1,6 +1,6 @@
-import * as C from '../component'
-import * as U from '../menu-utils'
-import * as P from '../parameter-utils.js'
+import * as C from './component'
+import * as U from './menu-utils'
+import * as P from './parameter-utils.js'
 
 // Browser Video Codec --------------------------------
 export function getCodecList(codecs) {

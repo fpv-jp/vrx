@@ -13,18 +13,18 @@ const Command = Constants.Command
 //-------------------------------------
 export default async function OpenVtxDataChannel(channel) {
   switch (channel.label) {
+
+    // ----------------------------------------
+    // PC2 Command Channel Message
+    // ----------------------------------------
     case ChannelLabel.CMD:
-      // --- PC2 Command Channel Message ------------------------------------
       channel.onmessage = ({ data }) => {
         const message = JSON.parse(data)
         switch (message.cmd) {
           case Command.HANG_UP:
-            // --- CMD HANG_UP ------------------------------------
-
             break
 
           case Command.PONG:
-            // --- CMD PONG ------------------------------------
             MonitorState.ping = (window.performance.now() - MonitorState.pingStartTime).toFixed(2)
             break
 
@@ -39,7 +39,6 @@ export default async function OpenVtxDataChannel(channel) {
     // Sensors in smartphones and tablets
     // ----------------------------------------
     case ChannelLabel.IMU:
-      // --- IMU Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         const quaternion = new Float32Array(data)
 
@@ -61,24 +60,21 @@ export default async function OpenVtxDataChannel(channel) {
       break
 
     case ChannelLabel.GNSS:
-      // --- GNSS Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         telemetryData.gps = Object.fromEntries(Object.entries(JSON.parse(data)).filter(([_, v]) => v !== null))
       }
       break
 
     case ChannelLabel.BAT:
-      // --- BAT Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         telemetryData.battery = Object.fromEntries(Object.entries(JSON.parse(data)).filter(([_, v]) => v !== null))
       }
       break
 
     // ----------------------------------------
-    // Multiwii Serial Protocol (MSP)
+    // Sensors in Flight controller Multiwii Serial Protocol (MSP)
     // ----------------------------------------
     case ChannelLabel.MSP_RAW_IMU:
-      // --- MSP_RAW_IMU Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -114,7 +110,6 @@ export default async function OpenVtxDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_RAW_GPS:
-      // --- MSP_RAW_GPS Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -141,7 +136,6 @@ export default async function OpenVtxDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_COMP_GPS:
-      // --- MSP_COMP_GPS Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -155,7 +149,6 @@ export default async function OpenVtxDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_ATTITUDE:
-      // --- MSP_ATTITUDE Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -173,7 +166,6 @@ export default async function OpenVtxDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_ALTITUDE:
-      // --- MSP_ALTITUDE Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         telemetryData.altitude = parseFloat((view.getInt32(0, true) / 100.0).toFixed(2))
@@ -181,7 +173,6 @@ export default async function OpenVtxDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_ANALOG:
-      // --- MSP_ANALOG Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -199,7 +190,6 @@ export default async function OpenVtxDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_SONAR:
-      // --- MSP_SONAR Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         telemetryData.sonar = view.getInt32(0, true)
@@ -207,7 +197,6 @@ export default async function OpenVtxDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_BATTERY_STATE:
-      // --- MSP_BATTERY_STATE Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -225,7 +214,6 @@ export default async function OpenVtxDataChannel(channel) {
       break
 
     case ChannelLabel.WPA_SUPPLICANT:
-      // --- WPA_SUPPLICANT Channel ------------------------------------
       channel.onmessage = ({ data }) => {
         let wifi = JSON.parse(data)
         wifi.status = { ...wifi.status, ...Utils.frequencyToWifiChannel(wifi.status.freq) }
