@@ -4,7 +4,12 @@ import * as C from './component'
 export function checkRequiredKeys() {
   let requiredKeys = ['video_capture', 'audio_sampling']
   if (C.MenuParams?.message?.source === 'gstreamer') {
-    requiredKeys.push('video_device', 'video_codec', 'audio_device', 'audio_codec')
+    requiredKeys.push('video_device', 'audio_device', 'audio_codec')
+    const capture = C.MenuParams.video_capture
+    const needsVideoCodec = typeof capture === 'string' && capture.includes('video/x-raw')
+    if (needsVideoCodec) {
+      requiredKeys.push('video_codec')
+    }
   }
   const isReady = requiredKeys.every((key) => C.MenuParams[key] !== 'none')
   return !isReady

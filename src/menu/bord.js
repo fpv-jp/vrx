@@ -1,4 +1,5 @@
-import * as C from '../component'
+import * as C from './component'
+import { setListOptions } from './list-utils.js'
 
 export function initBordList() {
   const flight_controllers = C.MenuParams.message.flight_controllers
@@ -10,9 +11,5 @@ export function initBordList() {
     options.push({ text: `[${target_name}] ${manufacturer_id} ${board_name}`, value: fc.port })
   })
 
-  options.unshift(C.Placeholder)
-
-  C.BordDeviceList.options = options
-  C.MenuParams.flight_controller = options[options.length === 1 ? 0 : 1].value
-  C.BordDeviceList.refresh()
+  setListOptions(C.BordDeviceList, options)
 }

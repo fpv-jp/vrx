@@ -3,13 +3,13 @@ import * as C from './component'
 import * as P from './parameter-utils.js'
 import * as Sub from './sub-control.js'
 
-import { setSenderEntryList } from './sender'
-import { initNetworkList } from './network'
-import { initBordList } from './bord'
-import { initDeviceList } from './device'
-import { initVideoList } from './video'
-import { initAudioList } from './audio'
-import './connection'
+import { setSenderEntryList } from './sender.js'
+import { initNetworkList } from './network.js'
+import { initBordList } from './bord.js'
+import { initDeviceList } from './device.js'
+import { initVideoList } from './video.js'
+import { initAudioList } from './audio.js'
+import './connection.js'
 
 // SenderDifferentComponent -----------------------------------------------
 const SenderDifferentComponent = [
@@ -120,7 +120,7 @@ const ParameterEditorComponent = [
   C.BordDeviceList,
   //
   C.VideoCodecList,
-  C.VideoDeviceList,
+  C.VideoCameraList,
   C.VideoCaptureList,
   C.VideoFormatList,
   C.VideoDRMFormatList,
@@ -131,7 +131,7 @@ const ParameterEditorComponent = [
   C.VideoFramerateList,
   C.VideoFramerateSlider,
   //
-  C.AudioDeviceList,
+  C.AudioMicrophoneList,
   C.AudioCodecList,
   C.AudioSamplingList,
   C.AudioFormatList,
@@ -158,10 +158,10 @@ function initialize() {
     //
     C.NetworkDeviceList,
     C.BordDeviceList,
-    C.VideoDeviceList,
+    C.VideoCameraList,
     C.VideoCodecList,
     C.VideoCaptureList,
-    C.AudioDeviceList,
+    C.AudioMicrophoneList,
     C.AudioCodecList,
     C.AudioSamplingList,
   )

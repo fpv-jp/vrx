@@ -1,4 +1,5 @@
-import * as C from '../component'
+import * as C from './component'
+import { setListOptions } from './list-utils.js'
 
 // Device List --------------------------------
 export function initDeviceList() {
@@ -63,14 +64,8 @@ export function initDeviceList() {
   }
 
   // Video
-  videoOptions.unshift(C.Placeholder)
-  C.VideoDeviceList.options = videoOptions
-  C.MenuParams.video_device = videoOptions[videoOptions.length === 1 ? 0 : 1].value
-  C.VideoDeviceList.refresh()
+  setListOptions(C.VideoCameraList, videoOptions)
 
   // Audio
-  audioOptions.unshift(C.Placeholder)
-  C.AudioDeviceList.options = audioOptions
-  C.MenuParams.audio_device = audioOptions[audioOptions.length === 1 ? 0 : 1].value
-  C.AudioDeviceList.refresh()
+  setListOptions(C.AudioMicrophoneList, audioOptions)
 }

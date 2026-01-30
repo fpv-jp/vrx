@@ -47,7 +47,7 @@ export const MenuParams = {
 // Sender Entry -----------------------------------------------
 
 export const SenderEntryList = ConnectionMenu.addBinding(MenuParams, 'sender', {
-  label: 'Sender',
+  label: 'Sender ID',
   view: 'list',
   options: defaultOption,
 })
@@ -55,13 +55,13 @@ export const SenderEntryList = ConnectionMenu.addBinding(MenuParams, 'sender', {
 // Network Interface -----------------------------------------------
 
 export const Network = ConnectionMenu.addFolder({
-  title: 'Network interface',
+  title: 'Network setting',
   expanded: true,
   hidden: true,
 })
 
 export const NetworkDeviceList = Network.addBinding(MenuParams, 'network_interface', {
-  label: 'Device',
+  label: 'Interface',
   view: 'list',
   options: defaultOption,
 })
@@ -69,13 +69,13 @@ export const NetworkDeviceList = Network.addBinding(MenuParams, 'network_interfa
 // Flight controller -----------------------------------------------
 
 export const Bord = ConnectionMenu.addFolder({
-  title: 'Flight controller',
+  title: 'Flight controller setting',
   expanded: true,
   hidden: true,
 })
 
 export const BordDeviceList = Bord.addBinding(MenuParams, 'flight_controller', {
-  label: 'Device',
+  label: 'Board',
   view: 'list',
   options: defaultOption,
 })
@@ -83,13 +83,13 @@ export const BordDeviceList = Bord.addBinding(MenuParams, 'flight_controller', {
 // Video Main --------------------------------
 
 export const Video = ConnectionMenu.addFolder({
-  title: 'Video camera',
+  title: 'Video setting',
   expanded: true,
   hidden: true,
 })
 
-export const VideoDeviceList = Video.addBinding(MenuParams, 'video_device', {
-  label: 'Device',
+export const VideoCameraList = Video.addBinding(MenuParams, 'video_device', {
+  label: 'Camera',
   view: 'list',
   options: defaultOption,
 })
@@ -217,13 +217,13 @@ export const VideoFramerateSlider = Video.addBinding(MenuParams, 'video_framerat
 
 // Audio Main --------------------------------
 export const Audio = ConnectionMenu.addFolder({
-  title: 'Audio microphone',
+  title: 'Audio setting',
   expanded: true,
   hidden: true,
 })
 
-export const AudioDeviceList = Audio.addBinding(MenuParams, 'audio_device', {
-  label: 'Device',
+export const AudioMicrophoneList = Audio.addBinding(MenuParams, 'audio_device', {
+  label: 'Microphone',
   view: 'list',
   options: defaultOption,
 })

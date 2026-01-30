@@ -1,4 +1,4 @@
-import * as C from '../component'
+import * as C from './component'
 
 // buildPayload -------------------------------------------
 export function buildPayload() {
