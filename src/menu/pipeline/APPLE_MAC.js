@@ -19,105 +19,66 @@ export function buildVidePipeline(P) {
   let video_codec = JSON.parse(P.video_codec)
 
   switch (video_codec.name) {
+
     // vtenc_h264_hw //////////////////////////////////
     case 'vtenc_h264_hw':
-      return `${video_launch.replace('...', video_capture)} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-vtenc_h264_hw realtime=true ! 
-h264parse ! 
-rtph264pay config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type} ! 
-application/x-rtp,media=video,encoding-name=H264,payload=${U.video_payload_type}`
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e \
-    // avfvideosrc do-stats=true do-timestamp=true device-index=0 ! \
-    // video/x-raw,width=640,height=480,framerate=30/1,format=NV12 ! \
-    // queue max-size-buffers=1 leaky=downstream ! \
-    // vtenc_h264_hw realtime=true ! \
-    // h264parse ! \
-    // rtph264pay config-interval=-1 aggregate-mode=zero-latency ! \
-    // udpsink host=127.0.0.1 port=5000 sync=false async=false
+      return U.Pipeline.start(video_launch)
+        .caps(video_capture)
+        .queue()
+        .elem('vtenc_h264_hw', 'realtime=true')
+        .h264parse()
+        .rtph264pay(`config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type}`)
+        .rtpCaps(`application/x-rtp,media=video,encoding-name=H264,payload=${U.video_payload_type}`)
+        .toString()
 
     // vtenc_h265_hw //////////////////////////////////
     case 'vtenc_h265_hw':
-      return `${video_launch.replace('...', video_capture)} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-vtenc_h265_hw realtime=true allow-frame-reordering=false ! 
-h265parse ! 
-rtph265pay config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type} ! 
-application/x-rtp,media=video,encoding-name=H265,payload=${U.video_payload_type}`
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e \
-    // avfvideosrc do-stats=true do-timestamp=true device-index=0 ! \
-    // video/x-raw,width=640,height=480,framerate=30/1,format=NV12 ! \
-    // queue max-size-buffers=1 leaky=downstream ! \
-    // vtenc_h265_hw realtime=true allow-frame-reordering=false ! \
-    // h265parse ! \
-    // rtph265pay config-interval=-1 aggregate-mode=zero-latency ! \
-    // udpsink host=127.0.0.1 port=5000 sync=false async=false
+      return U.Pipeline.start(video_launch)
+        .caps(video_capture)
+        .queue()
+        .elem('vtenc_h265_hw', 'realtime=true allow-frame-reordering=false')
+        .h265parse()
+        .rtph265pay(`config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type}`)
+        .rtpCaps(`application/x-rtp,media=video,encoding-name=H265,payload=${U.video_payload_type}`)
+        .toString()
 
     // vp8enc //////////////////////////////////
     case 'vp8enc':
-      return `${video_launch.replace('...', video_capture)} ! 
-videoconvert ! 
-video/x-raw,format=I420 ! 
-queue max-size-buffers=1 leaky=downstream ! 
-vp8enc deadline=1 ! 
-rtpvp8pay pt=${U.video_payload_type} ! 
-application/x-rtp,media=video,encoding-name=VP8,payload=${U.video_payload_type}`
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e
-    // avfvideosrc do-stats=true do-timestamp=true device-index=0 !
-    // video/x-raw,width=640,height=480,framerate=30/1 !
-    // videoconvert !
-    // video/x-raw,format=I420 !
-    // queue max-size-buffers=1 leaky=downstream !
-    // vp8enc deadline=1 !
-    // rtpvp8pay !
-    // udpsink host=127.0.0.1 port=5000 sync=false async=false
+      return U.Pipeline.start(video_launch)
+        .caps(video_capture)
+        .videoconvert()
+        .caps('video/x-raw,format=I420')
+        .queue()
+        .elem('vp8enc', 'deadline=1')
+        .rtpvp8pay(`pt=${U.video_payload_type}`)
+        .rtpCaps(`application/x-rtp,media=video,encoding-name=VP8,payload=${U.video_payload_type}`)
+        .toString()
 
     // vp9enc //////////////////////////////////
     case 'vp9enc':
-      return `${video_launch.replace('...', video_capture)} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-vp9enc deadline=1 cpu-used=8 threads=4 lag-in-frames=0 ! 
-vp9parse ! 
-rtpvp9pay pt=${U.video_payload_type} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-application/x-rtp,media=video,encoding-name=VP9,payload=${U.video_payload_type}`
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e
-    // avfvideosrc do-stats=true do-timestamp=true device-index=0 !
-    // video/x-raw,width=640,height=480,framerate=30/1 !
-    // videoconvert !
-    // video/x-raw,format=I420 !
-    // queue max-size-buffers=1 leaky=downstream !
-    // vp9enc deadline=1 cpu-used=8 threads=4 lag-in-frames=0 !
-    // vp9parse !
-    // rtpvp9pay !
-    // udpsink host=127.0.0.1 port=5000 sync=false async=false
+      return U.Pipeline.start(video_launch)
+        .caps(video_capture)
+        .queue()
+        .elem('vp9enc', 'deadline=1 cpu-used=8 threads=4 lag-in-frames=0')
+        .vp9parse()
+        .rtpvp9pay(`pt=${U.video_payload_type}`)
+        .queue()
+        .rtpCaps(`application/x-rtp,media=video,encoding-name=VP9,payload=${U.video_payload_type}`)
+        .toString()
 
     // svtav1enc //////////////////////////////////
     case 'svtav1enc':
-      return `${video_launch.replace('...', video_capture)} ! 
-videoconvert ! 
-video/x-raw,format=I420 ! 
-queue max-size-buffers=1 leaky=downstream ! 
-svtav1enc ! 
-av1parse ! 
-rtpav1pay pt=${U.video_payload_type} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-application/x-rtp,media=video,encoding-name=AV1,payload=${U.video_payload_type}`
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e
-    // avfvideosrc do-stats=true do-timestamp=true device-index=0 !
-    // video/x-raw,width=640,height=480,framerate=30/1 !
-    // videoconvert !
-    // video/x-raw,format=I420 !
-    // queue max-size-buffers=1 leaky=downstream !
-    // svtav1enc !
-    // av1parse !
-    // rtpav1pay !
-    // udpsink host=127.0.0.1 port=5000 sync=false async=false
+      return U.Pipeline.start(video_launch)
+        .caps(video_capture)
+        .videoconvert()
+        .caps('video/x-raw,format=I420')
+        .queue()
+        .elem('svtav1enc')
+        .av1parse()
+        .rtpav1pay(`pt=${U.video_payload_type}`)
+        .queue()
+        .rtpCaps(`application/x-rtp,media=video,encoding-name=AV1,payload=${U.video_payload_type}`)
+        .toString()
 
     // UNKNOWN //////////////////////////////////
     case 'UNKNOWN':
@@ -139,13 +100,15 @@ export function buildAudioPipeline(P) {
   switch (audio_codec.name) {
     // opusenc //////////////////////////////////
     case 'opusenc':
-      return `${audio_launch.replace('...', audio_sampling)} ! 
-audioconvert ! 
-audioresample ! 
-queue max-size-buffers=1 leaky=downstream ! 
-opusenc perfect-timestamp=true ! 
-rtpopuspay pt=${U.audio_payload_type} ! 
-application/x-rtp,media=audio,encoding-name=OPUS,payload=${U.audio_payload_type}`
+      return U.Pipeline.start(audio_launch)
+        .caps(audio_sampling)
+        .audioconvert()
+        .audioresample()
+        .queue()
+        .elem('opusenc', 'perfect-timestamp=true')
+        .rtpopuspay(`pt=${U.audio_payload_type}`)
+        .rtpCaps(`application/x-rtp,media=audio,encoding-name=OPUS,payload=${U.audio_payload_type}`)
+        .toString()
 
     // GST_DEBUG=2 gst-launch-1.0 -v -e
     // osxaudiosrc device=0 do-timestamp=true !
@@ -159,13 +122,15 @@ application/x-rtp,media=audio,encoding-name=OPUS,payload=${U.audio_payload_type}
 
     // mulawenc //////////////////////////////////
     case 'mulawenc':
-      return `${audio_launch.replace('...', audio_sampling)} ! 
-audioconvert ! 
-audioresample ! 
-queue max-size-buffers=1 leaky=downstream ! 
-mulawenc ! 
-rtppcmupay pt=0 ! 
-application/x-rtp,media=audio,encoding-name=PCMU,payload=0`
+      return U.Pipeline.start(audio_launch)
+        .caps(audio_sampling)
+        .audioconvert()
+        .audioresample()
+        .queue()
+        .elem('mulawenc')
+        .rtppcmupay('pt=0')
+        .rtpCaps('application/x-rtp,media=audio,encoding-name=PCMU,payload=0')
+        .toString()
 
     // GST_DEBUG=2 gst-launch-1.0 -v -e
     // osxaudiosrc device=0 do-timestamp=true !

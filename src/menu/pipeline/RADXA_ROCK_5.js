@@ -4,7 +4,8 @@ import * as U from './pipeline-utils.js'
 export function buildVidePipeline(P) {
   let video_device = JSON.parse(P.video_device)
 
-  let video_launch = video_device.launch
+  let video_launch = video_device.launch.replaceAll("'", '')
+  video_launch = video_launch.replace('v4l2src', 'v4l2src io-mode=dmabuf do-timestamp=true')
 
   let video_capture = U.embeddedVideo(P)
 
@@ -18,53 +19,46 @@ export function buildVidePipeline(P) {
   let video_codec = JSON.parse(P.video_codec)
 
   switch (video_codec.name) {
-    // openh264enc //////////////////////////////////
-    case 'openh264enc':
+
+    // mpph264enc //////////////////////////////////
+    case 'mpph264enc':
       return U.Pipeline.start(video_launch)
         .caps(video_capture)
+        .queue()
         .videoconvert()
-        .elem('openh264enc', 'bitrate=3000000 enable-denoise=true complexity=2')
-        .queue('max-size-buffers=3 leaky=downstream')
+        .caps('video/x-raw,format=NV12')
+        .queue()
+        .elem('mpph264enc', 'level=40 profile=100')
+        .h264parse()
         .rtph264pay(`config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type}`)
         .rtpCaps(`application/x-rtp,media=video,encoding-name=H264,payload=${U.video_payload_type}`)
         .toString()
 
-    // x265enc //////////////////////////////////
-    case 'x265enc':
+    // mpph265enc //////////////////////////////////
+    case 'mpph265enc':
       return U.Pipeline.start(video_launch)
         .caps(video_capture)
-        .videoconvert()
         .queue()
-        .elem('x265enc')
+        .videoconvert()
+        .caps('video/x-raw,format=NV12')
+        .queue()
+        .elem('mpph265enc')
         .h265parse()
         .rtph265pay(`config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type}`)
         .rtpCaps(`application/x-rtp,media=video,encoding-name=H265,payload=${U.video_payload_type}`)
         .toString()
 
-    // vp8enc //////////////////////////////////
-    case 'vp8enc':
+    // mppvp8enc //////////////////////////////////
+    case 'mppvp8enc':
       return U.Pipeline.start(video_launch)
         .caps(video_capture)
-        .videoconvert()
-        .caps('video/x-raw,format=I420')
         .queue()
-        .elem('vp8enc', 'deadline=1')
+        .videoconvert()
+        .caps('video/x-raw,format=NV12')
+        .queue()
+        .elem('mppvp8enc')
         .rtpvp8pay(`pt=${U.video_payload_type}`)
         .rtpCaps(`application/x-rtp,media=video,encoding-name=VP8,payload=${U.video_payload_type}`)
-        .toString()
-
-    // vp9enc //////////////////////////////////
-    case 'vp9enc':
-      return U.Pipeline.start(video_launch)
-        .caps(video_capture)
-        .videoconvert()
-        .caps('video/x-raw,format=I420')
-        .queue()
-        .elem('vp9enc', 'deadline=1 cpu-used=4')
-        .vp9parse()
-        .rtpvp9pay(`pt=${U.video_payload_type}`)
-        .queue()
-        .rtpCaps(`application/x-rtp,media=video,encoding-name=VP9,payload=${U.video_payload_type}`)
         .toString()
 
     case 'UNKNOWN':

@@ -1,10 +1,113 @@
-import * as U from './pipeline-utils.js'
 import * as Utils from '../../utils.js'
 
 export const video_priority = 'high'
 export const audio_priority = 'high'
 export const video_payload_type = 96
 export const audio_payload_type = 97
+
+export class Pipeline {
+  constructor(base) {
+    this.parts = []
+    if (base) {
+      this.parts.push(base.trim())
+    }
+    this.hasPlaceholder = this.parts[0]?.includes('...')
+  }
+
+  static start(base) {
+    return new Pipeline(base)
+  }
+
+  add(part) {
+    if (!part) return this
+    const trimmed = part.trim()
+    if (!trimmed) return this
+    this.parts.push(trimmed)
+    return this
+  }
+
+  caps(value) {
+    if (!value) return this
+    if (this.hasPlaceholder && this.parts.length > 0) {
+      this.parts[0] = this.parts[0].replace('...', value)
+      this.hasPlaceholder = false
+      return this
+    }
+    return this.add(value)
+  }
+
+  elem(name, props) {
+    return this.add(props ? `${name} ${props}` : name)
+  }
+
+  queue(props = 'max-size-buffers=1 leaky=downstream') {
+    return this.elem('queue', props)
+  }
+
+  videoconvert() {
+    return this.add('videoconvert')
+  }
+
+  audioconvert() {
+    return this.add('audioconvert')
+  }
+
+  audioresample() {
+    return this.add('audioresample')
+  }
+
+  h264parse() {
+    return this.add('h264parse')
+  }
+
+  h265parse() {
+    return this.add('h265parse')
+  }
+
+  av1parse() {
+    return this.add('av1parse')
+  }
+
+  vp9parse() {
+    return this.add('vp9parse')
+  }
+
+  rtph264pay(props) {
+    return this.elem('rtph264pay', props)
+  }
+
+  rtph265pay(props) {
+    return this.elem('rtph265pay', props)
+  }
+
+  rtpav1pay(props) {
+    return this.elem('rtpav1pay', props)
+  }
+
+  rtpvp8pay(props) {
+    return this.elem('rtpvp8pay', props)
+  }
+
+  rtpvp9pay(props) {
+    return this.elem('rtpvp9pay', props)
+  }
+
+  rtpopuspay(props) {
+    return this.elem('rtpopuspay', props)
+  }
+
+  rtppcmupay(props) {
+    return this.elem('rtppcmupay', props)
+  }
+
+  rtpCaps(value) {
+    return this.add(value)
+  }
+
+  toString() {
+    return this.parts.join(' ! \n')
+  }
+}
 
 function framerate(v) {
   if (typeof v === 'string' && v.includes('/')) {
@@ -65,40 +168,25 @@ export async function buildVidePipeline_H264(P, video_launch, video_capture) {
     capture = capture.replace('video/x-h264', `video/x-h264,profile=${supportedProfile}`)
   }
 
-  return `${video_launch.replace('...', capture)} !
-queue max-size-buffers=1 leaky=downstream !
-h264parse !
-rtph264pay config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type} !
-application/x-rtp,media=video,encoding-name=H264,payload=${U.video_payload_type}`
-
-  // =========== h264 encode support camera
-
-  // GST_DEBUG=2 gst-launch-1.0 -v -e \
-  // v4l2src device=/dev/video0 io-mode=dmabuf do-timestamp=true ! \
-  // video/x-h264,width=1920,height=1080,framerate=30/1,stream-format=byte-stream ! \
-  // queue max-size-buffers=1 leaky=downstream ! \
-  // h264parse ! \
-  // rtph264pay config-interval=-1 aggregate-mode=zero-latency ! \
-  // udpsink host=192.168.151.5 port=5000 sync=false async=false
+  return Pipeline.start(video_launch)
+    .caps(capture)
+    .queue()
+    .h264parse()
+    .rtph264pay(`config-interval=-1 aggregate-mode=zero-latency pt=${video_payload_type}`)
+    .rtpCaps(`application/x-rtp,media=video,encoding-name=H264,payload=${video_payload_type}`)
+    .toString()
 }
 
 // buildVidePipeline_H265 -------------------------------------------
 export function buildVidePipeline_H265(video_launch, video_capture) {
-  return `${video_launch.replace('...', video_capture)} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-h265parse !
-rtph265pay config-interval=-1 aggregate-mode=zero-latency pt=${video_payload_type} ! 
-application/x-rtp,media=video,encoding-name=H265,payload=${video_payload_type}`
+  return Pipeline.start(video_launch)
+    .caps(video_capture)
+    .queue()
+    .h265parse()
+    .rtph265pay(`config-interval=-1 aggregate-mode=zero-latency pt=${video_payload_type}`)
+    .rtpCaps(`application/x-rtp,media=video,encoding-name=H265,payload=${video_payload_type}`)
+    .toString()
 
-  // =========== h265 encode support camera
-
-  // GST_DEBUG=2 gst-launch-1.0 -v -e \
-  // v4l2src device=/dev/video0 io-mode=dmabuf do-timestamp=true ! \
-  // video/x-h265,width=1920,height=1080,framerate=30/1,stream-format=byte-stream ! \
-  // queue max-size-buffers=1 leaky=downstream ! \
-  // h265parse ! \
-  // rtph265pay config-interval=-1 aggregate-mode=zero-latency ! \
-  // udpsink host=192.168.151.5 port=5000 sync=false async=false
 }
 
 // buildAudioPipeline_ALSA -------------------------------------------
@@ -109,19 +197,21 @@ export function buildAudioPipeline_ALSA(P) {
   let audio_launch = audio_device.launch.replaceAll('"', '').replaceAll("'", '').replaceAll('\\', '')
   audio_launch = audio_launch.replace('alsasrc', 'alsasrc do-timestamp=true')
 
-  let audio_sampling = U.embeddedAudio(P)
+  let audio_sampling = embeddedAudio(P)
   audio_sampling = audio_sampling.replaceAll('channel-mask=', 'channel-mask=\\(bitmask\\)')
 
   switch (audio_codec.name) {
     // opusenc //////////////////////////////////
     case 'opusenc':
-      return `${audio_launch.replace('...', audio_sampling)} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-audioconvert ! 
-audioresample ! 
-opusenc perfect-timestamp=true ! 
-rtpopuspay pt=${audio_payload_type} ! 
-application/x-rtp,media=audio,encoding-name=OPUS,payload=${audio_payload_type}`
+      return Pipeline.start(audio_launch)
+        .caps(audio_sampling)
+        .queue()
+        .audioconvert()
+        .audioresample()
+        .elem('opusenc', 'perfect-timestamp=true')
+        .rtpopuspay(`pt=${audio_payload_type}`)
+        .rtpCaps(`application/x-rtp,media=audio,encoding-name=OPUS,payload=${audio_payload_type}`)
+        .toString()
 
     // GST_DEBUG=2 gst-launch-1.0 -v -e \
     // alsasrc device=hw:1,0 do-timestamp=true ! \
@@ -135,13 +225,15 @@ application/x-rtp,media=audio,encoding-name=OPUS,payload=${audio_payload_type}`
 
     // mulawenc //////////////////////////////////
     case 'mulawenc':
-      return `${audio_launch.replace('...', audio_sampling)} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-audioconvert ! 
-audioresample ! 
-mulawenc ! 
-rtppcmupay pt=0 ! 
-application/x-rtp,media=audio,encoding-name=PCMU,payload=0`
+      return Pipeline.start(audio_launch)
+        .caps(audio_sampling)
+        .queue()
+        .audioconvert()
+        .audioresample()
+        .elem('mulawenc')
+        .rtppcmupay('pt=0')
+        .rtpCaps('application/x-rtp,media=audio,encoding-name=PCMU,payload=0')
+        .toString()
 
     // GST_DEBUG=2 gst-launch-1.0 -v -e \
     // alsasrc device=hw:3 do-timestamp=true ! \
