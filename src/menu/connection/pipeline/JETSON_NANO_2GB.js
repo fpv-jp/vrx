@@ -12,7 +12,7 @@ export function buildVidePipeline(P) {
   let video_capture = U.embeddedVideo(P)
 
   if (video_capture.startsWith('video/x-h264')) {
-    return U.buildVidePipeline_H264(video_launch, video_capture)
+    return U.buildVidePipeline_H264(P, video_launch, video_capture)
   }
   if (video_capture.startsWith('video/x-h265')) {
     return U.buildVidePipeline_H265(video_launch, video_capture)
