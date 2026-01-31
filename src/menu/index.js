@@ -20,6 +20,14 @@ const SenderDifferentComponent = [
   C.AudioMimeType,
 ]
 
+// MainComponent -----------------------------------------------
+const MainComponent = [
+  C.Network,
+  C.Bord,
+  C.Video,
+  C.Audio,
+]
+
 // setMediaDeviceList -----------------------------------------------
 function setMediaDeviceList(message) {
   // console.log('message:', message)
@@ -93,6 +101,7 @@ function setMediaDeviceList(message) {
   initAudioList()
 
   U.showComponent(C.Video, C.Audio, C.ConnectionButton)
+  U.expandComponent(...MainComponent)
 
   switch (message.source) {
     case 'browser':
@@ -144,14 +153,18 @@ function connectionEstablishment() {
   U.disabledComponent(...ParameterEditorComponent)
   U.showComponent(C.SubControl)
   C.ConnectionButton.title = C.ConnectionText.Hangup
-  U.contractionComponent(C.ConnectionMenu)
+  U.contractionComponent(C.ConnectionMenu, ...MainComponent)
 }
 
 // initialize -----------------------------------------------
 function initialize() {
   U.enableComponent(...ParameterEditorComponent)
   C.ConnectionButton.title = C.ConnectionText.Start
+  
+  C.initializeMenuParams()
+
   U.expandComponent(C.ConnectionMenu)
+
   U.resetLists(
     //
     C.NetworkDeviceList,
@@ -165,10 +178,7 @@ function initialize() {
   )
   U.hideComponent(
     //
-    C.Network,
-    C.Bord,
-    C.Video,
-    C.Audio,
+    ...MainComponent,
     C.ConnectionButton,
     C.SubControl,
   )

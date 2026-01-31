@@ -67,5 +67,5 @@ C.GrayscaleCheck.on('change', (ev) => {
 
 // MuteCheck -----------------------------------------------
 C.MuteCheck.on('change', (ev) => {
-  State.audio.muted = ev.value
+  ReceiverState.audio.muted = ev.value
 })

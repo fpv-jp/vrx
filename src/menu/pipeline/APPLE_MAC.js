@@ -110,16 +110,6 @@ export function buildAudioPipeline(P) {
         .rtpCaps(`application/x-rtp,media=audio,encoding-name=OPUS,payload=${U.audio_payload_type}`)
         .toString()
 
-    // GST_DEBUG=2 gst-launch-1.0 -v -e
-    // osxaudiosrc device=0 do-timestamp=true !
-    // audio/x-raw,rate=48000,channels=2 !
-    // queue max-size-buffers=1 leaky=downstream !
-    // audioconvert !
-    // audioresample !
-    // mulawenc !
-    // rtppcmupay !
-    // udpsink host=127.0.0.1 port=5001 sync=false async=false
-
     // mulawenc //////////////////////////////////
     case 'mulawenc':
       return U.Pipeline.start(audio_launch)
@@ -131,16 +121,6 @@ export function buildAudioPipeline(P) {
         .rtppcmupay('pt=0')
         .rtpCaps('application/x-rtp,media=audio,encoding-name=PCMU,payload=0')
         .toString()
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e
-    // osxaudiosrc device=0 do-timestamp=true !
-    // audio/x-raw,rate=48000,channels=2 !
-    // queue max-size-buffers=1 leaky=downstream !
-    // audioconvert !
-    // audioresample !
-    // opusenc !
-    // rtpopuspay !
-    // udpsink host=127.0.0.1 port=5001 sync=false async=false
 
     // UNKNOWN //////////////////////////////////
     case 'UNKNOWN':
