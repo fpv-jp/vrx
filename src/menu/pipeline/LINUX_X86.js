@@ -1,11 +1,5 @@
 import * as U from './pipeline-utils.js'
 
-// sudo mv /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstpipewire.so \
-//         /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstpipewire.so.disabled
-
-// sudo mv /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstpulseaudio.so \
-//         /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstpulseaudio.so.disabled
-
 // ┌────────┬──────────────────────────────────────────────────────────┬───────────────────────┐
 // │  GPU   │                       エンコーダー                         │         説明           │
 // ├────────┼──────────────────────────────────────────────────────────┼───────────────────────┤

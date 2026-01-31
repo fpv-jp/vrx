@@ -41,7 +41,36 @@ export const MenuParams = {
   audio_channels: 0,
 
   grayscale: false,
-  mute: true,
+  mute: false,
+}
+
+export function initializeMenuParams() {
+
+  MenuParams.network_interface = 'none'
+  MenuParams.flight_controller = 'none'
+
+  MenuParams.video_device = 'none'
+  MenuParams.video_codec = 'none'
+  MenuParams.video_capture = ''
+
+  MenuParams.video_mimetype = ''
+  MenuParams.video_format = ''
+  MenuParams.video_drm_format = ''
+  MenuParams.video_width = 0
+  MenuParams.video_height = 0
+  MenuParams.video_framerate = 0
+
+  MenuParams.audio_device = 'none'
+  MenuParams.audio_codec = 'none'
+  MenuParams.audio_sampling = ''
+
+  MenuParams.audio_mimetype = ''
+  MenuParams.audio_format = ''
+  MenuParams.audio_rate = 0
+  MenuParams.audio_channels = 0
+
+  MenuParams.grayscale = false
+  MenuParams.mute = false
 }
 
 // Sender Entry -----------------------------------------------

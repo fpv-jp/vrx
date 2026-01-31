@@ -156,7 +156,12 @@ export function embeddedAudio(P) {
     base = base.replace(regex, `${key}=${value}`)
   }
 
-  return base.replace(/\s+/g, ' ').trim()
+  base = base.replace(/\s+/g, ' ').trim()
+  // Drop empty audio format fields like "format=," to avoid caps parse errors.
+  base = base.replace(/,\s*format=\s*(?=,|$)/gi, '')
+  base = base.replace(/\s*,\s*,/g, ',')
+  base = base.replace(/,\s*$/g, '')
+  return base
 }
 
 // buildVidePipeline_H264 -------------------------------------------
@@ -213,16 +218,6 @@ export function buildAudioPipeline_ALSA(P) {
         .rtpCaps(`application/x-rtp,media=audio,encoding-name=OPUS,payload=${audio_payload_type}`)
         .toString()
 
-    // GST_DEBUG=2 gst-launch-1.0 -v -e \
-    // alsasrc device=hw:1,0 do-timestamp=true ! \
-    // audio/x-raw,rate=48000,channels=1 ! \
-    // queue max-size-buffers=1 leaky=downstream ! \
-    // audioconvert ! \
-    // audioresample ! \
-    // opusenc perfect-timestamp=true ! \
-    // rtpopuspay ! \
-    // udpsink host=192.168.151.5 port=5001 sync=false async=false
-
     // mulawenc //////////////////////////////////
     case 'mulawenc':
       return Pipeline.start(audio_launch)
@@ -234,16 +229,6 @@ export function buildAudioPipeline_ALSA(P) {
         .rtppcmupay('pt=0')
         .rtpCaps('application/x-rtp,media=audio,encoding-name=PCMU,payload=0')
         .toString()
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e \
-    // alsasrc device=hw:3 do-timestamp=true ! \
-    // audio/x-raw,rate=48000,channels=1 ! \
-    // queue max-size-buffers=1 leaky=downstream ! \
-    // audioconvert ! \
-    // audioresample ! \
-    // mulawenc ! \
-    // rtppcmupay ! \
-    // udpsink host=192.168.151.5 port=5001 sync=false async=false
 
     case 'UNKNOWN':
     default:

@@ -208,7 +208,7 @@ export default async function OpenVtxDataChannel(channel) {
           mAhDrawn: view.getUint16(offset + 3, true),
           amperage: view.getUint16(offset + 5, true) / 100,
           batteryState: view.getUint8(offset + 7),
-          voltage: view.getUint16(offset + 8, true) / 100,
+          // voltage: view.getUint16(offset + 8, true) / 100,
         }
       }
       break

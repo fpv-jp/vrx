@@ -109,7 +109,6 @@ function attachAudioStream(srcObject) {
 
   var audio = new Audio()
   audio.srcObject = srcObject
-  audio.muted = true
   audio.play().catch(() => {})
   ReceiverState.audio = audio
 }
