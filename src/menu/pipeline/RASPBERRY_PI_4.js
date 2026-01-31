@@ -4,7 +4,8 @@ import * as U from './pipeline-utils.js'
 export function buildVidePipeline(P) {
   let video_device = JSON.parse(P.video_device)
 
-  let video_launch = video_device.launch //.replaceAll('\\', '\\\\')
+  let video_launch = video_device.launch.replaceAll("'", '')
+  video_launch = video_launch.replace('v4l2src', 'v4l2src io-mode=dmabuf do-timestamp=true')
 
   let video_capture = U.embeddedVideo(P)
 
@@ -18,12 +19,13 @@ export function buildVidePipeline(P) {
   let video_codec = JSON.parse(P.video_codec)
 
   switch (video_codec.name) {
-    case 'openh264enc':
+    case 'v4l2h264enc':
       return U.Pipeline.start(video_launch)
         .caps(video_capture)
-        .videoconvert()
-        .elem('openh264enc', 'bitrate=3000000 enable-denoise=true complexity=2')
-        .queue('max-size-buffers=3 leaky=downstream')
+        .queue()
+        .elem('v4l2h264enc', 'capture-io-mode=dmabuf output-io-mode=dmabuf')
+        .queue()
+        .elem('capsfilter', 'caps=video/x-h264,level=\\(string\\)4.1')
         .rtph264pay(`config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type}`)
         .rtpCaps(`application/x-rtp,media=video,encoding-name=H264,payload=${U.video_payload_type}`)
         .toString()

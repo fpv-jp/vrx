@@ -4,12 +4,11 @@ import * as Utils from '../utils.js'
 
 import * as APPLE_MAC from './pipeline/APPLE_MAC'
 import * as LINUX_X86 from './pipeline/LINUX_X86'
-import * as RASPBERRY_PI_4B from './pipeline/RASPBERRY_PI_4B'
+import * as RASPBERRY_PI_4 from './pipeline/RASPBERRY_PI_4'
 import * as RASPBERRY_PI_5 from './pipeline/RASPBERRY_PI_5'
 import * as JETSON_NANO_2GB from './pipeline/JETSON_NANO_2GB'
 import * as JETSON_ORIN_NANO_SUPER from './pipeline/JETSON_ORIN_NANO_SUPER'
-import * as RADXA_ROCK_5B from './pipeline/RADXA_ROCK_5B'
-import * as RADXA_ROCK_5T from './pipeline/RADXA_ROCK_5T'
+import * as RADXA_ROCK_5 from './pipeline/RADXA_ROCK_5'
 
 // buildPayload -------------------------------------------
 export async function buildPayload() {
@@ -26,7 +25,7 @@ export async function buildPayload() {
       break
     case 'RASPBERRY_PI_4B':
     case 'RASPBERRY_PI_4CM':
-      builder = RASPBERRY_PI_4B
+      builder = RASPBERRY_PI_4
       break
     case 'RASPBERRY_PI_5':
       builder = RASPBERRY_PI_5
@@ -38,10 +37,8 @@ export async function buildPayload() {
       builder = JETSON_ORIN_NANO_SUPER
       break
     case 'RADXA_ROCK_5B':
-      builder = RADXA_ROCK_5B
-      break
     case 'RADXA_ROCK_5T':
-      builder = RADXA_ROCK_5T
+      builder = RADXA_ROCK_5
       break
     case 'UNKNOWN':
     default:

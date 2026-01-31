@@ -20,60 +20,40 @@ export function buildVidePipeline(P) {
   let video_codec = JSON.parse(P.video_codec)
 
   switch (video_codec.name) {
+
     // nvv4l2h264enc //////////////////////////////////
     case 'nvv4l2h264enc':
-      return `${video_launch.replace('...', video_capture)} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-nvv4l2h264enc preset-level=3 profile=4 bitrate=20000000 ! 
-capsfilter caps=video/x-h264,level=\\(string\\)4 ! 
-queue max-size-buffers=3 leaky=downstream ! 
-rtph264pay config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type} ! 
-application/x-rtp,media=video,encoding-name=H264,payload=${U.video_payload_type}`
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e \
-    // nvarguscamerasrc do-timestamp=true ! \
-    // video/x-raw\(memory:NVMM\),width=1920,height=1080,framerate=30/1 ! \
-    // queue max-size-buffers=1 leaky=downstream ! \
-    // nvv4l2h264enc preset-level=3 profile=4 bitrate=20000000 ! \
-    // capsfilter caps=video/x-h264,level=\(string\)4 ! \
-    // queue max-size-buffers=3 leaky=downstream ! \
-    // rtph264pay config-interval=-1 ! \
-    // udpsink host=192.168.151.20 port=5000 sync=false async=false
+      return U.Pipeline.start(video_launch)
+        .caps(video_capture)
+        .queue()
+        .elem('nvv4l2h264enc', 'preset-level=3 profile=4 bitrate=20000000')
+        .elem('capsfilter', 'caps=video/x-h264,level=\\(string\\)4')
+        .queue('max-size-buffers=3 leaky=downstream')
+        .rtph264pay(`config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type}`)
+        .rtpCaps(`application/x-rtp,media=video,encoding-name=H264,payload=${U.video_payload_type}`)
+        .toString()
 
     // nvv4l2h265enc //////////////////////////////////
     case 'nvv4l2h265enc':
-      return `${video_launch.replace('...', video_capture)} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-nvv4l2h265enc preset-level=3 profile=0 bitrate=30000000 ! 
-capsfilter caps=video/x-h265,level=\\(string\\)4 ! 
-queue max-size-buffers=3 leaky=downstream ! 
-rtph265pay config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type} ! 
-application/x-rtp,media=video,encoding-name=H265,payload=${U.video_payload_type}`
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e \
-    // nvarguscamerasrc ! \
-    // video/x-raw\(memory:NVMM\),width=1920,height=1080,framerate=30/1 ! \
-    // queue max-size-buffers=1 leaky=downstream ! \
-    // nvv4l2h265enc preset-level=3 profile=0 bitrate=30000000 ! \
-    // capsfilter caps=video/x-h265,level=\(string\)4 ! \
-    // queue max-size-buffers=3 leaky=downstream ! \
-    // rtph265pay config-interval=1 aggregate-mode=zero-latency ! \
-    // udpsink host=192.168.151.1 port=5000 sync=false async=false
+      return U.Pipeline.start(video_launch)
+        .caps(video_capture)
+        .queue()
+        .elem('nvv4l2h265enc', 'preset-level=3 profile=0 bitrate=30000000')
+        .elem('capsfilter', 'caps=video/x-h265,level=\\(string\\)4')
+        .queue('max-size-buffers=3 leaky=downstream')
+        .rtph265pay(`config-interval=-1 aggregate-mode=zero-latency pt=${U.video_payload_type}`)
+        .rtpCaps(`application/x-rtp,media=video,encoding-name=H265,payload=${U.video_payload_type}`)
+        .toString()
 
     // nvv4l2vp8enc //////////////////////////////////
     case 'nvv4l2vp8enc':
-      return `${video_launch.replace('...', video_capture)} ! 
-queue max-size-buffers=1 leaky=downstream ! 
-nvv4l2vp8enc bitrate=20000000 ! 
-rtpvp8pay pt=${U.video_payload_type} ! 
-application/x-rtp,media=video,encoding-name=VP8,payload=${U.video_payload_type}`
-
-    // GST_DEBUG=2 gst-launch-1.0 -v -e \
-    // nvarguscamerasrc ! \
-    // video/x-raw\(memory:NVMM\),width=1920,height=1080,framerate=30/1 ! \
-    // queue max-size-buffers=1 leaky=downstream ! \
-    // nvv4l2vp8enc bitrate=20000000 ! \
-    // rtpvp8pay ! udpsink host=192.168.151.1 port=5000 sync=false async=false
+      return U.Pipeline.start(video_launch)
+        .caps(video_capture)
+        .queue()
+        .elem('nvv4l2vp8enc', 'bitrate=20000000')
+        .rtpvp8pay(`pt=${U.video_payload_type}`)
+        .rtpCaps(`application/x-rtp,media=video,encoding-name=VP8,payload=${U.video_payload_type}`)
+        .toString()
 
     case 'UNKNOWN':
     default:

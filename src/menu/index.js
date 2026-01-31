@@ -62,8 +62,6 @@ function setMediaDeviceList(message) {
         //
         break
       case 'RADXA_ROCK_5B':
-        //
-        break
       case 'RADXA_ROCK_5T':
         //
         break
