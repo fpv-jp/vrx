@@ -1,36 +1,55 @@
 # vrx
-video and telemetry visualization using webrtc
 
-# ⚠️ Documentation is currently being written.
+Video and telemetry visualization using WebRTC.
 
+A web application that visualizes video, audio, and telemetry streams received via WebRTC from [vtx](https://github.com/fpv-jp/vtx).
 
-## Local development steps
+## Development Setup
 
-1. Save the certificates locally
+The following instructions assume remote development over SSH (e.g., using VS Code Remote SSH) connected to a development machine.
+
+### 1. Start the signaling server
+
+Start the signaling server from [app](https://github.com/fpv-jp/app) for SDP/ICE exchange.
+
+### 2. [Remote] Download the TLS certificates
+
 ```sh
 curl -L -o server-cert.pem https://raw.githubusercontent.com/fpv-jp/app/refs/heads/main/certificate/server-cert.pem
-
 curl -L -o server-key.pem https://raw.githubusercontent.com/fpv-jp/app/refs/heads/main/certificate/server-key.pem
 ```
 
-2. Add vtx DNS entry
-``` bash
+### 3. [Remote] Add a DNS entry for the server hostname
+
+```bash
 sudo vim /etc/hosts
 
 # /etc/hosts
-192.168.???.??? fpv
+127.0.0.1 fpv
 ```
 
-3. Install the CA certificate in the OS or browser
-```sh
-curl -L -o server-ca-cert.pem https://raw.githubusercontent.com/fpv-jp/app/refs/heads/main/certificate/server-ca-cert.pem
-```
+### 4. [Remote] Start the dev server
 
-4. Start the web app
 ```sh
 npm i
 npm run dev
 ```
 
-5. Open this in your browser
-[https://localhost:4443](https://localhost:4443)
+### 5. [Local] Install the CA certificate in the OS or browser
+
+```sh
+curl -L -o server-ca-cert.pem https://raw.githubusercontent.com/fpv-jp/app/refs/heads/main/certificate/server-ca-cert.pem
+```
+
+### 6. [Local] Add a DNS entry pointing to the remote machine
+
+```bash
+sudo vim /etc/hosts
+
+# /etc/hosts
+192.168.xxx.xxx fpv
+```
+
+### 7. [Local] Open the application in your browser
+
+[https://fpv:4443](https://fpv:4443)
