@@ -18,6 +18,16 @@ export default async function comingSignalingMessage(message, initSenderPeerConn
       SenderState.ws1.id = message.sessionId
       console.log(`assigned session id : ${message.sessionId}`)
       SenderId.textContent = `Your Sender Id: ${message.sessionId}`
+
+      // Send platform info to server
+      const browserInfo = Utils.parseBrowserInfo()
+      const platformInfo = {
+        type: SENDER.PLATFORM_INFO,
+        platform: 'BROWSER',
+        gpu: browserInfo,
+      }
+      SenderState.ws1.originalSend(JSON.stringify(platformInfo))
+      console.log(`<<< ${SENDER.PLATFORM_INFO} SENDER_PLATFORM_INFO:`, platformInfo)
       break
 
     case SENDER.MEDIA_DEVICE_LIST_REQUEST:
