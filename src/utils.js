@@ -1,5 +1,23 @@
 const isNonEmpty = (v) => v !== undefined && v !== null && String(v) !== ''
 
+export function parseBrowserInfo() {
+  const ua = navigator.userAgent
+  const browsers = [
+    { name: 'Chrome', regex: /Chrome\/(\d+\.\d+)/ },
+    { name: 'Firefox', regex: /Firefox\/(\d+\.\d+)/ },
+    { name: 'Safari', regex: /Version\/(\d+\.\d+).*Safari/ },
+    { name: 'Edge', regex: /Edg\/(\d+\.\d+)/ },
+    { name: 'Opera', regex: /OPR\/(\d+\.\d+)/ },
+  ]
+  for (const { name, regex } of browsers) {
+    const match = ua.match(regex)
+    if (match) {
+      return `${name}/${match[1]}`
+    }
+  }
+  return 'Unknown'
+}
+
 export async function sendSignalingMessage(ws, type, message = {}) {
   let { readyState, protocol, id, pair } = ws
   if (isNonEmpty(id) && isNonEmpty(pair)) {

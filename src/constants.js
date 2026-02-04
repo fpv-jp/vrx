@@ -37,6 +37,7 @@ const Constants = {
     ICE: 104,
     RECEIVER_CLOSE: 108,
     SYSTEM_ERROR: 109,
+    PLATFORM_INFO: 110,
   }),
   // Message types that the RECEIVER will listen for
   RECEIVER: Object.freeze({
