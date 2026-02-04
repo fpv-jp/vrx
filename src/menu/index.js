@@ -84,11 +84,16 @@ function setMediaDeviceList(message) {
   if (message.source === 'gstreamer') {
     // Network Device
     initNetworkList()
-    U.showComponent(C.Network)
 
     // Bord Device
     initBordList()
-    U.showComponent(C.Bord)
+
+    U.showComponent(C.Network, C.Bord)
+
+  } else {
+
+    U.hideComponent(C.Network, C.Bord)
+
   }
 
   // Camera / Microphone
@@ -160,7 +165,7 @@ function connectionEstablishment() {
 function initialize() {
   U.enableComponent(...ParameterEditorComponent)
   C.ConnectionButton.title = C.ConnectionText.Start
-  
+
   C.initializeMenuParams()
 
   U.expandComponent(C.ConnectionMenu)
