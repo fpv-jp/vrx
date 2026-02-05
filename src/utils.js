@@ -122,8 +122,8 @@ export function setSenderPriority(senders) {
 
 // KeyFrame Request
 // --------------------------------------------------------------------------------------------
-export async function sendKeyFrameRequest(pc1) {
-  const sender = pc1.getSenders().find((s) => s.track?.kind === 'video')
+export async function sendKeyFrameRequest(pc) {
+  const sender = pc.getSenders().find((s) => s.track?.kind === 'video')
   if (!sender) return
   const original = sender.track
   const clone = original.clone()

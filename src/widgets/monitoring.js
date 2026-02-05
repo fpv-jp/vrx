@@ -1,5 +1,5 @@
 import Constants from '../constants.js'
-import { ReceiverState } from '../receiver.js'
+import { ReceiverState } from '../receiver'
 import * as Utils from '../utils.js'
 
 import charts from '../thirdparty/realtime-chart.js'
@@ -7,6 +7,26 @@ const { AreaChart } = charts
 
 const Command = Constants.Command
 const Interva = 1000 // ms
+
+function getRemoteAddress() {
+  try {
+    const store = window.Alpine?.store('menu')
+    const network = store?.message?.network
+    const selected = store?.network_interface
+    if (!network || !selected || selected === 'none') return null
+    const nic = network.find((n) => n.name === selected)
+    return nic?.address || null
+  } catch (e) {
+    return null
+  }
+}
+
+function formatLocalIP(ip) {
+  if (!ip) return '(unknown)'
+  if (ip.endsWith('.local')) return '(mDNS)'
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(ip)) return '(mDNS)'
+  return ip
+}
 
 //-------------------------------------
 //
@@ -16,6 +36,7 @@ export const MonitorState = {
 
   inboundAreaChart: null,
   outboundAreaChart: null,
+  statsDiv: null,
 
   candidatePairReport: null,
 
@@ -69,6 +90,11 @@ const ConnectionMonitoring = {
       'basis',
     )
 
+    const statsDiv = document.createElement('pre')
+    statsDiv.style.cssText = 'margin:4px 0 0; font:10px monospace; color:rgba(0,255,0,0.9); white-space:pre; line-height:1.4;'
+    NetworkMonitoring.appendChild(statsDiv)
+    MonitorState.statsDiv = statsDiv
+
     MonitorState.monitorId = setInterval(this.reportAggregate.bind(this), Interva)
   },
 
@@ -80,6 +106,7 @@ const ConnectionMonitoring = {
     }
     if (MonitorState.inboundAreaChart) MonitorState.inboundAreaChart.stop()
     if (MonitorState.outboundAreaChart) MonitorState.outboundAreaChart.stop()
+    MonitorState.statsDiv = null
   },
 
   // getInboundTraffic ---------------------------
@@ -95,9 +122,11 @@ const ConnectionMonitoring = {
     }
 
     if (candidatePairReport) {
+      const local = Utils.excludedCandidate(candidatePairReport.localCandidate)
+      if (local.ip) local.ip = formatLocalIP(local.ip)
       MonitorState.telemetryInfo = {
         ...MonitorState.telemetryInfo,
-        Local: Utils.excludedCandidate(candidatePairReport.localCandidate),
+        Local: local,
       }
 
       if (candidatePairReport.inboundNetworkTraffic) {
@@ -122,9 +151,12 @@ const ConnectionMonitoring = {
     }
 
     if (candidatePairReport) {
+      const remote = Utils.excludedCandidate(candidatePairReport.remoteCandidate)
+      const remoteIP = getRemoteAddress()
+      if (remoteIP) remote.ip = remoteIP
       MonitorState.telemetryInfo = {
         ...MonitorState.telemetryInfo,
-        Remote: Utils.excludedCandidate(candidatePairReport.remoteCandidate),
+        Remote: remote,
       }
 
       if (candidatePairReport.outboundNetworkTraffic) {
@@ -243,7 +275,7 @@ const ConnectionMonitoring = {
 
       case 'data-channel':
         const { label, state, messages } = r
-        let channelInfo = `Ping ${MonitorState.ping} ms`
+        let channelInfo = `Ping ${MonitorState.ping ?? '--'} ms`
         if (label !== 'CMD') {
           channelInfo = `${state} (${messages}Hz)`
         }
@@ -289,22 +321,66 @@ const ConnectionMonitoring = {
   },
 
   // ---------------------------
+  // statsDiv テキスト更新
+  updateStatsDiv: function () {
+    if (!MonitorState.statsDiv) return
+
+    const lines = []
+
+    // Ping
+    lines.push(`Ping : ${MonitorState.ping ?? '--'} ms`)
+
+    // Remote IP (from selected network interface)
+    const remoteIP = getRemoteAddress()
+    if (remoteIP) lines.push(`Remote: ${remoteIP}`)
+
+    // Local IP (from ICE, may be mDNS)
+    const localIP = MonitorState.candidatePairReport?.localCandidate?.ip
+    if (localIP) lines.push(`Local : ${formatLocalIP(localIP)}`)
+
+    // Video stats
+    const v = MonitorState.inboundRtpVideoReport
+    if (v?.codec) {
+      const mime = v.codec.mimeType.replace('video/', '')
+      lines.push(`Video : ${mime} ${v.frameWidth}x${v.frameHeight} ${v.framesPerSecond || 0}fps jitter ${(v.jitter || 0).toFixed(3)}`)
+    }
+
+    // Audio stats
+    const a = MonitorState.inboundRtpAudioReport
+    if (a?.codec) {
+      const mime = a.codec.mimeType.replace('audio/', '')
+      lines.push(`Audio : ${mime} ${a.codec.clockRate}Hz ch${a.codec.channels}`)
+    }
+
+    // WiFi
+    if (MonitorState.wifi?.status?.wpa_state === 'COMPLETED') {
+      const { ssid, ip_address } = MonitorState.wifi.status
+      const { RSSI, LINKSPEED, FREQUENCY, WIDTH } = MonitorState.wifi.signal_poll
+      lines.push(`WiFi  : ${ssid}  ${FREQUENCY}MHz W:${WIDTH}`)
+      lines.push(`        ${ip_address}  RSSI:${RSSI}dBm ${LINKSPEED}Mb/s`)
+    }
+
+    MonitorState.statsDiv.textContent = lines.join('\n')
+  },
+
+  // ---------------------------
   // メインの集約関数
   reportAggregate: function () {
     // ping
-    let { dc2CMD } = ReceiverState
-    if (dc2CMD && dc2CMD.readyState == 'open') {
-      let cmd = Command.PING
+    let { cmd } = ReceiverState
+    if (cmd && cmd.readyState == 'open') {
       MonitorState.pingStartTime = window.performance.now()
-      dc2CMD.send(JSON.stringify({ cmd }))
+      cmd.send(JSON.stringify({ cmd: Command.PING }))
     }
 
-    ReceiverState.pc2.getStats(null).then((stats) => {
+    ReceiverState.pc.getStats(null).then((stats) => {
       const processedReports = this.collectRelevantStats(stats)
 
       processedReports.forEach((report) => {
         this.updateMonitorState(report)
       })
+
+      this.updateStatsDiv()
 
       WebrtcReport.innerHTML = this.formatDebugOutput(processedReports)
     })
