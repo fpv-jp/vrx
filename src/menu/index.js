@@ -159,14 +159,16 @@ function connectionEstablishment() {
   U.showComponent(C.SubControl)
   C.ConnectionButton.title = C.ConnectionText.Hangup
   U.contractionComponent(C.ConnectionMenu, ...MainComponent)
-  document.getElementById('SenderQR').style.display = 'none'
+  const senderQR = document.getElementById('SenderQR')
+  if (senderQR) senderQR.style.display = 'none'
 }
 
 // initialize -----------------------------------------------
 function initialize() {
   U.enableComponent(...ParameterEditorComponent)
   C.ConnectionButton.title = C.ConnectionText.Start
-  document.getElementById('SenderQR').style.display = ''
+  const senderQR = document.getElementById('SenderQR')
+  if (senderQR) senderQR.style.display = 'block'
 
   C.initializeMenuParams()
 
