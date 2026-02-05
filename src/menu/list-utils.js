@@ -1,20 +1,10 @@
-import * as C from './component'
+import Alpine from 'alpinejs'
 
-export function setListOptions(list, options, { placeholder = C.Placeholder, defaultIndex = 1 } = {}) {
-  if (!list) return
-
-  const items = []
-  if (placeholder) items.push(placeholder)
-  if (Array.isArray(options) && options.length > 0) items.push(...options)
-
-  list.options = items
-
-  if (items.length > 0 && list.key) {
-    const safeIndex = Math.min(defaultIndex, items.length - 1)
-    C.MenuParams[list.key] = items[safeIndex].value
-  }
-
-  if (typeof list.refresh === 'function') {
-    list.refresh()
+export function setListOptions(valueKey, optionsKey, options, { defaultIndex = 0 } = {}) {
+  const store = Alpine.store('menu')
+  const items = Array.isArray(options) && options.length > 0 ? options : []
+  store[optionsKey] = items
+  if (items.length > 0) {
+    store[valueKey] = items[Math.min(defaultIndex, items.length - 1)].value
   }
 }

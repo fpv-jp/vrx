@@ -1,73 +1,50 @@
-import * as C from './component'
+import Alpine from 'alpinejs'
 import { bindMediaLists } from './media-utils.js'
-import * as P from './parameter-utils.js'
+import { checkRequiredKeys } from './parameter-utils.js'
 import * as B from './video-browser.js'
 import * as G from './video-gstreamer.js'
 
 const { initCodecList, initOptionList } = bindMediaLists({
   type: 'video',
-  deviceList: C.VideoCameraList,
-  codecList: C.VideoCodecList,
-  optionList: C.VideoCaptureList,
   getCodecListBySource(source, codecs) {
-    switch (source) {
-      case 'browser':
-        return B.getCodecList(codecs.video)
-      case 'gstreamer':
-        return G.getCodecList(codecs.video)
-    }
+    if (source === 'browser') return B.getCodecList(codecs.video)
+    if (source === 'gstreamer') return G.getCodecList(codecs.video)
     return []
   },
   getOptionListBySource(source) {
-    switch (source) {
-      case 'browser':
-        return B.getCaptureList()
-      case 'gstreamer':
-        return G.getCaptureList()
-    }
+    if (source === 'browser') return B.getCaptureList()
+    if (source === 'gstreamer') return G.getCaptureList()
     return []
   },
   showSubMenuBySource(source) {
-    switch (source) {
-      case 'browser':
-        B.showSubMenu()
-        break
-      case 'gstreamer':
-        G.showSubMenu()
-        break
-    }
+    if (source === 'browser') B.showSubMenu()
+    else if (source === 'gstreamer') G.showSubMenu()
   },
   shouldShowSubMenuByState() {
-    return C.MenuParams.message?.source === 'gstreamer' || C.MenuParams.video_codec !== 'none'
+    const store = Alpine.store('menu')
+    return store.message?.source === 'gstreamer' || store.video_codec !== 'none'
   },
 })
 
-function updateVideoCodecVisibility() {
-  const capture = C.MenuParams.video_capture
+window.addEventListener('menu:video-capture-change', () => {
+  const store = Alpine.store('menu')
+  const capture = store.video_capture
   const isRaw = typeof capture === 'string' && capture.includes('video/x-raw')
+
   if (isRaw) {
-    C.VideoCodecList.hidden = false
-    const options = Array.isArray(C.VideoCodecList.options) ? C.VideoCodecList.options : []
-    if (options.length > 0) {
-      const index = options.length > 1 ? 1 : 0
-      C.MenuParams.video_codec = options[index].value
-      C.VideoCodecList.refresh()
+    store.video_codec_hidden = false
+    if (store.video_codec_options.length > 0) {
+      store.video_codec = store.video_codec_options[store.video_codec_options.length > 1 ? 1 : 0].value
     }
   } else {
-    C.MenuParams.video_codec = 'none'
-    C.VideoCodecList.hidden = true
-    C.VideoCodecList.refresh()
+    store.video_codec = 'none'
+    store.video_codec_hidden = true
   }
 
-  C.ConnectionButton.disabled = P.checkRequiredKeys()
-}
-
-C.VideoCaptureList.on('change', () => {
-  updateVideoCodecVisibility()
+  store.connectionDisabled = checkRequiredKeys()
 })
 
 export function initVideoList() {
   initCodecList()
   initOptionList()
-  updateVideoCodecVisibility()
 }

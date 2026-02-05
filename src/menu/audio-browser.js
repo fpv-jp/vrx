@@ -1,48 +1,19 @@
-import * as C from './component'
-import * as U from './menu-utils'
-import * as P from './parameter-utils.js'
+import Alpine from 'alpinejs'
+import { browserCodecList } from './codec-utils.js'
 
-// getCodecList -----------------------------------------------
-export function getCodecList(codecs) {
-  let options = []
+export const getCodecList = browserCodecList
 
-  for (let codec of codecs) {
-    let text = codec.sdpFmtpLine ? `${codec.mimeType} (${codec.sdpFmtpLine})` : codec.mimeType
-    let value = JSON.stringify(codec)
-    options.push({ text, value })
-  }
-
-  return options
-}
-
-// getSamplingList -----------------------------------------------
 export function getSamplingList() {
-  let options = []
-
-  const { audio_codec } = C.MenuParams
-  if (audio_codec === 'none') return []
-
-  const codec = JSON.parse(audio_codec)
-  options.push({
-    text: `clockRate ${codec.clockRate} channels ${codec.channels}`,
-    value: JSON.stringify(codec),
-  })
-
-  return options
+  const store = Alpine.store('menu')
+  if (store.audio_codec === 'none') return []
+  const codec = JSON.parse(store.audio_codec)
+  return [{ text: `clockRate ${codec.clockRate} channels ${codec.channels}`, value: JSON.stringify(codec) }]
 }
 
-// showSubMenu -----------------------------------------------
 export function showSubMenu() {
-  U.hideComponent(
-    //
-    C.AudioMimeType,
-    C.AudioFormat,
-    C.AudioFormatList,
-    C.AudioRate,
-    C.AudioRateList,
-    C.AudioRateSlider,
-    C.AudioChannels,
-    C.AudioChannelsList,
-    C.AudioChannelsSlider,
-  )
+  const store = Alpine.store('menu')
+  store.audio_mimetype_show = false
+  store.audio_format_mode = 'hidden'
+  store.audio_rate_mode = 'hidden'
+  store.audio_channels_mode = 'hidden'
 }

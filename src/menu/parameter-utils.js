@@ -1,89 +1,75 @@
-import * as C from './component'
-
-// checkRequiredKeys -----------------------------------------------
-export function checkRequiredKeys() {
-  let requiredKeys = ['video_capture', 'audio_sampling']
-  if (C.MenuParams?.message?.source === 'gstreamer') {
-    requiredKeys.push('video_device', 'audio_device', 'audio_codec')
-    const capture = C.MenuParams.video_capture
-    const needsVideoCodec = typeof capture === 'string' && capture.includes('video/x-raw')
-    if (needsVideoCodec) {
-      requiredKeys.push('video_codec')
-    }
-  }
-  const isReady = requiredKeys.every((key) => C.MenuParams[key] !== 'none')
-  return !isReady
-}
-
-// getVideoCaptureParameter -----------------------------------------------
-export function getVideoCaptureParameter(key) {
-  const regex = new RegExp(`${key}=({[^}]+}|\\[[^\\]]+\\]|[^,\\s]+)`)
-  const match = C.MenuParams.video_capture.match(regex)
-  if (!match) return null
-  return match[1].trim()
-}
-
-// getAudioSamplingParameter -----------------------------------------------
-export function getAudioSamplingParameter(key) {
-  const regex = new RegExp(`${key}=({[^}]+}|\\[[^\\]]+\\]|[^,\\s]+)`)
-  const match = C.MenuParams.audio_sampling.match(regex)
-  if (!match) return null
-  return match[1].trim()
-}
+import Alpine from 'alpinejs'
 
 const parsePart = (s) => parseInt(s.split('/')[0])
 
-// setListParameterOption -----------------------------------------------
-export function setListParameterOption(list, value) {
-  const options = value
+function parseOptions(rawValue) {
+  return rawValue
     .slice(1, -1)
     .split(',')
     .map((s) => s.trim())
-
-  list.hidden = false
-  list.options = options
-    .map((option) => {
-      const num = parsePart(option)
-      return { text: option, value: option, num }
-    })
+    .map((opt) => ({ text: opt, value: opt, num: parsePart(opt) }))
     .sort((a, b) => {
-      const aNaN = isNaN(a.num)
-      const bNaN = isNaN(b.num)
-      if (aNaN && bNaN) return 0
-      if (aNaN) return 1
-      if (bNaN) return -1
+      if (isNaN(a.num) && isNaN(b.num)) return 0
+      if (isNaN(a.num)) return 1
+      if (isNaN(b.num)) return -1
       return b.num - a.num
     })
-
-  list.refresh()
 }
 
-// setSliderParameterOption -----------------------------------------------
-export function setSliderParameterOption(slider, value) {
-  const parts = value
-    .slice(1, -1)
-    .split(',')
-    .map((s) => s.trim())
-
-  const min = parsePart(parts[0])
-  const max = parsePart(parts[1])
-  const step = parts.length >= 3 ? parseInt(parts[2]) : undefined
-  const sliderOption = { min, max, ...(step !== undefined ? { step } : {}) }
-
-  slider.hidden = false
-  Object.assign(slider, sliderOption)
-  slider.refresh()
+function parseSlider(rawValue) {
+  const parts = rawValue.slice(1, -1).split(',').map((s) => s.trim())
+  return {
+    min: parsePart(parts[0]),
+    max: parsePart(parts[1]),
+    step: parts.length >= 3 ? parseInt(parts[2]) : 1,
+  }
 }
 
-// setTextOrNumberField -----------------------------------------------
-export function setTextOrNumberField(field, value) {
+export function setListParameterOption(key, rawValue) {
+  const store = Alpine.store('menu')
+  const options = parseOptions(rawValue)
+  store[key + '_options'] = options
+  store[key + '_mode'] = 'list'
+  if (options.length > 0) store[key] = options[0].value
+}
+
+export function setSliderParameterOption(key, rawValue) {
+  const store = Alpine.store('menu')
+  const { min, max, step } = parseSlider(rawValue)
+  store[key + '_min'] = min
+  store[key + '_max'] = max
+  store[key + '_step'] = step
+  store[key + '_mode'] = 'slider'
+}
+
+export function setTextOrNumberField(key, value) {
   const num = parseInt(value)
-  setMenuOptionText(field, isNaN(num) ? value : num)
+  setMenuOptionText(key, isNaN(num) ? value : num)
 }
 
-// setMenuOptionText -----------------------------------------------
-export function setMenuOptionText(text, value) {
-  C.MenuParams[text.key] = value
-  text.hidden = false
-  text.refresh()
+export function setMenuOptionText(key, value) {
+  const store = Alpine.store('menu')
+  store[key] = value
+  store[key + '_mode'] = 'text'
+}
+
+function getStoreParam(storeKey, paramKey) {
+  const match = Alpine.store('menu')[storeKey].match(new RegExp(`${paramKey}=({[^}]+}|\\[[^\\]]+\\]|[^,\\s]+)`))
+  return match ? match[1].trim() : null
+}
+
+export const getVideoCaptureParameter = (k) => getStoreParam('video_capture', k)
+export const getAudioSamplingParameter = (k) => getStoreParam('audio_sampling', k)
+
+export function checkRequiredKeys() {
+  const store = Alpine.store('menu')
+  const msg = store.message
+  let keys = ['video_capture', 'audio_sampling']
+  if (msg?.source === 'gstreamer') {
+    keys.push('video_device', 'audio_device', 'audio_codec')
+    if (typeof store.video_capture === 'string' && store.video_capture.includes('video/x-raw')) {
+      keys.push('video_codec')
+    }
+  }
+  return !keys.every((k) => store[k] !== 'none' && store[k] !== '' && store[k] !== 0)
 }

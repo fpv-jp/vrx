@@ -1,9 +1,8 @@
-import * as C from './component'
+import Alpine from 'alpinejs'
 import * as B from './connection-browser.js'
 import * as G from './connection-gstreamer.js'
 import Constants from '../constants.js'
-import ReceiverManager, { ReceiverState } from '../receiver.js'
-
+import ReceiverManager, { ReceiverState } from '../receiver'
 import * as Widgets from '../widgets'
 import * as Menu from './index.js'
 import * as Utils from '../utils.js'
@@ -11,12 +10,12 @@ import * as Utils from '../utils.js'
 const SENDER = Constants.SENDER
 const Command = Constants.Command
 
-// ConnectionButton -----------------------------------------------
-C.ConnectionButton.on('click', async () => {
-  // Start -------------
-  if (C.ConnectionButton.title == C.ConnectionText.Start) {
+window.addEventListener('menu:connection-click', async () => {
+  const store = Alpine.store('menu')
+
+  if (store.connectionText === '🎦 Start') {
     let payload
-    switch (C.MenuParams.message.source) {
+    switch (store.message.source) {
       case 'browser':
         payload = B.buildPayload()
         break
@@ -25,22 +24,15 @@ C.ConnectionButton.on('click', async () => {
         break
     }
     console.log('payload:', payload)
-
     ReceiverManager.initReceiverPeerConnection()
-
-    Utils.sendSignalingMessage(ReceiverState.ws2, SENDER.MEDIA_STREAM_START, payload)
-  }
-
-  // Hangup -------------
-  if (C.ConnectionButton.title == C.ConnectionText.Hangup) {
-    let { dc2CMD } = ReceiverState
-    if (dc2CMD && dc2CMD.readyState == 'open') {
-      let cmd = Command.HANG_UP
-      dc2CMD.send(JSON.stringify({ cmd }))
+    Utils.sendSignalingMessage(ReceiverState.ws, SENDER.MEDIA_STREAM_START, payload)
+  } else {
+    let { cmd } = ReceiverState
+    if (cmd && cmd.readyState === 'open') {
+      cmd.send(JSON.stringify({ cmd: Command.HANG_UP }))
     }
     Widgets.destroyReceiver()
     Menu.initialize()
-    C.MenuParams.sender = 'none'
-    C.SenderEntryList.refresh()
+    store.sender = 'none'
   }
 })

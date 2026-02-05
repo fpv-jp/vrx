@@ -1,16 +1,8 @@
-import * as C from './component'
+import Alpine from 'alpinejs'
 
-// buildPayload -------------------------------------------
 export function buildPayload() {
-  const {
-    video_device,
-    video_codec,
-    video_capture,
-    //
-    audio_device,
-    audio_codec,
-    audio_sampling,
-  } = C.MenuParams
+  const store = Alpine.store('menu')
+  const { video_device, video_codec, video_capture, audio_device, audio_codec } = store
 
   const video = JSON.parse(video_capture)
   video.deviceId = { ideal: video_device }

@@ -5,10 +5,10 @@ import path from 'path'
 
 const isDev = process.env.NODE_ENV === 'development'
 
-export default defineConfig(({ mode, command }) => {
+export default defineConfig(({ mode }) => {
   return {
     build: {
-      outDir: mode === 'production' ? 'vrx/production' : 'vrx/development',
+      outDir: mode === 'public' ? 'vrx/public' : 'vrx/private',
     },
     optimizeDeps: {
       exclude: ['@ffmpeg/core', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
@@ -38,7 +38,7 @@ export default defineConfig(({ mode, command }) => {
           key: fs.readFileSync(path.resolve(__dirname, 'server-key.pem')),
           cert: fs.readFileSync(path.resolve(__dirname, 'server-cert.pem')),
         },
-        hmr: {
+        hmr: mode === 'private' ? false : {
           protocol: 'wss',
           host: 'fpv',
           port: 4443,

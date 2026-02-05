@@ -1,71 +1,45 @@
-import * as C from './component'
-import { ReceiverState } from '../receiver.js'
+import Alpine from 'alpinejs'
+import { ReceiverState } from '../receiver'
+import { startRecording, stopRecording } from '../record'
 
-const subElements = [
-  //
-  C.WebrtcReportButton,
-  C.SearchRadarButton,
-  C.FullScreenButton,
-  C.GrayscaleCheck,
-  C.MuteCheck,
-]
-
-export function disabled() {
-  subElements.forEach((el) => {
-    if (el) el.disabled = true
-  })
-}
-
-disabled()
-
-export function enable() {
-  subElements.forEach((el) => {
-    if (el) el.disabled = false
-  })
-}
-
-function toggleVisibility(...elements) {
-  elements.forEach((el) => {
-    if (el) el.style.visibility = el.style.visibility === 'visible' ? 'hidden' : 'visible'
-  })
-}
-
-// WebrtcReportButton -----------------------------------------------
-C.WebrtcReportButton.on('click', () => {
-  RadarMap.style.visibility = 'hidden'
-  toggleVisibility(WebrtcReport)
+window.addEventListener('menu:grayscale-change', () => {
+  const gray = Alpine.store('menu').grayscale
+  RemoteVideo.style.filter = gray ? 'grayscale(1)' : ''
+  RemoteVideo.style.webkitFilter = gray ? 'grayscale(1)' : ''
 })
 
-// SearchRadarButton -----------------------------------------------
-C.SearchRadarButton.on('click', () => {
+window.addEventListener('menu:mute-change', () => {
+  if (ReceiverState.audio) ReceiverState.audio.muted = Alpine.store('menu').mute
+})
+
+window.addEventListener('menu:fullscreen-click', () => {
+  const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement
+  if (isFullscreen) {
+    document.exitFullscreen()
+  } else {
+    ReceiverContainer.requestFullscreen()
+  }
+})
+
+window.addEventListener('menu:webrtc-report-click', () => {
+  RadarMap.style.visibility = 'hidden'
+  WebrtcReport.style.visibility = WebrtcReport.style.visibility === 'visible' ? 'hidden' : 'visible'
+})
+
+window.addEventListener('menu:search-radar-click', () => {
   WebrtcReport.style.visibility = 'hidden'
-  toggleVisibility(RadarMap)
+  RadarMap.style.visibility = RadarMap.style.visibility === 'visible' ? 'hidden' : 'visible'
   if (RadarMap.style.visibility === 'visible') {
     ReceiverState.searchRadar.start()
-  } else if (RadarMap.style.visibility === 'hidden') {
+  } else {
     ReceiverState.searchRadar.stop()
   }
 })
 
-// FullScreenButton -----------------------------------------------
-C.FullScreenButton.on('click', () => {
-  const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement
-  isFullscreen ? document.exitFullscreen() : ReceiverContainer.requestFullscreen()
-  C.FullScreenButton.title = isFullscreen ? 'Fullscreen' : 'Exit Fullscreen'
-})
-
-// GrayscaleCheck -----------------------------------------------
-C.GrayscaleCheck.on('change', (ev) => {
-  if (ev.value) {
-    RemoteVideo.style.filter = 'grayscale(1)'
-    RemoteVideo.style.webkitFilter = 'grayscale(1)'
+window.addEventListener('menu:record-click', () => {
+  if (Alpine.store('menu').recording) {
+    stopRecording()
   } else {
-    RemoteVideo.style.filter = ''
-    RemoteVideo.style.webkitFilter = ''
+    startRecording()
   }
-})
-
-// MuteCheck -----------------------------------------------
-C.MuteCheck.on('change', (ev) => {
-  ReceiverState.audio.muted = ev.value
 })

@@ -1,56 +1,44 @@
-import * as C from './component'
-import * as P from './parameter-utils.js'
+import Alpine from 'alpinejs'
+import { checkRequiredKeys } from './parameter-utils.js'
 import { setListOptions } from './list-utils.js'
 
-export function bindMediaLists({
-  type,
-  deviceList,
-  codecList,
-  optionList,
-  getCodecListBySource,
-  getOptionListBySource,
-  showSubMenuBySource,
-  shouldShowSubMenuByState,
-}) {
-  const codecKey = `${type}_codec`
-  const shouldShowSubMenu =
-    typeof shouldShowSubMenuByState === 'function'
-      ? shouldShowSubMenuByState
-      : () => C.MenuParams[codecKey] !== 'none'
+export function bindMediaLists({ type, getCodecListBySource, getOptionListBySource, showSubMenuBySource, shouldShowSubMenuByState }) {
+  const isVideo = type === 'video'
+  const deviceKey = isVideo ? 'video_device' : 'audio_device'
+  const codecKey = isVideo ? 'video_codec' : 'audio_codec'
+  const codecOptionsKey = isVideo ? 'video_codec_options' : 'audio_codec_options'
+  const optionKey = isVideo ? 'video_capture' : 'audio_sampling'
+  const optionOptionsKey = isVideo ? 'video_capture_options' : 'audio_sampling_options'
+
+  const deviceEvent = isVideo ? 'menu:video-device-change' : 'menu:audio-device-change'
+  const codecEvent = isVideo ? 'menu:video-codec-change' : 'menu:audio-codec-change'
+  const optionEvent = isVideo ? 'menu:video-capture-change' : 'menu:audio-sampling-change'
+
+  const shouldShow = typeof shouldShowSubMenuByState === 'function'
+    ? shouldShowSubMenuByState
+    : () => Alpine.store('menu')[codecKey] !== 'none'
 
   function onChange() {
-    if (shouldShowSubMenu()) {
-      showSubMenuBySource(C.MenuParams.message.source)
-    }
+    const store = Alpine.store('menu')
+    if (shouldShow()) showSubMenuBySource(store.message.source)
+    store.connectionDisabled = checkRequiredKeys()
   }
 
-  deviceList.on('change', () => {
-    if (C.MenuParams.sender !== 'none') {
-      initOptionList()
-    }
+  window.addEventListener(deviceEvent, () => {
+    if (Alpine.store('menu').sender !== 'none') initOptionList()
   })
 
-  optionList.on('change', () => {
-    C.ConnectionButton.disabled = P.checkRequiredKeys()
-  })
-
-  codecList.on('change', () => {
-    onChange()
-  })
-
-  optionList.on('change', () => {
-    onChange()
-  })
+  window.addEventListener(optionEvent, onChange)
+  window.addEventListener(codecEvent, onChange)
 
   function initCodecList() {
-    const { source, codecs } = C.MenuParams.message
-    const options = getCodecListBySource(source, codecs)
-    setListOptions(codecList, options)
+    const { source, codecs } = Alpine.store('menu').message
+    setListOptions(codecKey, codecOptionsKey, getCodecListBySource(source, codecs))
   }
 
   function initOptionList() {
-    const options = getOptionListBySource(C.MenuParams.message.source)
-    setListOptions(optionList, options)
+    const store = Alpine.store('menu')
+    setListOptions(optionKey, optionOptionsKey, getOptionListBySource(store.message.source))
     onChange()
   }
 

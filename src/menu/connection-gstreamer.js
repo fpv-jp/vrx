@@ -1,4 +1,4 @@
-import * as C from './component'
+import Alpine from 'alpinejs'
 import * as U from './pipeline/pipeline-utils.js'
 import * as Utils from '../utils.js'
 
@@ -10,58 +10,36 @@ import * as JETSON_NANO_2GB from './pipeline/JETSON_NANO_2GB'
 import * as JETSON_ORIN_NANO_SUPER from './pipeline/JETSON_ORIN_NANO_SUPER'
 import * as RADXA_ROCK_5 from './pipeline/RADXA_ROCK_5'
 
-// buildPayload -------------------------------------------
 export async function buildPayload() {
-  let P = C.MenuParams
-  let { platform } = P.message
+  const store = Alpine.store('menu')
+  const { platform } = store.message
 
-  let builder = null
-  switch (platform) {
-    case 'APPLE_MAC':
-      builder = APPLE_MAC
-      break
-    case 'LINUX_X86':
-      builder = LINUX_X86
-      break
-    case 'RASPBERRY_PI_4B':
-    case 'RASPBERRY_PI_4CM':
-      builder = RASPBERRY_PI_4
-      break
-    case 'RASPBERRY_PI_5':
-      builder = RASPBERRY_PI_5
-      break
-    case 'JETSON_NANO_2GB':
-      builder = JETSON_NANO_2GB
-      break
-    case 'JETSON_ORIN_NANO_SUPER':
-      builder = JETSON_ORIN_NANO_SUPER
-      break
-    case 'RADXA_ROCK_5B':
-    case 'RADXA_ROCK_5T':
-      builder = RADXA_ROCK_5
-      break
-    case 'UNKNOWN':
-    default:
+  const builders = {
+    APPLE_MAC,
+    LINUX_X86,
+    RASPBERRY_PI_4B: RASPBERRY_PI_4,
+    RASPBERRY_PI_4CM: RASPBERRY_PI_4,
+    RASPBERRY_PI_5,
+    JETSON_NANO_2GB,
+    JETSON_ORIN_NANO_SUPER,
+    RADXA_ROCK_5B: RADXA_ROCK_5,
+    RADXA_ROCK_5T: RADXA_ROCK_5,
   }
+  const builder = builders[platform]
 
-  let network_interface = P.network_interface
-  
-  let flight_controller = P.flight_controller
+  const network_interface = store.network_interface
+  const flight_controller = store.flight_controller
+  const video_width = parseInt(store.video_width) || store.video_width
+  const video_height = parseInt(store.video_height) || store.video_height
+  const video_framerate = parseInt(store.video_framerate) || store.video_framerate
 
-  let video_pipeline = await builder.buildVidePipeline(P)
+  const P = { ...store, video_width, video_height, video_framerate }
 
-  video_pipeline = video_pipeline.replaceAll('\n', '')//.replaceAll('(', '\\(').replaceAll(')', '\\)')
-  
-  let audio_pipeline = builder.buildAudioPipeline(P).replaceAll('\n', '')//.replaceAll('(', '\\(').replaceAll(')', '\\)')
+  let video_pipeline = (await builder.buildVidePipeline(P)).replaceAll('\n', '')
+  let audio_pipeline = builder.buildAudioPipeline(P).replaceAll('\n', '')
+  let video_profile = await Utils.checkDecodingInfo(video_width, video_height, video_framerate)
 
-  // Check browser's H264 profile support
-  let video_profile = await Utils.checkDecodingInfo(P.video_width, P.video_height, P.video_framerate)
-
-  // console.log('video_pipeline:', video_pipeline)
-  // console.log('audio_pipeline:', audio_pipeline)
-  // console.log('video_profile:', video_profile)
-
-  let { video_priority, audio_priority, video_payload_type, audio_payload_type } = U
+  const { video_priority, audio_priority, video_payload_type, audio_payload_type } = U
 
   return {
     network_interface,
@@ -71,7 +49,7 @@ export async function buildPayload() {
     video_priority,
     audio_priority,
     video_payload_type,
-    audio_payload_type: JSON.parse(P.audio_codec).name === 'mulawenc' ? 0 : audio_payload_type,
+    audio_payload_type: JSON.parse(store.audio_codec).name === 'mulawenc' ? 0 : audio_payload_type,
     video_profile,
     platform,
   }

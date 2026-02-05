@@ -1,10 +1,10 @@
-import Constants from './constants.js'
-import { ReceiverState } from './receiver.js'
-import StreamHandler, { PostMessageType } from './stream-handler.js'
+import Constants from '../constants.js'
+import { ReceiverState } from './index.js'
+import StreamHandler, { PostMessageType } from '../stream/handler.js'
 
-import * as Menu from './menu'
-import * as Widgets from './widgets'
-import * as Utils from './utils.js'
+import * as Menu from '../menu'
+import * as Widgets from '../widgets'
+import * as Utils from '../utils.js'
 
 const SENDER = Constants.SENDER
 const RECEIVER = Constants.RECEIVER
@@ -34,7 +34,7 @@ function transferRemoteVideoWorker(answer) {
     switch (data.type) {
       // --- KeyFrame -------------------------
       case PostMessageType.KeyFrame:
-        // console.log('PostMessageType.KeyFrame')
+        RemoteVideo.style.aspectRatio = `${data.width} / ${data.height}`
         break
     }
   }
@@ -46,7 +46,7 @@ function transferRemoteVideoWorker(answer) {
 export default async function comingSignalingMessage(message) {
   switch (message.type) {
     case RECEIVER.SESSION_ID_ISSUANCE:
-      ReceiverState.ws2.id = message.sessionId
+      ReceiverState.ws.id = message.sessionId
       console.log(`assigned session id : ${message.sessionId}`)
 
     case RECEIVER.CHANGE_SENDER_ENTRIES:
@@ -58,12 +58,12 @@ export default async function comingSignalingMessage(message) {
       break
 
     case RECEIVER.SDP_OFFER:
-      await ReceiverState.pc2.setRemoteDescription(new RTCSessionDescription(message.offer))
+      await ReceiverState.pc.setRemoteDescription(new RTCSessionDescription(message.offer))
 
-      const answer = await ReceiverState.pc2.createAnswer()
-      await ReceiverState.pc2.setLocalDescription(answer)
+      const answer = await ReceiverState.pc.createAnswer()
+      await ReceiverState.pc.setLocalDescription(answer)
 
-      Utils.sendSignalingMessage(ReceiverState.ws2, SENDER.SDP_ANSWER, { answer })
+      Utils.sendSignalingMessage(ReceiverState.ws, SENDER.SDP_ANSWER, { answer })
       transferRemoteVideoWorker(answer)
       break
 
@@ -74,7 +74,7 @@ export default async function comingSignalingMessage(message) {
       } else {
         console.log(`>>> ${RECEIVER.ICE} RECEIVER.ICE: ${message.candidate.candidate}`)
       }
-      await ReceiverState.pc2.addIceCandidate(new RTCIceCandidate(message.candidate))
+      await ReceiverState.pc.addIceCandidate(new RTCIceCandidate(message.candidate))
       break
 
     case RECEIVER.SENDER_CLOSE:

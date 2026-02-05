@@ -1,5 +1,5 @@
 import Constants from '../constants.js'
-import { ReceiverState } from '../receiver.js'
+import { ReceiverState } from '../receiver'
 import * as Utils from '../utils.js'
 
 import charts from '../thirdparty/realtime-chart.js'
@@ -292,14 +292,14 @@ const ConnectionMonitoring = {
   // メインの集約関数
   reportAggregate: function () {
     // ping
-    let { dc2CMD } = ReceiverState
-    if (dc2CMD && dc2CMD.readyState == 'open') {
+    let { cmd } = ReceiverState
+    if (cmd && cmd.readyState == 'open') {
       let cmd = Command.PING
       MonitorState.pingStartTime = window.performance.now()
-      dc2CMD.send(JSON.stringify({ cmd }))
+      cmd.send(JSON.stringify({ cmd }))
     }
 
-    ReceiverState.pc2.getStats(null).then((stats) => {
+    ReceiverState.pc.getStats(null).then((stats) => {
       const processedReports = this.collectRelevantStats(stats)
 
       processedReports.forEach((report) => {
