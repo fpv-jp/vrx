@@ -16,13 +16,14 @@ function displayNone(...elements) {
   })
 }
 
-import SenderManager from '../sender.js'
-import ReceiverManager from '../receiver.js'
+import Alpine from 'alpinejs'
+import SenderManager from '../sender'
+import ReceiverManager from '../receiver'
 import AudioStreamVisualizer from './audio-visualizer.js'
-import { ReceiverState } from '../receiver.js'
+import { ReceiverState } from '../receiver'
 import * as Utils from '../utils.js'
 import ConnectionMonitoring from '../widgets/monitoring.js'
-import StreamHandler, { PostMessageType } from '../stream-handler.js'
+import StreamHandler, { PostMessageType } from '../stream/handler.js'
 
 // initializeUnknown -----------------------------------------------
 function initializeUnknown() {
@@ -73,6 +74,8 @@ function initializeReceiver() {
     RadarMap,
   )
 
+  if (import.meta.env.MODE === 'production') SenderQR.style.display = 'block'
+
   window.addEventListener('unload', (e) => {
     ReceiverManager.onunload(e)
   })
@@ -98,17 +101,29 @@ function connectionEstablishment() {
     // WebrtcReport,
     // RadarMap,
   )
+
+  const store = Alpine.store('menu')
+  ReceiverState.headUpDisplay.start()
+  ReceiverState.headUpDisplay.setDebugVisible(store.showDebug)
+  RemoteVideo.style.filter = store.grayscale ? 'grayscale(1)' : ''
+  RemoteVideo.style.webkitFilter = store.grayscale ? 'grayscale(1)' : ''
 }
 
 // attachAudioStream -----------------------------------------------
 function attachAudioStream(srcObject) {
   var audioVisualizer = AudioStreamVisualizer(AudioVisualizer, srcObject)
   audioVisualizer.resizeCanvas(240, 80)
+  const { selectedColor } = Alpine.store('menu')
+  const COLOR_THEMES = { green:[0,255,0], amber:[255,176,0], cyan:[0,210,255], white:[200,200,200], red:[255,50,50] }
+  const [r, g, b] = COLOR_THEMES[selectedColor] || COLOR_THEMES.green
+  audioVisualizer.setColor(r, g, b)
+  audioVisualizer.setFont(Alpine.store('menu').selectedFont)
   audioVisualizer.start(ReceiverState.audioText)
   ReceiverState.audioVisualizer = audioVisualizer
 
   var audio = new Audio()
   audio.srcObject = srcObject
+  audio.muted = Alpine.store('menu').mute
   audio.play().catch(() => {})
   ReceiverState.audio = audio
 }
@@ -131,7 +146,7 @@ function destroyReceiver() {
     const { id, tagName } = child
 
     switch (id) {
-      case 'TweakpaneMenu':
+      case 'AlpineMenu':
         break
 
       case 'RemoteVideo':
@@ -144,6 +159,9 @@ function destroyReceiver() {
         break
 
       case 'Aircraft':
+        break
+
+      case 'SenderQR':
         break
 
       case 'AudioVisualizer':

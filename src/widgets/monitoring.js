@@ -1,5 +1,5 @@
 import Constants from '../constants.js'
-import { ReceiverState } from '../receiver.js'
+import { ReceiverState } from '../receiver'
 import * as Utils from '../utils.js'
 
 import charts from '../thirdparty/realtime-chart.js'
@@ -7,6 +7,26 @@ const { AreaChart } = charts
 
 const Command = Constants.Command
 const Interva = 1000 // ms
+
+function getRemoteAddress() {
+  try {
+    const store = window.Alpine?.store('menu')
+    const network = store?.message?.network
+    const selected = store?.network_interface
+    if (!network || !selected || selected === 'none') return null
+    const nic = network.find((n) => n.name === selected)
+    return nic?.address || null
+  } catch (e) {
+    return null
+  }
+}
+
+function formatLocalIP(ip) {
+  if (!ip) return '(unknown)'
+  if (ip.endsWith('.local')) return '(mDNS)'
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(ip)) return '(mDNS)'
+  return ip
+}
 
 //-------------------------------------
 //
@@ -29,7 +49,8 @@ export const MonitorState = {
 
   wifi: null,
 
-  telemetryInfo: { DataChannel: {} },
+  telemetryInfo: {},
+  dataChannelInfo: {},
 }
 
 //-------------------------------------
@@ -95,11 +116,6 @@ const ConnectionMonitoring = {
     }
 
     if (candidatePairReport) {
-      MonitorState.telemetryInfo = {
-        ...MonitorState.telemetryInfo,
-        Local: Utils.excludedCandidate(candidatePairReport.localCandidate),
-      }
-
       if (candidatePairReport.inboundNetworkTraffic) {
         value = candidatePairReport.inboundNetworkTraffic
       }
@@ -122,11 +138,6 @@ const ConnectionMonitoring = {
     }
 
     if (candidatePairReport) {
-      MonitorState.telemetryInfo = {
-        ...MonitorState.telemetryInfo,
-        Remote: Utils.excludedCandidate(candidatePairReport.remoteCandidate),
-      }
-
       if (candidatePairReport.outboundNetworkTraffic) {
         value = candidatePairReport.outboundNetworkTraffic
       }
@@ -225,16 +236,16 @@ const ConnectionMonitoring = {
             MonitorState.inboundRtpVideoReport = r
             if (r?.codec) {
               const { codec, frameWidth, frameHeight, framesPerSecond, jitter } = r
-              // videoText
-              ReceiverState.videoText = `${codec ? codec.mimeType : ''} ${frameWidth}x${frameHeight} FPS ${framesPerSecond || 0} jitter ${jitter || 0}`
+              const mime = codec.mimeType.replace('video/', '')
+              ReceiverState.videoText = `${mime} ${frameWidth}x${frameHeight} ${framesPerSecond || 0}fps jitter ${(jitter || 0).toFixed(3)}`
             }
             break
           case 'audio':
             MonitorState.inboundRtpAudioReport = r
             if (r?.codec) {
               const { mimeType, clockRate, channels } = r.codec
-              // audioText
-              ReceiverState.audioText = `${mimeType} rate ${clockRate} channels ${channels}`
+              const mime = mimeType.replace('audio/', '')
+              ReceiverState.audioText = `${mime} ${clockRate}Hz ch${channels}`
               if (ReceiverState.audioVisualizer) ReceiverState.audioVisualizer.text(ReceiverState.audioText)
             }
             break
@@ -242,12 +253,9 @@ const ConnectionMonitoring = {
         break
 
       case 'data-channel':
-        const { label, state, messages } = r
-        let channelInfo = `Ping ${MonitorState.ping} ms`
-        if (label !== 'CMD') {
-          channelInfo = `${state} (${messages}Hz)`
+        if (r.label !== 'CMD') {
+          MonitorState.dataChannelInfo[r.label] = `${r.state ?? '?'} ${r.messages ?? 0}Hz`
         }
-        MonitorState.telemetryInfo.DataChannel[label] = channelInfo
         break
     }
   },
@@ -289,22 +297,66 @@ const ConnectionMonitoring = {
   },
 
   // ---------------------------
+  // HUD用 telemetryInfo 構築
+  buildTelemetryInfo: function () {
+    const cp = MonitorState.candidatePairReport
+    if (!cp) return
+
+    const network = {}
+
+    const localIP = cp.localCandidate?.ip
+    const remoteIP = getRemoteAddress() || cp.remoteCandidate?.ip
+    if (localIP)  network['Local']    = formatLocalIP(localIP)
+    if (remoteIP) network['Remote']   = remoteIP
+
+    const ctype = cp.localCandidate?.candidateType
+    if (ctype)    network['Type']     = ctype
+    const proto = cp.localCandidate?.protocol
+    if (proto)    network['Protocol'] = proto
+
+    if (MonitorState.wifi?.status?.wpa_state === 'COMPLETED') {
+      const { ssid, band } = MonitorState.wifi.status
+      const { RSSI, LINKSPEED } = MonitorState.wifi.signal_poll
+      if (ssid) network['SSID'] = ssid
+      if (band) network['Band'] = band
+      if (RSSI != null) network['WiFi'] = `RSSI:${RSSI}dBm ${LINKSPEED}Mb/s`
+    }
+
+    network['Ping'] = `${MonitorState.ping ?? '--'} ms`
+
+    const v = MonitorState.inboundRtpVideoReport
+    if (v?.codec) {
+      const mime = v.codec.mimeType.replace('video/', '')
+      network['Video'] = `${mime} ${v.frameWidth}x${v.frameHeight} ${v.framesPerSecond || 0}fps jitter ${(v.jitter || 0).toFixed(3)}`
+    }
+
+    const a = MonitorState.inboundRtpAudioReport
+    if (a?.codec) {
+      const mime = a.codec.mimeType.replace('audio/', '')
+      network['Audio'] = `${mime} ${a.codec.clockRate}Hz ch${a.codec.channels}`
+    }
+
+    MonitorState.telemetryInfo = { Network: network }
+  },
+
+  // ---------------------------
   // メインの集約関数
   reportAggregate: function () {
     // ping
-    let { dc2CMD } = ReceiverState
-    if (dc2CMD && dc2CMD.readyState == 'open') {
-      let cmd = Command.PING
+    let { cmd } = ReceiverState
+    if (cmd && cmd.readyState == 'open') {
       MonitorState.pingStartTime = window.performance.now()
-      dc2CMD.send(JSON.stringify({ cmd }))
+      cmd.send(JSON.stringify({ cmd: Command.PING }))
     }
 
-    ReceiverState.pc2.getStats(null).then((stats) => {
+    ReceiverState.pc.getStats(null).then((stats) => {
       const processedReports = this.collectRelevantStats(stats)
 
       processedReports.forEach((report) => {
         this.updateMonitorState(report)
       })
+
+      this.buildTelemetryInfo()
 
       WebrtcReport.innerHTML = this.formatDebugOutput(processedReports)
     })

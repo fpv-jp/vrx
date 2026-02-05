@@ -53,3 +53,27 @@ sudo vim /etc/hosts
 ### 7. [Local] Open the application in your browser
 
 [https://fpv:4443](https://fpv:4443)
+
+## Creating a Release
+
+Pushing to the `main` branch (or triggering manually) automatically runs the [Build and Create Release](.github/workflows/build-release.yml) workflow, which:
+
+1. Builds both `public` and `private` modes (`npm run build`)
+2. Archives the output (`vrx/public` + `vrx/private`) as `dist.tar.gz`
+3. Creates a GitHub Release with a timestamped tag (e.g. `release-20251103-012538`)
+
+To trigger manually, go to **Actions → Build and Create Release → Run workflow** on GitHub.
+
+The release artifact is consumed by [app](https://github.com/fpv-jp/app) to build its Docker images.
+
+
+  ┌─────────────────┬─────────────────────┬──────────────────────────────────────────────┐
+  │    フォント     │       雰囲気        │                     特徴                     │
+  ├─────────────────┼─────────────────────┼──────────────────────────────────────────────┤
+  │ Share Tech Mono │ 軍用HUD・レーダー   │ 角ばっていて視認性が高い。等幅でドット感あり │
+  ├─────────────────┼─────────────────────┼──────────────────────────────────────────────┤
+  │ VT323           │ レトロCRTターミナル │ ブラウン管感。ピクセルっぽい。緑画面と相性◎  │
+  ├─────────────────┼─────────────────────┼──────────────────────────────────────────────┤
+  │ DSEG7 Classic   │ 7セグ液晶           │ 数字がまさに「デジタル計器」。ただし数字限定 │
+  └─────────────────┴─────────────────────┴──────────────────────────────────────────────┘
+  
