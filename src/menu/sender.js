@@ -1,75 +1,78 @@
-import * as C from './component'
+import Alpine from 'alpinejs'
 import Constants from '../constants.js'
-import { ReceiverState } from '../receiver.js'
-
+import { ReceiverState } from '../receiver'
 import * as Menu from './index.js'
 import * as Utils from '../utils.js'
 
 const SENDER = Constants.SENDER
 
-// Format sender display text based on platform info
+/**
+ * Sender エントリを表示テキストに変換する
+ * platform / gpu 情報があれば "(platform:gpu)" 形式で付記する
+ * @param {string|{ id: string, platform?: string, gpu?: string }} sender
+ * @returns {string}
+ */
 function formatSenderText(sender) {
-  // Support old format (string) and new format (object with id, platform, gpu)
-  if (typeof sender === 'string') {
-    return sender
-  }
+  if (typeof sender === 'string') return sender
   const { id, platform, gpu } = sender
-  if (platform === 'LINUX_X86' && gpu) {
-    return `${id} (${platform}:${gpu})`
-  }
-  if (platform === 'BROWSER' && gpu) {
-    return `${id} (${gpu})`
-  }
-  if (platform) {
-    return `${id} (${platform})`
-  }
+  if (platform === 'LINUX_X86' && gpu) return `${id} (${platform}:${gpu})`
+  if (platform === 'BROWSER' && gpu) return `${id} (${gpu})`
+  if (platform) return `${id} (${platform})`
   return id
 }
 
-// Get sender ID from sender (handles both old and new format)
+/**
+ * Sender エントリから WebSocket セッション ID を取得する
+ * @param {string|{ id: string }} sender
+ * @returns {string}
+ */
 function getSenderId(sender) {
   return typeof sender === 'string' ? sender : sender.id
 }
 
-// SenderEntryList -----------------------------------------------
+/**
+ * シグナリングサーバーから受け取った Sender リストを Alpine ストアに反映する
+ * 現在選択中の Sender がリストから消えた場合はメニューを初期化する
+ * @param {(string|object)[]} senders
+ */
 function setSenderEntryList(senders) {
   console.log('senders:', senders)
 
-  // Normalize to always store IDs for compatibility
-  const senderIds = senders.map(getSenderId)
-  C.MenuParams.senders = senderIds
+  const store = Alpine.store('menu')
+  store.senders = senders.map((sender) => ({
+    id: getSenderId(sender),
+    label: formatSenderText(sender),
+  }))
 
-  C.SenderEntryList.options = [
-    //
-    C.Placeholder,
-    ...senders.map((sender) => {
-      const id = getSenderId(sender)
-      const text = formatSenderText(sender)
-      return { text, value: id }
-    }),
-  ]
-
-  if (senderIds && senderIds.includes(C.MenuParams.sender)) {
-  } else {
+  const senderIds = store.senders.map((s) => s.id)
+  if (!senderIds.includes(store.sender)) {
     Menu.initialize()
-    C.MenuParams.sender = 'none'
-    C.SenderEntryList.refresh()
+    store.sender = 'none'
   }
 }
 
-// SenderEntryList on change -----------------------------------------------
-C.SenderEntryList.on('change', () => {
-  const sender = C.MenuParams.sender
-  const senders = C.MenuParams.senders
+window.addEventListener('menu:sender-change', () => {
+  const store = Alpine.store('menu')
+  const sender = store.sender
+  const senderIds = store.senders.map((s) => s.id)
 
-  if (senders && senders.includes(sender)) {
-    ReceiverState.ws2.pair = sender
-    Utils.sendSignalingMessage(ReceiverState.ws2, SENDER.MEDIA_DEVICE_LIST_REQUEST)
+  if (senderIds.includes(sender)) {
+    ReceiverState.ws.pair = sender
+    store.pinInput = ''
+    store.pinError = ''
+    store.pinRequired = true
   } else {
     Menu.initialize()
-    C.MenuParams.sender = 'none'
-    C.SenderEntryList.refresh()
+    store.sender = 'none'
+    store.pinRequired = false
   }
+})
+
+window.addEventListener('menu:pin-confirm', () => {
+  const store = Alpine.store('menu')
+  const pin = store.pinInput.trim()
+  store.pinError = ''
+  Utils.sendSignalingMessage(ReceiverState.ws, SENDER.MEDIA_DEVICE_LIST_REQUEST, { pin })
 })
 
 export { setSenderEntryList }

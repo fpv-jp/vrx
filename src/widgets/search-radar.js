@@ -1,13 +1,14 @@
-// FlyingObject
-// --------------------------------------------------------------------------------------------
+/** レーダー上を移動するダミー航空機オブジェクト */
 class FlyingObject {
+  /**
+   * @param {number} radius - レーダー半径（リセット時の配置範囲に使用）
+   */
   constructor(radius) {
     this.radius = radius
     this.reset()
   }
 
-  // reset
-  // ---------------------------
+  /** ランダムな軌道でオブジェクトを再配置する */
   reset() {
     const startAngle = Math.random() * Math.PI * 2
     const endAngle = startAngle + Math.PI + (Math.random() - 1)
@@ -30,15 +31,21 @@ class FlyingObject {
     this.speedY = (dy / len) * speed
   }
 
-  // update
-  // ---------------------------
+  /** 速度ベクトルに従って位置を更新する */
   update() {
     this.x += this.speedX
     this.y += this.speedY
   }
 
-  // draw
-  // ---------------------------
+  /**
+   * レーダー半径内にいる場合にオブジェクトをキャンバスに描画する
+   * スキャナー角と一致したときにハイライトリングを表示する
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {number} centerX
+   * @param {number} centerY
+   * @param {number} radarAngle - スキャナー現在角度（ラジアン）
+   * @param {number} radius
+   */
   draw(ctx, centerX, centerY, radarAngle, radius) {
     const dist = Math.sqrt(this.x * this.x + this.y * this.y)
     if (dist <= radius) {
@@ -64,7 +71,11 @@ class FlyingObject {
   }
 }
 
-// SearchRadar --------------------------------------------------------------------------------------------
+/**
+ * レーダー canvas にスキャナー・グリッド・航空機を描画するファクトリ関数
+ * @param {HTMLCanvasElement} map - レーダー描画対象の canvas
+ * @returns {{ start: Function, stop: Function, resizeCanvas: Function, clear: Function }}
+ */
 export default (map) => {
   const state = {
     canvas: map,
@@ -85,11 +96,14 @@ export default (map) => {
     aircrafts: [],
 
     animationId: null,
+    scannerGradient: null,  // createRadialGradient キャッシュ
   }
 
   const SearchRadar = {
-    // drawBackground
-    // ---------------------------
+    /**
+     * グリッド・同心円・目盛りなどの静的背景を描画する
+     * @param {CanvasRenderingContext2D} ctx
+     */
     drawBackground(ctx) {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
       ctx.fillRect(0, 0, state.width, state.height)
@@ -145,7 +159,7 @@ export default (map) => {
       ctx.lineTo(state.center.x + state.radius, state.center.y)
       ctx.stroke()
 
-      // 目盛り
+      // 目盛り（バッチ描画: 360回の個別stroke → 3回の一括strokeに削減）
       ctx.strokeStyle = 'rgba(0, 255, 0, 0.7)'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
@@ -154,30 +168,51 @@ export default (map) => {
       const tickLength = 10
       const labelRadius = state.radius + 20
 
-      for (let deg = 0; deg < 360; deg++) {
+      // 30度ごとの太い目盛り（12本）
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      for (let deg = 0; deg < 360; deg += 30) {
         const angle = (deg * Math.PI) / 180 - Math.PI / 2
-        const isMajorTick = deg % 10 === 0
+        const cos = Math.cos(angle)
+        const sin = Math.sin(angle)
+        ctx.moveTo(state.center.x + cos * (state.radius - 5), state.center.y + sin * (state.radius - 5))
+        ctx.lineTo(state.center.x + cos * (state.radius + tickLength), state.center.y + sin * (state.radius + tickLength))
+      }
+      ctx.stroke()
 
-        if (isMajorTick) {
-          ctx.lineWidth = deg % 30 === 0 ? 2 : 1
-          const startRadius = deg % 30 === 0 ? state.radius - 5 : state.radius - 3
-
-          ctx.beginPath()
-          ctx.moveTo(state.center.x + Math.cos(angle) * startRadius, state.center.y + Math.sin(angle) * startRadius)
-          ctx.lineTo(state.center.x + Math.cos(angle) * (state.radius + tickLength), state.center.y + Math.sin(angle) * (state.radius + tickLength))
-          ctx.stroke()
-
-          if (deg % 10 === 0) {
-            ctx.fillStyle = 'rgba(0, 255, 0, 0.9)'
-            ctx.fillText(deg.toString(), state.center.x + Math.cos(angle) * labelRadius, state.center.y + Math.sin(angle) * labelRadius)
-          }
-        } else {
-          ctx.lineWidth = 0.5
-          ctx.beginPath()
-          ctx.moveTo(state.center.x + Math.cos(angle) * state.radius, state.center.y + Math.sin(angle) * state.radius)
-          ctx.lineTo(state.center.x + Math.cos(angle) * (state.radius + tickLength / 2), state.center.y + Math.sin(angle) * (state.radius + tickLength / 2))
-          ctx.stroke()
+      // 10度ごとの細い目盛り（24本、30の倍数を除く）
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      for (let deg = 10; deg < 360; deg += 10) {
+        if (deg % 30 !== 0) {
+          const angle = (deg * Math.PI) / 180 - Math.PI / 2
+          const cos = Math.cos(angle)
+          const sin = Math.sin(angle)
+          ctx.moveTo(state.center.x + cos * (state.radius - 3), state.center.y + sin * (state.radius - 3))
+          ctx.lineTo(state.center.x + cos * (state.radius + tickLength), state.center.y + sin * (state.radius + tickLength))
         }
+      }
+      ctx.stroke()
+
+      // 1度ごとの極細目盛り（324本）
+      ctx.lineWidth = 0.5
+      ctx.beginPath()
+      for (let deg = 1; deg < 360; deg++) {
+        if (deg % 10 !== 0) {
+          const angle = (deg * Math.PI) / 180 - Math.PI / 2
+          const cos = Math.cos(angle)
+          const sin = Math.sin(angle)
+          ctx.moveTo(state.center.x + cos * state.radius, state.center.y + sin * state.radius)
+          ctx.lineTo(state.center.x + cos * (state.radius + tickLength / 2), state.center.y + sin * (state.radius + tickLength / 2))
+        }
+      }
+      ctx.stroke()
+
+      // ラベル（10度ごと）
+      ctx.fillStyle = 'rgba(0, 255, 0, 0.9)'
+      for (let deg = 0; deg < 360; deg += 10) {
+        const angle = (deg * Math.PI) / 180 - Math.PI / 2
+        ctx.fillText(deg.toString(), state.center.x + Math.cos(angle) * labelRadius, state.center.y + Math.sin(angle) * labelRadius)
       }
 
       // 距離ラベル
@@ -191,8 +226,10 @@ export default (map) => {
       }
     },
 
-    // drawScanner
-    // ---------------------------
+    /**
+     * 回転するスキャナー線とグラデーション扇形を描画する
+     * @param {CanvasRenderingContext2D} ctx
+     */
     drawScanner(ctx) {
       // スキャナー線
       ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)'
@@ -202,12 +239,15 @@ export default (map) => {
       ctx.lineTo(state.center.x + Math.cos(state.angle) * state.radius, state.center.y + Math.sin(state.angle) * state.radius)
       ctx.stroke()
 
-      // グラデーション効果
-      const gradient = ctx.createRadialGradient(state.center.x, state.center.y, 0, state.center.x, state.center.y, state.radius)
-      gradient.addColorStop(0, 'rgba(0, 255, 0, 0.2)')
-      gradient.addColorStop(1, 'rgba(0, 255, 0, 0)')
+      // グラデーション効果（リサイズ時のみ再生成）
+      if (!state.scannerGradient) {
+        const gradient = ctx.createRadialGradient(state.center.x, state.center.y, 0, state.center.x, state.center.y, state.radius)
+        gradient.addColorStop(0, 'rgba(0, 255, 0, 0.2)')
+        gradient.addColorStop(1, 'rgba(0, 255, 0, 0)')
+        state.scannerGradient = gradient
+      }
 
-      ctx.fillStyle = gradient
+      ctx.fillStyle = state.scannerGradient
       ctx.beginPath()
       ctx.moveTo(state.center.x, state.center.y)
       ctx.arc(state.center.x, state.center.y, state.radius, state.angle - 0.2, state.angle, false)
@@ -215,8 +255,10 @@ export default (map) => {
       ctx.fill()
     },
 
-    // drawAircrafts
-    // ---------------------------
+    /**
+     * すべての FlyingObject を更新・描画する
+     * @param {CanvasRenderingContext2D} ctx
+     */
     drawAircrafts(ctx) {
       for (const aircraft of state.aircrafts) {
         aircraft.update()
@@ -224,8 +266,7 @@ export default (map) => {
       }
     },
 
-    // draw
-    // ---------------------------
+    /** 1フレームを描画してスキャナー角度を進める */
     draw() {
       this.drawBackground(state.ctx)
       this.drawScanner(state.ctx)
@@ -235,12 +276,13 @@ export default (map) => {
       if (state.angle > Math.PI * 2) {
         state.angle = 0
       }
-
-      state.animationId = requestAnimationFrame(() => this.draw())
     },
 
-    // resizeCanvas
-    // ---------------------------
+    /**
+     * レーダー半径に合わせて canvas サイズと内部パラメータを更新する
+     * devicePixelRatio を考慮して高 DPI 対応する
+     * @param {number} radius
+     */
     resizeCanvas(radius) {
       state.radius = radius
       let width = radius * 2.25
@@ -268,19 +310,20 @@ export default (map) => {
 
       state.ctx.imageSmoothingEnabled = true
 
+      // グラデーションキャッシュを無効化（中心・半径が変わるため）
+      state.scannerGradient = null
+
       state.aircrafts.forEach((aircraft) => {
         aircraft.radius = state.radius
       })
     },
 
-    // clear
-    // ---------------------------
+    /** canvas 全体をクリアする */
     clear() {
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
     },
 
-    // start
-    // ---------------------------
+    /** 航空機オブジェクトを初期化して RAF ループを開始する */
     start() {
       this.resizeCanvas(window.innerHeight / 3)
 
@@ -289,12 +332,15 @@ export default (map) => {
         state.aircrafts.push(new FlyingObject(state.radius))
       }
       if (!state.animationId) {
-        this.draw()
+        const loop = () => {
+          this.draw()
+          state.animationId = requestAnimationFrame(loop)
+        }
+        loop()
       }
     },
 
-    // stop
-    // ---------------------------
+    /** RAF ループをキャンセルして描画を停止する */
     stop() {
       if (state.animationId) {
         cancelAnimationFrame(state.animationId)
