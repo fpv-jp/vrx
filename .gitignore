@@ -1,3 +1,5 @@
 vrx/
 node_modules/
 *.pem
+docs/.vitepress/dist
+docs/.vitepress/cache

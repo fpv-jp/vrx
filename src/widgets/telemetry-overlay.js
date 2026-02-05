@@ -1,6 +1,4 @@
-// ===========================
 // スタイル設定ヘルパー
-// ===========================
 const Styles = {
   cyaan: 'rgba(0, 174, 239, 1)',
   magenta: 'rgba(255, 0, 255, 1)',
@@ -14,21 +12,26 @@ const Styles = {
 
   red: 'red',
   white: 'rgba(255, 255, 255, 1)',
-  font: '18px monospace',
-  fontBold: 'bold 20px monospace',
+  font: "18px 'Share Tech Mono', monospace",
+  fontBold: "bold 20px 'Share Tech Mono', monospace",
 
   fontSmall: '11px Arial',
-  fontSmall2: '11px monospace',
+  fontSmall2: "11px 'Share Tech Mono', monospace",
 
-  fontBattery: 'bold 12px Arial',
-  fontVideoText: '12px Arial',
+  fontBattery: "bold 12px 'Share Tech Mono', monospace",
+  fontVideoText: "12px 'Share Tech Mono', monospace",
   thickLineWidth: 2,
   thinLineWidth: 1,
 }
 
 const TelemetryRenderer = {
-  // Compass
-  // ---------------------------
+  /**
+     * コンパス方位テープを描画する（N/NE/E/SE/S/SW/W/NW と目盛り）
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position - { width, center }
+     * @param {number} heading - 機首方位（度）
+     * @param {number} canvasWidth
+     */
   Compass(ctx, position, heading, canvasWidth) {
     let { width, center } = position
 
@@ -91,8 +94,11 @@ const TelemetryRenderer = {
     ctx.fill()
   },
 
-  // Crosshair
-  // ---------------------------
+  /**
+     * 画面中央にクロスヘアと矩形を描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position - { width, center }
+     */
   Crosshair(ctx, position) {
     let { width, center } = position
 
@@ -119,8 +125,13 @@ const TelemetryRenderer = {
     ctx.stroke()
   },
 
-  // PitchLadder
-  // ---------------------------
+  /**
+     * ピッチラダー（仰角目盛り）を roll 角に合わせて回転描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position - { width, height, center }
+     * @param {number} pitch - ピッチ角（度）
+     * @param {number} roll - ロール角（度）
+     */
   PitchLadder(ctx, position, pitch, roll) {
     let { width, height, center } = position
 
@@ -179,8 +190,12 @@ const TelemetryRenderer = {
     }
   },
 
-  // RollIndicator
-  // ---------------------------
+  /**
+     * ロールインジケーターを描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position - { width, height, center }
+     * @param {number} roll - ロール角（度）
+     */
   RollIndicator(ctx, position, roll) {
     let { width, center } = position
 
@@ -206,9 +221,15 @@ const TelemetryRenderer = {
     ctx.fill()
   },
 
-  // Altitude
-  // ---------------------------
-  Altitude(ctx, position, altitude, currentDisplayAltitude, canvasWidth) {
+  /**
+     * 高度テープをスクロールアニメーション付きで描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position - { height, center }
+     * @param {number} _altitude - 目標高度（m）
+     * @param {number} currentDisplayAltitude - 現在表示中の高度（アニメーション補間用）
+     * @param {number} canvasWidth
+     */
+  Altitude(ctx, position, _altitude, currentDisplayAltitude, canvasWidth) {
     let { width, height, center } = position
 
     // スタイル設定
@@ -267,9 +288,15 @@ const TelemetryRenderer = {
     ctx.fillText(Math.round(currentDisplayAltitude).toString(), tapeRight - tapeWidth / 2, center.y)
   },
 
-  // Speed
-  // ---------------------------
-  Speed(ctx, position, speed, currentDisplaySpeed, canvasWidth) {
+  /**
+     * 速度テープをスクロールアニメーション付きで描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position - { height, center }
+     * @param {number} _speed - 目標速度（km/h）
+     * @param {number} currentDisplaySpeed - 現在表示中の速度（アニメーション補間用）
+     * @param {number} canvasWidth
+     */
+  Speed(ctx, position, _speed, currentDisplaySpeed, canvasWidth) {
     let { width, height, center } = position
 
     // スタイル設定
@@ -329,8 +356,14 @@ const TelemetryRenderer = {
     ctx.fillText(Math.round(currentDisplaySpeed).toString(), tapeLeft + tapeWidth / 2, center.y)
   },
 
-  // Battery
-  // ---------------------------
+  /**
+     * バッテリー残量バーとビデオ情報テキストを描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position
+     * @param {number} level - 残量（0.0–1.0）
+     * @param {boolean} charging
+     * @param {string} videoText - コーデック情報などの補足テキスト
+     */
   Battery(ctx, position, level, charging, videoText) {
     let { x, y, width, height, center } = position
 
@@ -389,15 +422,26 @@ const TelemetryRenderer = {
     }
 
     // Video text
-    ctx.font = Styles.fontVideoText
-    ctx.fillStyle = Styles.green
-    ctx.textAlign = 'right'
-    ctx.textBaseline = 'top'
-    ctx.fillText(videoText, center.x + width, 0)
+    if (videoText) {
+      ctx.font = Styles.fontVideoText
+      ctx.textAlign = 'right'
+      ctx.textBaseline = 'top'
+      const tw = ctx.measureText(videoText).width
+      const pad = 4
+      const tx = center.x + width
+      ctx.fillStyle = Styles.black
+      ctx.fillRect(tx - tw - pad, 0, tw + pad * 2, 18)
+      ctx.fillStyle = Styles.green
+      ctx.fillText(videoText, tx, 2)
+    }
   },
 
-  // TelemetryInfo
-  // ---------------------------
+  /**
+     * テレメトリ情報テキストの行リストを描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position
+     * @param {string[]} lines
+     */
   TelemetryInfo(ctx, position, lines) {
     ctx.fillStyle = Styles.blackAlpha
     ctx.fillRect(position.x, position.y, position.width, position.height)
@@ -412,8 +456,91 @@ const TelemetryRenderer = {
     })
   },
 
-  // DebugParameter
-  // ---------------------------
+  /**
+     * ホーム方向インジケーター（矢印と距離）を描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position
+     * @param {number} directionToHome - ホームへの方位（度）
+     * @param {number} distanceToHome - ホームまでの距離（m）
+     * @param {number} heading - 機首方位（度）
+     */
+  HomeIndicator(ctx, position, directionToHome, distanceToHome, heading) {
+    const { center } = position
+    const radius = position.width / 2
+
+    // Relative bearing: angle from current heading to home
+    const relBearing = ((directionToHome - heading) + 360) % 360
+    const angle = ((relBearing - 90) * Math.PI) / 180
+
+    // Circle
+    ctx.beginPath()
+    ctx.arc(center.x, center.y, radius, 0, Math.PI * 2)
+    ctx.strokeStyle = Styles.cyaan
+    ctx.lineWidth = Styles.thickLineWidth
+    ctx.stroke()
+
+    // H label
+    ctx.fillStyle = Styles.cyaan
+    ctx.font = `bold ${Math.round(radius * 1.1)}px 'Share Tech Mono', monospace`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('H', center.x, center.y)
+
+    // Arrow pointing toward home
+    const arrowStart = radius + 4
+    const arrowEnd = radius + radius * 0.9
+    const ax = center.x + Math.cos(angle) * arrowEnd
+    const ay = center.y + Math.sin(angle) * arrowEnd
+
+    ctx.beginPath()
+    ctx.moveTo(center.x + Math.cos(angle) * arrowStart, center.y + Math.sin(angle) * arrowStart)
+    ctx.lineTo(ax, ay)
+    ctx.strokeStyle = Styles.cyaan
+    ctx.lineWidth = Styles.thickLineWidth
+    ctx.stroke()
+
+    // Arrowhead
+    const headLen = radius * 0.4
+    const headAngle = Math.PI / 5
+    ctx.beginPath()
+    ctx.moveTo(ax, ay)
+    ctx.lineTo(ax - headLen * Math.cos(angle - headAngle), ay - headLen * Math.sin(angle - headAngle))
+    ctx.moveTo(ax, ay)
+    ctx.lineTo(ax - headLen * Math.cos(angle + headAngle), ay - headLen * Math.sin(angle + headAngle))
+    ctx.stroke()
+
+    // Distance text
+    const dist = distanceToHome >= 1000 ? `${(distanceToHome / 1000).toFixed(1)}km` : `${distanceToHome}m`
+    ctx.font = Styles.fontSmall2
+    ctx.fillStyle = Styles.cyaan
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top'
+    ctx.fillText(dist, center.x, center.y + radius + 4)
+  },
+
+  /**
+     * LiDAR / 超音波センサーの距離値を描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position
+     * @param {number} sonar - 距離（cm）
+     */
+  SonarDistance(ctx, position, sonar) {
+    const { center } = position
+    const dist = (sonar / 100).toFixed(2)
+
+    ctx.fillStyle = Styles.yellow
+    ctx.font = Styles.font
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.fillText(`◆ ${dist}m`, center.x, center.y)
+  },
+
+  /**
+     * デバッグパラメータのテキスト行を描画する
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {object} position
+     * @param {string[]} lines
+     */
   DebugParameter(ctx, position, lines) {
     ctx.fillStyle = Styles.blackAlpha
     ctx.fillRect(position.x, position.y, position.width, position.height)
@@ -429,7 +556,11 @@ const TelemetryRenderer = {
   },
 }
 
-// TelemetryOverlay --------------------------------------------------------------------------------------------
+/**
+ * HUD キャンバスにテレメトリ情報をリアルタイム描画するファクトリ関数
+ * @param {HTMLCanvasElement} hud - HeadUpDisplay 要素
+ * @returns {object} TelemetryOverlay インスタンス
+ */
 export default (hud) => {
   const state = {
     canvas: hud,
@@ -445,12 +576,39 @@ export default (hud) => {
 
     currentDisplayAltitude: 0,
     currentDisplaySpeed: 0,
+
+    pendingData: null,
+    pendingType: null,
+    dirty: false,
+    animationId: null,
+    showDebug: true,
   }
 
   const TelemetryOverlay = {
-    // update
-    // ---------------------------
+    // update - データを保存してdirtyフラグを立てるだけ
+    /**
+         * テレメトリデータを保存して dirty フラグを立てる（RAF ループが次フレームで再描画）
+         * @param {object} [telemetryData={}]
+         */
     update(telemetryData = {}) {
+      state.pendingData = telemetryData
+      state.pendingType = 'update'
+      state.dirty = true
+    },
+
+    // MSP - データを保存してdirtyフラグを立てるだけ
+    /**
+         * MSP プロトコルのテレメトリデータを保存して dirty フラグを立てる
+         * @param {object} [telemetryData={}]
+         */
+    MSP(telemetryData = {}) {
+      state.pendingData = telemetryData
+      state.pendingType = 'MSP'
+      state.dirty = true
+    },
+
+    // _drawUpdate - update の実際の描画処理
+    _drawUpdate(telemetryData) {
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
 
       let { heading, pitch, roll, gps, battery, videoText, telemetryInfo } = telemetryData
@@ -466,31 +624,73 @@ export default (hud) => {
       this.drawDebugParameter(telemetryData)
     },
 
-    // MSP
-    // ---------------------------
-    MSP(telemetryData = {}) {
+    // _drawMSP - MSP の実際の描画処理
+    _drawMSP(telemetryData) {
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
 
-      // console.log(JSON.stringify(telemetryData, null, 2))
-      let { acc, gyro, mag, roll, pitch, yaw, altitude, sonar, analog, battery, gps, compGps, videoText, telemetryInfo } = telemetryData
+      let { roll, pitch, yaw, altitude, analog, battery, gps, compGps, sonar, videoText, telemetryInfo } = telemetryData
 
-      let level = 0.89//this.calculateBatteryLevel(analog, battery)
-      // this.drawCompass(heading ?? 0)
+      // yaw from MSP_ATTITUDE = heading (0-360 degrees)
+      const level = analog && battery ? this.calculateBatteryLevel(analog, battery) : 0
+      this.drawCompass(yaw ?? 0)
       this.drawCrosshair()
       this.drawPitchLadder(pitch ?? 0, roll ?? 0)
       this.drawRollIndicator(roll ?? 0)
-      this.drawAltitude(altitude ?? 0) // gps.alt
-      this.drawSpeed(gps?.speed ?? 0)
-      this.drawBattery(level ?? 0, false, videoText ?? '')
+      this.drawAltitude(altitude ?? 0)          // MSP_ALTITUDE (meters)
+      this.drawSpeed(gps?.speed ?? 0)           // MSP_RAW_GPS speed (cm/s)
+      this.drawBattery(level, false, videoText ?? '')
+      if (compGps?.update) this.drawHomeIndicator(compGps.directionToHome, compGps.distanceToHome, yaw ?? 0)
+      if (sonar != null) this.drawSonarDistance(sonar)
       this.drawTelemetryInfo(telemetryInfo)
       this.drawDebugParameter(telemetryData)
     },
 
+    // _renderFrame - dirty なときだけ描画
+    _renderFrame() {
+      if (!state.dirty || !state.pendingData) return
+      state.dirty = false
+      const data = state.pendingData
+      if (state.pendingType === 'MSP') {
+        this._drawMSP(data)
+      } else if (data.heading !== undefined || data.pitch !== undefined || data.roll !== undefined) {
+        this._drawUpdate(data)
+      } else {
+        state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
+        this.drawTelemetryInfo(data.telemetryInfo)
+      }
+    },
+
+    // start - RAF ループ開始（ループ関数は一度だけ生成）
+    /** RAF ループを開始して HUD の描画を始める */
+    start() {
+      if (!state.animationId) {
+        const loop = () => {
+          this._renderFrame()
+          state.animationId = requestAnimationFrame(loop)
+        }
+        loop()
+      }
+    },
+
+    // stop - RAF ループ停止
+    /** RAF ループをキャンセルして描画を停止する */
+    stop() {
+      if (state.animationId) {
+        cancelAnimationFrame(state.animationId)
+        state.animationId = null
+      }
+    },
+
     // calculateBatteryLevel
-    // ---------------------------
+    /**
+         * MSP のアナログ・バッテリー状態データからバッテリーレベル（0–1）を計算する
+         * @param {object} mspAnalog
+         * @param {object} mspBatteryState
+         * @returns {{ level: number, charging: boolean }}
+         */
     calculateBatteryLevel(mspAnalog, mspBatteryState) {
       const { voltage, mAhdrawn } = mspAnalog
-      const { cellCount, capacity, batteryState } = mspBatteryState
+      const { cellCount, capacity } = mspBatteryState
       let level = 0
       if (capacity > 0 && mAhdrawn >= 0) {
         const remaining = capacity - mAhdrawn
@@ -505,13 +705,18 @@ export default (hud) => {
     },
 
     // clear
-    // ---------------------------
+    /** canvas 全体をクリアして RAF ループを停止する */
     clear() {
+      this.stop()
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
     },
 
     // resizeCanvas
-    // ---------------------------
+    /**
+         * canvas を新しいサイズにリサイズして HUD 全体を再描画する
+         * @param {number} width
+         * @param {number} height
+         */
     resizeCanvas(width, height) {
       state.width = width
       state.height = height
@@ -535,7 +740,11 @@ export default (hud) => {
     },
 
     // renderPosition
-    // ---------------------------
+    /**
+         * HUD 要素タイプに対応する描画領域の位置情報を返す
+         * @param {string} type
+         * @returns {{ width: number, height: number, center: { x: number, y: number } }}
+         */
     renderPosition(type) {
       switch (type) {
         case 'Compass': {
@@ -622,11 +831,35 @@ export default (hud) => {
           const y = center.y - height / 2
           return { x, y, width, height, center }
         }
+        case 'SonarDistance': {
+          const center = {
+            x: state.center.x,
+            y: state.height - state.height / 12,
+          }
+          return { center }
+        }
+        case 'HomeIndicator': {
+          // Right side, below battery
+          const width = state.width / 18
+          const height = width
+          const center = {
+            x: state.width - width * 1.5,
+            y: state.height / 8,
+          }
+          const x = center.x - width / 2
+          const y = center.y - height / 2
+          return { x, y, width, height, center }
+        }
       }
     },
 
     // renderSize
-    // ---------------------------
+    /**
+         * テキスト行を描画するための領域サイズを計算する
+         * @param {string} type
+         * @param {string[]} lines
+         * @returns {{ width: number, height: number }}
+         */
     renderSize(type, lines) {
       let padding = 5
       let charWidth = 5.5
@@ -663,7 +896,10 @@ export default (hud) => {
     },
 
     // drawCompass
-    // ---------------------------
+    /**
+         * コンパスを描画する
+         * @param {number} heading
+         */
     drawCompass(heading) {
       let current = 'Compass'
       let position = this.renderPosition(current)
@@ -680,7 +916,7 @@ export default (hud) => {
     },
 
     // drawCrosshair
-    // ---------------------------
+    /** クロスヘアを描画する */
     drawCrosshair() {
       let current = 'Crosshair'
       let position = this.renderPosition(current)
@@ -697,7 +933,11 @@ export default (hud) => {
     },
 
     // drawPitchLadder
-    // ---------------------------
+    /**
+         * ピッチラダーを描画する
+         * @param {number} pitch
+         * @param {number} roll
+         */
     drawPitchLadder(pitch, roll) {
       let current = 'PitchLadder'
       let position = this.renderPosition(current)
@@ -714,7 +954,10 @@ export default (hud) => {
     },
 
     // drawRollIndicator
-    // ---------------------------
+    /**
+         * ロールインジケーターを描画する
+         * @param {number} roll
+         */
     drawRollIndicator(roll) {
       let current = 'RollIndicator'
       let position = this.renderPosition(current)
@@ -731,7 +974,10 @@ export default (hud) => {
     },
 
     // drawAltitude
-    // ---------------------------
+    /**
+         * 高度テープを描画する
+         * @param {number} altitude
+         */
     drawAltitude(altitude) {
       const altitudeLerpFactor = 0.1
       state.currentDisplayAltitude += (altitude - state.currentDisplayAltitude) * altitudeLerpFactor
@@ -751,7 +997,10 @@ export default (hud) => {
     },
 
     // drawSpeed
-    // ---------------------------
+    /**
+         * 速度テープを描画する
+         * @param {number} speed
+         */
     drawSpeed(speed) {
       const speedLerpFactor = 0.1
       state.currentDisplaySpeed += (speed - state.currentDisplaySpeed) * speedLerpFactor
@@ -770,8 +1019,53 @@ export default (hud) => {
       }
     },
 
+    // drawSonarDistance
+    /**
+         * ソナー距離を描画する
+         * @param {number} sonar
+         */
+    drawSonarDistance(sonar) {
+      let current = 'SonarDistance'
+      let position = this.renderPosition(current)
+
+      state.ctx.save()
+      try {
+        TelemetryRenderer.SonarDistance(state.ctx, position, sonar)
+      } catch (e) {
+        console.error(current, ' : ', e)
+      } finally {
+        state.ctx.restore()
+      }
+    },
+
+    // drawHomeIndicator
+    /**
+         * ホームインジケーターを描画する
+         * @param {number} directionToHome
+         * @param {number} distanceToHome
+         * @param {number} heading
+         */
+    drawHomeIndicator(directionToHome, distanceToHome, heading) {
+      let current = 'HomeIndicator'
+      let position = this.renderPosition(current)
+
+      state.ctx.save()
+      try {
+        TelemetryRenderer.HomeIndicator(state.ctx, position, directionToHome, distanceToHome, heading)
+      } catch (e) {
+        console.error(current, ' : ', e)
+      } finally {
+        state.ctx.restore()
+      }
+    },
+
     // drawBattery
-    // ---------------------------
+    /**
+         * バッテリーと映像情報を描画する
+         * @param {number} level
+         * @param {boolean} charging
+         * @param {string} videoText
+         */
     drawBattery(level, charging, videoText) {
       let current = 'Battery'
       let position = this.renderPosition(current)
@@ -788,7 +1082,10 @@ export default (hud) => {
     },
 
     // drawTelemetryInfo
-    // ---------------------------
+    /**
+         * テレメトリ情報テキストを描画する
+         * @param {object} telemetryInfo
+         */
     drawTelemetryInfo(telemetryInfo) {
       let current = 'TelemetryInfo'
 
@@ -810,9 +1107,58 @@ export default (hud) => {
       }
     },
 
+    // setDebugVisible
+    /**
+         * デバッグ情報の表示・非表示を切り替える
+         * @param {boolean} visible
+         */
+    setDebugVisible(visible) {
+      state.showDebug = visible
+      state.dirty = true
+    },
+
+    /**
+         * テレメトリ情報オブジェクトを更新する
+         * @param {object} info
+         */
+    setTelemetryInfo(info) {
+      state.pendingData = { ...(state.pendingData ?? {}), telemetryInfo: info }
+      state.dirty = true
+    },
+
+    /**
+         * HUD 全体の描画カラーを変更する
+         * @param {number} r
+         * @param {number} g
+         * @param {number} b
+         */
+    setColor(r, g, b) {
+      Styles.green = `rgba(${r}, ${g}, ${b}, 1)`
+      Styles.greenAlpha = `rgba(${r}, ${g}, ${b}, 0.2)`
+      state.dirty = true
+    },
+
+    /**
+         * HUD テキストのフォントを変更する
+         * @param {string} fontFamily
+         */
+    setFont(fontFamily) {
+      Styles.font = `18px ${fontFamily}`
+      Styles.fontBold = `bold 20px ${fontFamily}`
+      Styles.fontSmall2 = `11px ${fontFamily}`
+      Styles.fontBattery = `bold 12px ${fontFamily}`
+      Styles.fontVideoText = `12px ${fontFamily}`
+      state.dirty = true
+    },
+
     // drawDebugParameter
-    // ---------------------------
+    /**
+         * デバッグパラメータオーバーレイを描画する
+         * @param {object} telemetryData
+         */
     drawDebugParameter(telemetryData) {
+      if (!state.showDebug) return
+
       let current = 'Debug'
 
       let filtered = Object.fromEntries(Object.entries(telemetryData).filter(([key]) => key !== 'telemetryInfo' && key !== 'videoText'))
@@ -835,7 +1181,12 @@ export default (hud) => {
     },
 
     // collectLines
-    // ---------------------------
+    /**
+         * オブジェクトを再帰的にたどってデバッグ用テキスト行を収集する
+         * @param {object} obj
+         * @param {string[]} lines - 収集先の配列
+         * @param {number} [indent=0]
+         */
     collectLines(obj, lines, indent = 0) {
       const entries = Object.entries(obj)
       const maxKeyLength = Math.max(...entries.map(([key]) => key.length))
@@ -846,20 +1197,29 @@ export default (hud) => {
           lines.push(`${paddedKey}:`)
           this.collectLines(value, lines, indent + 1)
         } else {
-          lines.push(`${paddedKey}: ${value}`)
+          const formatted = typeof value === 'number' && !Number.isInteger(value)
+            ? value.toFixed(4)
+            : value
+          lines.push(`${paddedKey}: ${formatted}`)
         }
       })
     },
 
     // print
-    // ---------------------------
+    /**
+         * 背景付きテキストボックスを canvas に描画する
+         * @param {string} name - テキスト内容
+         * @param {{ x: number, y: number }} position
+         * @param {string} bgColor
+         * @param {string} textColor
+         */
     print(name, position, bgColor, textColor) {
       state.ctx.fillStyle = bgColor
       state.ctx.fillRect(position.x, position.y, position.width, position.height)
 
       let fontSize = 11
       state.ctx.fillStyle = textColor
-      state.ctx.font = `${fontSize}px Arial`
+      state.ctx.font = `${fontSize}px ${Styles.fontSmall2.replace(/^\d+px\s*/, '')}`
 
       state.ctx.fillText(name, position.x, position.y)
 

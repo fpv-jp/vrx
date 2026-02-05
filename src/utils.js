@@ -1,5 +1,10 @@
+/** 値が undefined / null / 空文字でないかをチェックする */
 const isNonEmpty = (v) => v !== undefined && v !== null && String(v) !== ''
 
+/**
+ * navigator.userAgent からブラウザ名とバージョンを "Name/version" 形式で返す
+ * @returns {string}
+ */
 export function parseBrowserInfo() {
   const ua = navigator.userAgent
   const browsers = [
@@ -18,6 +23,13 @@ export function parseBrowserInfo() {
   return 'Unknown'
 }
 
+/**
+ * WebSocket 経由でシグナリングメッセージを送信する
+ * ws の id / pair が揃っていない場合はエラーログを出力する
+ * @param {WebSocket} ws
+ * @param {number} type - シグナリングメッセージ型番号
+ * @param {object} [message={}]
+ */
 export async function sendSignalingMessage(ws, type, message = {}) {
   let { readyState, protocol, id, pair } = ws
   if (isNonEmpty(id) && isNonEmpty(pair)) {
@@ -35,8 +47,11 @@ export async function sendSignalingMessage(ws, type, message = {}) {
   console.error('Could not send:', { readyState, protocol, id, pair })
 }
 
-// Get sender camera and microphone list
-// --------------------------------------------------------------------------------------------
+/**
+ * getUserMedia でパーミッションを取得してからデバイス一覧を返す
+ * @param {{ video?: boolean, audio?: boolean }} [option]
+ * @returns {Promise<MediaDeviceInfo[]|Error>}
+ */
 export async function getInputMediaDevicesList(option = { video: true, audio: true }) {
   let stream = null
   try {
@@ -53,12 +68,21 @@ export async function getInputMediaDevicesList(option = { video: true, audio: tr
   }
 }
 
+/**
+ * Sender または Receiver の RTP コーデック capabilities を取得する
+ * @param {'Sender'|'Receiver'} type
+ * @param {'video'|'audio'} kind
+ * @returns {RTCRtpCapabilities}
+ */
 export function getCodecs(type = 'Sender', kind = 'video') {
   return type === 'Sender' ? RTCRtpSender.getCapabilities(kind) : RTCRtpReceiver.getCapabilities(kind)
 }
 
-// Gets the available codecs
-// --------------------------------------------------------------------------------------------
+/**
+ * 対応する映像・音声コーデックを種別でフィルタして返す
+ * @param {'Sender'|'Receiver'} [type]
+ * @returns {{ video: RTCRtpCodecCapability[], audio: RTCRtpCodecCapability[] }}
+ */
 export function getCapabilityCodecs(type = 'Sender') {
   let videoFilter = [
     'video/VP9', //
@@ -77,8 +101,13 @@ export function getCapabilityCodecs(type = 'Sender') {
   }
 }
 
-// Sort the request codecs
-// --------------------------------------------------------------------------------------------
+/**
+ * トランシーバーに指定コーデックを先頭に並べてコーデック優先順位をセットする
+ * @param {RTCRtpTransceiver[]} transceivers
+ * @param {string} video_codec - JSON.stringify 済みの映像コーデック
+ * @param {string} audio_codec - JSON.stringify 済みの音声コーデック
+ * @param {'Sender'|'Receiver'} [type]
+ */
 export function setCapabilityCodec(transceivers, video_codec, audio_codec, type = 'Sender') {
   const codecs = getCapabilityCodecs(type)
 
@@ -105,8 +134,10 @@ export function setCapabilityCodec(transceivers, video_codec, audio_codec, type 
   })
 }
 
-// Sender network priority
-// --------------------------------------------------------------------------------------------
+/**
+ * 映像 Sender に high 優先度と最大ビットレート 15Mbps をセットする
+ * @param {RTCRtpSender[]} senders
+ */
 export function setSenderPriority(senders) {
   const sender = senders.find((s) => s.track?.kind === 'video')
   if (!sender) return
@@ -120,10 +151,12 @@ export function setSenderPriority(senders) {
   sender.setParameters(params).catch((err) => console.warn('setParameters failed:', err))
 }
 
-// KeyFrame Request
-// --------------------------------------------------------------------------------------------
-export async function sendKeyFrameRequest(pc1) {
-  const sender = pc1.getSenders().find((s) => s.track?.kind === 'video')
+/**
+ * 映像トラックを一時的に差し替えることで Sender にキーフレームを要求する
+ * @param {RTCPeerConnection} pc
+ */
+export async function sendKeyFrameRequest(pc) {
+  const sender = pc.getSenders().find((s) => s.track?.kind === 'video')
   if (!sender) return
   const original = sender.track
   const clone = original.clone()
@@ -134,6 +167,10 @@ export async function sendKeyFrameRequest(pc1) {
   await sender.replaceTrack(original)
 }
 
+/**
+ * 現在のページが localhost またはプライベート IP から配信されているかを判定する
+ * @returns {boolean}
+ */
 export function isLocalHost() {
   const hostname = location.hostname
   if (hostname === 'localhost' || hostname === '127.0.0.1') return true
@@ -142,10 +179,20 @@ export function isLocalHost() {
   return false
 }
 
+/**
+ * IPv4 アドレス文字列かどうかを判定する
+ * @param {string} address
+ * @returns {boolean}
+ */
 export function isIPv4(address) {
   return /^((25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)$/.test(address)
 }
 
+/**
+ * ICE candidate 文字列を構造化オブジェクトにパースする
+ * @param {string} candidate
+ * @returns {object|null}
+ */
 export function toICE(candidate) {
   const m = candidate.match(/candidate:(\d+) (\d+) (UDP|TCP|udp|tcp) (\d+) ([^\s]+) (\d+) typ (\w+)(?:\s+(.*))?/)
   if (!m) return null
@@ -171,6 +218,11 @@ export function toICE(candidate) {
   return result
 }
 
+/**
+ * ICE candidate 文字列を "key:value key:value..." 形式の人読み可能な文字列に変換する
+ * @param {string} candidate
+ * @returns {string|null}
+ */
 export function parseICE(candidate) {
   const ice = toICE(candidate)
   if (ice) {
@@ -179,6 +231,11 @@ export function parseICE(candidate) {
   return null
 }
 
+/**
+ * RTCIceCandidate 統計オブジェクトから表示に不要なフィールドを除いたコピーを返す
+ * @param {object} candidate
+ * @returns {object}
+ */
 export function excludedCandidate(candidate) {
   const excludedKeys = ['transportId', 'usernameFragment', 'isRemote']
   const excludedValues = ['', 'unknown']
@@ -191,19 +248,33 @@ export function excludedCandidate(candidate) {
   )
 }
 
+/**
+ * connectionstatechange イベントから RTCPeerConnection の各状態をログ出力して返す
+ * @param {Event} e
+ * @returns {{ connectionState: string, iceConnectionState: string, iceGatheringState: string, signalingState: string }}
+ */
 export function stats(e) {
   const { canTrickleIceCandidates, connectionState, iceConnectionState, iceGatheringState, signalingState } = e.currentTarget
   const stats = { canTrickleIceCandidates, connectionState, iceConnectionState, iceGatheringState, signalingState }
   console.log(e.type, stats)
-  // console.log(e.currentTarget.getConfiguration())
   return stats
 }
 
+/**
+ * iOS デバイス（iPhone / iPad / iPod）かどうかを判定する
+ * @returns {boolean}
+ */
 export function isIOS() {
   let appleProduct = ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod']
   return appleProduct.includes(navigator.platform) || (navigator.userAgent.includes('Mac') && navigator.maxTouchPoints > 1)
 }
 
+/**
+ * Wi-Fi 周波数（MHz）からバンドとチャンネル番号を返す
+ * 2.4GHz / 5GHz / 6GHz に対応し、該当しない場合は null を返す
+ * @param {number|string} freqMHz
+ * @returns {{ band: string, channel: number }|null}
+ */
 export function frequencyToWifiChannel(freqMHz) {
   const f = Number(freqMHz)
   if (!Number.isFinite(f)) return null
@@ -235,6 +306,15 @@ export function frequencyToWifiChannel(freqMHz) {
   return null
 }
 
+/**
+ * 指定 H264 プロファイルで VideoDecoder がスムーズに動作するかを確認する
+ * @param {string} profile - profile-level-id 16進数文字列（例: '640028'）
+ * @param {number} width
+ * @param {number} height
+ * @param {number} framerate
+ * @param {number} bitrate
+ * @returns {Promise<MediaDecodingInfo|null>}
+ */
 export async function checkH264Profile(profile, width, height, framerate, bitrate) {
   let contentType = `video/H264; profile-level-id=${profile}`
   try {
@@ -250,6 +330,11 @@ export async function checkH264Profile(profile, width, height, framerate, bitrat
   }
 }
 
+/**
+ * フレームレート値を数値に正規化する（"30/1" 形式も対応）
+ * @param {number|string} v
+ * @returns {number}
+ */
 export function parseFramerate(v) {
   if (typeof v === 'number') {
     return v
@@ -261,6 +346,15 @@ export function parseFramerate(v) {
   return Number(v)
 }
 
+/**
+ * 指定解像度・フレームレートでブラウザが対応できる最良の H264 プロファイル名を返す
+ * High → Main → Constrained Baseline → Baseline の順で確認する
+ * @param {number} [width=1280]
+ * @param {number} [height=720]
+ * @param {number} [framerate=30]
+ * @param {number} [bitrate=2000000]
+ * @returns {Promise<'high'|'main'|'constrained-baseline'|'baseline'|undefined>}
+ */
 export async function checkDecodingInfo(width = 1280, height = 720, framerate = 30, bitrate = 2000000) {
   framerate = parseFramerate(framerate)
   let result = await checkH264Profile('640028', width, height, framerate, bitrate) // High Level 4.0

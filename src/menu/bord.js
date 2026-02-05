@@ -1,15 +1,18 @@
-import * as C from './component'
-import { setListOptions } from './list-utils.js'
+import Alpine from 'alpinejs'
+import { setListOptions } from './utils/list-utils.js'
 
+/**
+ * VTX から受け取ったフライトコントローラー一覧を Alpine ストアにセットする
+ * MSP BOARD_INFO の manufacturer_id / target_name / board_name を表示テキストとして使用する
+ */
 export function initBordList() {
-  const flight_controllers = C.MenuParams.message.flight_controllers
-  if (flight_controllers === 'none') return []
+  const flight_controllers = Alpine.store('menu').message.flight_controllers
+  if (flight_controllers === 'none') return
 
-  let options = []
-  flight_controllers.forEach((fc) => {
-    let { manufacturer_id, target_name, board_name } = fc.msp_board_info
-    options.push({ text: `[${target_name}] ${manufacturer_id} ${board_name}`, value: fc.port })
+  const options = flight_controllers.map((fc) => {
+    const { manufacturer_id, target_name, board_name } = fc.msp_board_info
+    return { text: `[${target_name}] ${manufacturer_id} ${board_name}`, value: fc.port }
   })
 
-  setListOptions(C.BordDeviceList, options)
+  setListOptions('flight_controller', 'bord_options', options)
 }

@@ -27,6 +27,10 @@ const Constants = {
     SPS_PPS: 4,
     ERROR: 9,
   }),
+  Source: Object.freeze({
+    BROWSER: 'browser',
+    GSTREAMER: 'gstreamer',
+  }),
   ICE_SERVERS: [{ urls: 'stun:stun.l.google.com:19302' }],
   // Message types that the SENDER will listen for
   SENDER: Object.freeze({
