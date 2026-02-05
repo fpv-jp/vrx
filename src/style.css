@@ -1,54 +1,30 @@
+:root {
+  --ui-font: 'Share Tech Mono', monospace;
+  --ui-r: 0;
+  --ui-g: 255;
+  --ui-b: 0;
+}
+
 body {
   margin: 0;
   height: 100vh;
   background: rgba(50, 50, 50, 1);
-  color: rgba(0, 255, 0, 1);
-}
-
-:root {
-  --tp-base-font-family: "Orbitron", "Noto Sans JP";
-  --tp-base-background-color: hsla(230, 7%, 17%, 1);
-  --tp-base-shadow-color: hsla(0, 0%, 0%, 0.2);
-  --tp-button-background-color: hsla(230, 7%, 75%, 0.1);
-  --tp-button-background-color-active: hsla(230, 7%, 75%, 0.25);
-  --tp-button-background-color-focus: hsla(230, 7%, 75%, 0.2);
-  --tp-button-background-color-hover: hsla(230, 7%, 75%, 0.15);
-  --tp-button-foreground-color: hsla(230, 7%, 75%, 1.00);
-  --tp-container-background-color: hsla(230, 7%, 75%, 0.1);
-  --tp-container-background-color-active: hsla(230, 7%, 75%, 0.25);
-  --tp-container-background-color-focus: hsla(230, 7%, 75%, 0.2);
-  --tp-container-background-color-hover: hsla(230, 7%, 75%, 0.15);
-  --tp-container-foreground-color: hsla(100, 100%, 50%, 1.00);
-  --tp-groove-foreground-color: hsla(230, 7%, 75%, 0.1);
-  --tp-input-background-color: hsla(230, 7%, 75%, 0.1);
-  --tp-input-background-color-active: hsla(230, 7%, 75%, 0.25);
-  --tp-input-background-color-focus: hsla(230, 7%, 75%, 0.2);
-  --tp-input-background-color-hover: hsla(230, 7%, 75%, 0.15);
-  --tp-input-foreground-color: hsla(230, 7%, 75%, 1.00);
-  --tp-label-foreground-color: hsla(230, 0%, 100%, 0.70);
-  --tp-monitor-background-color: hsla(230, 7%, 0%, 0.2);
-  --tp-monitor-foreground-color: hsla(230, 7%, 75%, 0.70);
-}
-
-.tp-sglv_i {
-  text-align: end;
-}
-
-.tp-p2dv_b, .tp-btnv_b, .tp-lstv_s {
-  font-weight: normal !important;
-  text-align: end;
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
 }
 
 .receiver-container {
   position: relative;
-  display: inline-block;
+  display: block;
   width: 100%;
-  max-width: 100%;
 }
 
 #RemoteVideo {
   width: 100%;
   height: auto;
+  max-height: 100svh;
   display: block;
   background: black;
 }
@@ -56,9 +32,10 @@ body {
 /* ----- 共通 Overlay ----- */
 #PermissionButton,
 #SenderId,
-#TweakpaneMenu,
+#AlpineMenu,
 #HeadUpDisplay,
 #Aircraft,
+#SenderQR,
 #AudioVisualizer,
 #NetworkMonitoring,
 #WebrtcReport,
@@ -66,16 +43,211 @@ body {
   position: absolute;
   z-index: 10;
   pointer-events: auto;
-  font-family: monospace;
-  color: rgba(0, 255, 0, 1);
+  font-family: var(--ui-font);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
 
 /* ---------- 左上 ---------- */
-#TweakpaneMenu {
+#AlpineMenu {
   top: 10px;
   left: 10px;
   z-index: 11;
-  width: 300px;
+  width: 320px;
+  background: rgba(30, 30, 30, 0.3);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.3);
+  border-radius: 4px;
+  padding: 4px 8px 8px;
+  max-height: 90vh;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+#AlpineMenu::-webkit-scrollbar { width: 4px; }
+#AlpineMenu::-webkit-scrollbar-track { background: transparent; }
+#AlpineMenu::-webkit-scrollbar-thumb { background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.3); border-radius: 2px; }
+
+/* ─── details / summary ─── */
+#AlpineMenu details {
+  margin-top: 4px;
+}
+#AlpineMenu summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.7);
+  padding: 3px 0 2px;
+  border-bottom: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.15);
+  margin-bottom: 3px;
+  user-select: none;
+}
+#AlpineMenu summary:hover {
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+}
+
+/* ─── field row ─── */
+.field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+}
+.field > label:not(:has(input)) {
+  flex-shrink: 0;
+  width: 5.5em;
+  font-size: 12px;
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.55);
+}
+.field > select,
+.field > input[type="text"],
+.field > input[type="range"] {
+  flex: 1;
+  min-width: 0;
+}
+.field > button {
+  flex: 1;
+}
+
+/* ─── custom select ─── */
+.x-select {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.x-select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: rgba(0, 12, 0, 0.85);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.28);
+  border-radius: 2px;
+  font-family: var(--ui-font);
+  font-size: 12px;
+  padding: 2px 4px;
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+  gap: 4px;
+}
+
+.x-select-trigger:focus {
+  border-color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.65);
+  outline: none;
+}
+
+.x-select-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.x-select-arrow {
+  flex-shrink: 0;
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+.x-select-disabled .x-select-trigger {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.x-select-list {
+  z-index: 9999;
+  list-style: none;
+  margin: 0;
+  padding: 2px 0;
+  background: rgba(0, 18, 0, 0.97);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.4);
+  border-radius: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.x-select-list::-webkit-scrollbar { width: 4px; }
+.x-select-list::-webkit-scrollbar-track { background: transparent; }
+.x-select-list::-webkit-scrollbar-thumb { background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.3); border-radius: 2px; }
+
+.x-select-option {
+  padding: 3px 8px;
+  font-family: var(--ui-font);
+  font-size: 12px;
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.85);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.x-select-option:hover {
+  background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.12);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+}
+
+.x-select-cur {
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.07);
+}
+
+.x-select-cur::before {
+  content: '✓ ';
+}
+
+/* ─── controls ─── */
+#AlpineMenu input[type="text"] {
+  background: rgba(0, 12, 0, 0.85);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.28);
+  border-radius: 2px;
+  font-family: var(--ui-font);
+  font-size: 12px;
+  padding: 1px 4px;
+  box-sizing: border-box;
+  outline: none;
+}
+#AlpineMenu select:focus,
+#AlpineMenu input[type="text"]:focus {
+  border-color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.65);
+}
+#AlpineMenu input[type="text"][readonly] {
+  opacity: 0.55;
+  border-style: dashed;
+}
+#AlpineMenu input[type="range"] {
+  accent-color: rgb(var(--ui-r), var(--ui-g), var(--ui-b));
+}
+#AlpineMenu input[type="checkbox"] {
+  accent-color: rgb(var(--ui-r), var(--ui-g), var(--ui-b));
+  margin: 0;
+}
+
+#AlpineMenu button {
+  background: rgba(0, 12, 0, 0.85);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.32);
+  border-radius: 2px;
+  font-family: var(--ui-font);
+  font-size: 12px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+#AlpineMenu button:hover:not(:disabled) {
+  background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.1);
+}
+#AlpineMenu button:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+#AlpineMenu hr {
+  border: none;
+  border-top: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.15);
+  margin: 4px 0;
 }
 
 /* ---------- 中央全面 ---------- */
@@ -90,7 +262,7 @@ body {
   padding: 10px 20px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 255, 0, 1);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
 
 #HeadUpDisplay {
@@ -119,6 +291,26 @@ body {
 }
 
 /* ---------- 右上 ---------- */
+#SenderQR {
+  top: 0;
+  right: 0;
+  text-align: right;
+  pointer-events: none;
+  display: none;
+}
+
+#SenderQR img {
+  display: block;
+  margin-left: auto;
+}
+
+#SenderQR p {
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
 #Aircraft {
   top: 7.5%;
   transform: translateY(-10%);
@@ -135,7 +327,7 @@ body {
   left: 5px;
   bottom: 5px;
   background: rgba(0, 0, 0, 0.4);
-  padding: 8px;
+  padding: 2px;
 }
 
 /* ---------- 右下 ---------- */
@@ -147,34 +339,20 @@ body {
   border-radius: 6px;
 }
 
-/* ------------------------------------ 
-  TweakpaneMenu
---------------------------------------- */
-.tp-lblv {
-  align-items: unset !important;
-  flex-direction: column;
-}
-
-.tp-lblv_v {
-  width: 100% !important;
-  padding-top: var(--cnt-vp);
-  padding-bottom: var(--cnt-vp);
-}
-
 /* ------------------------------------
   NetworkMonitoring (Realtime chart)
 --------------------------------------- */
 
 #NetworkMonitoring svg {
-  font: 10px sans-serif;
-  fill: rgba(0, 255, 0, 1);
-  /* background: rgba(0, 0, 0, 0.3); */
+  font-size: 10px;
+  font-family: var(--ui-font);
+  fill: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
 
 #NetworkMonitoring .chart-axis path,
 #NetworkMonitoring .chart-axis line {
   fill: none;
-  stroke: rgba(0, 255, 0, 1);
+  stroke: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
   shape-rendering: crispEdges;
 }
 
@@ -184,31 +362,33 @@ body {
 
 #NetworkMonitoring .chart-line {
   fill: none;
-  stroke: rgba(0, 255, 0, 0.8);
+  stroke: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.8);
   stroke-width: 0.8px;
 }
 
 #NetworkMonitoring .chart-bar {
-  fill: rgba(0, 255, 0, 0.6);
+  fill: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.6);
 }
 
 #NetworkMonitoring .chart-area {
-  fill: rgba(0, 255, 0, 0.4);
+  fill: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.4);
 }
 
 #NetworkMonitoring .chart-grid-x {
-  stroke: rgba(0, 255, 0, 0.5);
+  stroke: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.5);
   stroke-width: 0.5;
   stroke-dasharray: 3, 6;
 }
 
 #NetworkMonitoring .chart-grid-y {
-  stroke: rgba(0, 255, 0, 0.8);
+  stroke: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.8);
   stroke-width: 0.5;
 }
 
 #NetworkMonitoring .chart-label {
   font-size: 11px;
+  font-family: var(--ui-font);
+  fill: rgb(var(--ui-r), var(--ui-g), var(--ui-b));
 }
 
 #NetworkMonitoring .chart-label-left {

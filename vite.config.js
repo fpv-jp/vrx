@@ -1,35 +1,17 @@
 import { defineConfig } from 'vite'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
 import fs from 'fs'
 import path from 'path'
 
 const isDev = process.env.NODE_ENV === 'development'
 
-export default defineConfig(({ mode, command }) => {
+export default defineConfig(({ mode }) => {
   return {
     build: {
-      outDir: mode === 'production' ? 'vrx/production' : 'vrx/development',
-    },
-    optimizeDeps: {
-      exclude: ['@ffmpeg/core', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
+      outDir: mode === 'public' ? 'vrx/public' : 'vrx/private',
     },
     worker: {
       format: 'es',
     },
-    plugins: [
-      viteStaticCopy({
-        targets: [
-          {
-            src: 'node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js',
-            dest: 'assets/ffmpeg',
-          },
-          {
-            src: 'node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm',
-            dest: 'assets/ffmpeg',
-          },
-        ],
-      }),
-    ],
     ...(isDev && {
       server: {
         host: true,
@@ -38,7 +20,7 @@ export default defineConfig(({ mode, command }) => {
           key: fs.readFileSync(path.resolve(__dirname, 'server-key.pem')),
           cert: fs.readFileSync(path.resolve(__dirname, 'server-cert.pem')),
         },
-        hmr: {
+        hmr: mode === 'private' ? false : {
           protocol: 'wss',
           host: 'fpv',
           port: 4443,
