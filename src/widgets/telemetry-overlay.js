@@ -445,12 +445,33 @@ export default (hud) => {
 
     currentDisplayAltitude: 0,
     currentDisplaySpeed: 0,
+
+    pendingData: null,
+    pendingType: null,
+    dirty: false,
+    animationId: null,
   }
 
   const TelemetryOverlay = {
-    // update
+    // update - データを保存してdirtyフラグを立てるだけ
     // ---------------------------
     update(telemetryData = {}) {
+      state.pendingData = telemetryData
+      state.pendingType = 'update'
+      state.dirty = true
+    },
+
+    // MSP - データを保存してdirtyフラグを立てるだけ
+    // ---------------------------
+    MSP(telemetryData = {}) {
+      state.pendingData = telemetryData
+      state.pendingType = 'MSP'
+      state.dirty = true
+    },
+
+    // _drawUpdate - update の実際の描画処理
+    // ---------------------------
+    _drawUpdate(telemetryData) {
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
 
       let { heading, pitch, roll, gps, battery, videoText, telemetryInfo } = telemetryData
@@ -466,9 +487,9 @@ export default (hud) => {
       this.drawDebugParameter(telemetryData)
     },
 
-    // MSP
+    // _drawMSP - MSP の実際の描画処理
     // ---------------------------
-    MSP(telemetryData = {}) {
+    _drawMSP(telemetryData) {
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
 
       // console.log(JSON.stringify(telemetryData, null, 2))
@@ -484,6 +505,40 @@ export default (hud) => {
       this.drawBattery(level ?? 0, false, videoText ?? '')
       this.drawTelemetryInfo(telemetryInfo)
       this.drawDebugParameter(telemetryData)
+    },
+
+    // _renderFrame - dirty なときだけ描画
+    // ---------------------------
+    _renderFrame() {
+      if (!state.dirty || !state.pendingData) return
+      state.dirty = false
+      const data = state.pendingData
+      if (state.pendingType === 'MSP') {
+        this._drawMSP(data)
+      } else {
+        this._drawUpdate(data)
+      }
+    },
+
+    // start - RAF ループ開始（ループ関数は一度だけ生成）
+    // ---------------------------
+    start() {
+      if (!state.animationId) {
+        const loop = () => {
+          this._renderFrame()
+          state.animationId = requestAnimationFrame(loop)
+        }
+        loop()
+      }
+    },
+
+    // stop - RAF ループ停止
+    // ---------------------------
+    stop() {
+      if (state.animationId) {
+        cancelAnimationFrame(state.animationId)
+        state.animationId = null
+      }
     },
 
     // calculateBatteryLevel
@@ -507,6 +562,7 @@ export default (hud) => {
     // clear
     // ---------------------------
     clear() {
+      this.stop()
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
     },
 

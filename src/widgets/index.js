@@ -73,6 +73,8 @@ function initializeReceiver() {
     RadarMap,
   )
 
+  if (import.meta.env.MODE === 'production') SenderQR.style.display = 'block'
+
   window.addEventListener('unload', (e) => {
     ReceiverManager.onunload(e)
   })
@@ -98,6 +100,8 @@ function connectionEstablishment() {
     // WebrtcReport,
     // RadarMap,
   )
+
+  ReceiverState.headUpDisplay.start()
 }
 
 // attachAudioStream -----------------------------------------------
@@ -144,6 +148,9 @@ function destroyReceiver() {
         break
 
       case 'Aircraft':
+        break
+
+      case 'SenderQR':
         break
 
       case 'AudioVisualizer':
