@@ -1,8 +1,10 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <script src="d3.v3.min.js" charset="utf-8"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
     <link href="src/style.css" rel="stylesheet" />
     <script type="module">
       import { SignalingManager } from './src/main.js'
@@ -17,10 +19,355 @@
     </div>
 
     <div id="ReceiverContainer" class="receiver-container">
-      <div id="TweakpaneMenu"></div>
+      <div id="AlpineMenu" x-data>
+        <details :open="$store.menu.menuOpen" @toggle="$store.menu.menuOpen = $el.open" open>
+          <summary>Menu</summary>
+
+          <div class="field">
+            <label>Color</label>
+            <div x-data="xSelect({ model: 'selectedColor', storeOptions: 'colorOptions', onChange: 'menu:color-change' })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+              <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+              <ul class="x-select-list" x-show="open" :style="listStyle">
+                <template x-for="opt in options" :key="opt.value">
+                  <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                </template>
+              </ul>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Font</label>
+            <div x-data="xSelect({ model: 'selectedFont', storeOptions: 'fontOptions', onChange: 'menu:font-change' })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+              <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+              <ul class="x-select-list" x-show="open" :style="listStyle">
+                <template x-for="opt in options" :key="opt.value">
+                  <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                </template>
+              </ul>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Sender ID</label>
+            <div x-data="xSelect({ model: 'sender', storeOptions: 'senders', valueKey: 'id', textKey: 'label', placeholder: '-- please select --', onChange: 'menu:sender-change', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+              <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+              <ul class="x-select-list" x-show="open" :style="listStyle">
+                <template x-for="opt in options" :key="opt.value">
+                  <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                </template>
+              </ul>
+            </div>
+          </div>
+
+          <details x-show="$store.menu.showNetwork" open>
+            <summary>Network setting</summary>
+            <div class="field">
+              <label>Interface</label>
+              <div x-data="xSelect({ model: 'network_interface', storeOptions: 'network_options', placeholder: '-- please select --', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+          </details>
+
+          <details x-show="$store.menu.showBord" open>
+            <summary>Flight controller setting</summary>
+            <div class="field">
+              <label>Board</label>
+              <div x-data="xSelect({ model: 'flight_controller', storeOptions: 'bord_options', placeholder: '-- please select --', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+          </details>
+
+          <details x-show="$store.menu.showVideo" open>
+            <summary>Video setting</summary>
+            <div class="field">
+              <label>Camera</label>
+              <div x-data="xSelect({ model: 'video_device', storeOptions: 'video_camera_options', placeholder: '-- please select --', onChange: 'menu:video-device-change', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field" x-show="!$store.menu.video_codec_hidden">
+              <label>Encoder</label>
+              <div x-data="xSelect({ model: 'video_codec', storeOptions: 'video_codec_options', placeholder: '-- please select --', onChange: 'menu:video-codec-change', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field">
+              <label>Capture</label>
+              <div x-data="xSelect({ model: 'video_capture', storeOptions: 'video_capture_options', placeholder: '-- please select --', onChange: 'menu:video-capture-change', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <hr x-show="$store.menu.video_mimetype_show">
+            <div class="field" x-show="$store.menu.video_mimetype_show">
+              <label>MimeType</label>
+              <input type="text" readonly :value="$store.menu.video_mimetype">
+            </div>
+            <div class="field" x-show="$store.menu.video_format_mode === 'list'">
+              <label>Format</label>
+              <div x-data="xSelect({ model: 'video_format', storeOptions: 'video_format_options', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field" x-show="$store.menu.video_format_mode === 'text'">
+              <label>Format</label>
+              <input type="text" readonly :value="$store.menu.video_format">
+            </div>
+            <div class="field" x-show="$store.menu.video_drm_format_mode === 'list'">
+              <label>DRM Format</label>
+              <div x-data="xSelect({ model: 'video_drm_format', storeOptions: 'video_drm_format_options', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field" x-show="$store.menu.video_drm_format_mode === 'text'">
+              <label>DRM Format</label>
+              <input type="text" readonly :value="$store.menu.video_drm_format">
+            </div>
+            <div class="field" x-show="$store.menu.video_width_mode === 'list'">
+              <label>Width</label>
+              <div x-data="xSelect({ model: 'video_width', storeOptions: 'video_width_options', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field" x-show="$store.menu.video_width_mode === 'slider'">
+              <label>Width <span x-text="$store.menu.video_width"></span></label>
+              <input type="range" x-model.number="$store.menu.video_width"
+                     :min="$store.menu.video_width_min" :max="$store.menu.video_width_max" :step="$store.menu.video_width_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.video_width_mode === 'text'">
+              <label>Width</label>
+              <input type="text" readonly :value="$store.menu.video_width">
+            </div>
+            <div class="field" x-show="$store.menu.video_height_mode === 'list'">
+              <label>Height</label>
+              <div x-data="xSelect({ model: 'video_height', storeOptions: 'video_height_options', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field" x-show="$store.menu.video_height_mode === 'slider'">
+              <label>Height <span x-text="$store.menu.video_height"></span></label>
+              <input type="range" x-model.number="$store.menu.video_height"
+                     :min="$store.menu.video_height_min" :max="$store.menu.video_height_max" :step="$store.menu.video_height_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.video_height_mode === 'text'">
+              <label>Height</label>
+              <input type="text" readonly :value="$store.menu.video_height">
+            </div>
+            <div class="field" x-show="$store.menu.video_framerate_mode === 'list'">
+              <label>Framerate</label>
+              <div x-data="xSelect({ model: 'video_framerate', storeOptions: 'video_framerate_options', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field" x-show="$store.menu.video_framerate_mode === 'slider'">
+              <label>Framerate <span x-text="$store.menu.video_framerate"></span></label>
+              <input type="range" x-model.number="$store.menu.video_framerate"
+                     :min="$store.menu.video_framerate_min" :max="$store.menu.video_framerate_max" :step="$store.menu.video_framerate_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.video_framerate_mode === 'text'">
+              <label>Framerate</label>
+              <input type="text" readonly :value="$store.menu.video_framerate">
+            </div>
+          </details>
+
+          <details x-show="$store.menu.showAudio" open>
+            <summary>Audio setting</summary>
+            <div class="field">
+              <label>Microphone</label>
+              <div x-data="xSelect({ model: 'audio_device', storeOptions: 'audio_microphone_options', placeholder: '-- please select --', onChange: 'menu:audio-device-change', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field">
+              <label>Encoder</label>
+              <div x-data="xSelect({ model: 'audio_codec', storeOptions: 'audio_codec_options', placeholder: '-- please select --', onChange: 'menu:audio-codec-change', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field">
+              <label>Sampling</label>
+              <div x-data="xSelect({ model: 'audio_sampling', storeOptions: 'audio_sampling_options', placeholder: '-- please select --', onChange: 'menu:audio-sampling-change', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <hr x-show="$store.menu.audio_mimetype_show">
+            <div class="field" x-show="$store.menu.audio_mimetype_show">
+              <label>MimeType</label>
+              <input type="text" readonly :value="$store.menu.audio_mimetype">
+            </div>
+            <div class="field" x-show="$store.menu.audio_format_mode === 'list'">
+              <label>Format</label>
+              <div x-data="xSelect({ model: 'audio_format', storeOptions: 'audio_format_options', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field" x-show="$store.menu.audio_format_mode === 'text'">
+              <label>Format</label>
+              <input type="text" readonly :value="$store.menu.audio_format">
+            </div>
+            <div class="field" x-show="$store.menu.audio_rate_mode === 'list'">
+              <label>Rate</label>
+              <div x-data="xSelect({ model: 'audio_rate', storeOptions: 'audio_rate_options', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field" x-show="$store.menu.audio_rate_mode === 'slider'">
+              <label>Rate <span x-text="$store.menu.audio_rate"></span></label>
+              <input type="range" x-model.number="$store.menu.audio_rate"
+                     :min="$store.menu.audio_rate_min" :max="$store.menu.audio_rate_max" :step="$store.menu.audio_rate_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.audio_rate_mode === 'text'">
+              <label>Rate</label>
+              <input type="text" readonly :value="$store.menu.audio_rate">
+            </div>
+            <div class="field" x-show="$store.menu.audio_channels_mode === 'list'">
+              <label>Channels</label>
+              <div x-data="xSelect({ model: 'audio_channels', storeOptions: 'audio_channels_options', formDisabled: true })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+                <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+                <ul class="x-select-list" x-show="open" :style="listStyle">
+                  <template x-for="opt in options" :key="opt.value">
+                    <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <div class="field" x-show="$store.menu.audio_channels_mode === 'slider'">
+              <label>Channels <span x-text="$store.menu.audio_channels"></span></label>
+              <input type="range" x-model.number="$store.menu.audio_channels"
+                     :min="$store.menu.audio_channels_min" :max="$store.menu.audio_channels_max" :step="$store.menu.audio_channels_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.audio_channels_mode === 'text'">
+              <label>Channels</label>
+              <input type="text" readonly :value="$store.menu.audio_channels">
+            </div>
+          </details>
+
+          <div x-show="$store.menu.showConnection">
+            <button @click="window.dispatchEvent(new CustomEvent('menu:connection-click'))"
+                    :disabled="$store.menu.connectionDisabled"
+                    x-text="$store.menu.connectionText">
+            </button>
+          </div>
+
+          <details x-show="$store.menu.showSubControl" open>
+            <summary>Sub Control</summary>
+            <div class="field">
+              <label><input type="checkbox" x-model="$store.menu.grayscale"
+                            @change="window.dispatchEvent(new CustomEvent('menu:grayscale-change'))"> Grayscale</label>
+            </div>
+            <div class="field">
+              <label><input type="checkbox" x-model="$store.menu.mute"
+                            @change="window.dispatchEvent(new CustomEvent('menu:mute-change'))"> Mute</label>
+            </div>
+            <div class="field">
+              <label><input type="checkbox" x-model="$store.menu.showDebug"
+                            @change="window.dispatchEvent(new CustomEvent('menu:debug-change'))"> Debug</label>
+            </div>
+            <div class="field">
+              <button @click="window.dispatchEvent(new CustomEvent('menu:fullscreen-click'))">Fullscreen</button>
+            </div>
+            <div class="field">
+              <button @click="window.dispatchEvent(new CustomEvent('menu:webrtc-report-click'))">Webrtc Report</button>
+            </div>
+            <div class="field">
+              <button @click="window.dispatchEvent(new CustomEvent('menu:search-radar-click'))">Search Radar</button>
+            </div>
+            <div class="field">
+              <button @click="window.dispatchEvent(new CustomEvent('menu:record-click'))"
+                      x-text="$store.menu.recording ? '⏹ Stop Recording' : '⏺ Record'"></button>
+            </div>
+          </details>
+        </details>
+      </div>
+
       <canvas id="RemoteVideo"></canvas>
       <canvas id="HeadUpDisplay"></canvas>
-      <img id="Aircraft" src="src/image/Helion10-O4P-6.jpg" />
+      <img id="Aircraft" src="/image/Helion10-O4P-6.jpg" />
+      <div id="SenderQR" style="display: none">
+        <img src="/image/sender.png" />
+        <p>To register as a Sender,<br />scan this QR code on your<br />smartphone or tablet.</p>
+      </div>
       <canvas id="AudioVisualizer"></canvas>
       <div id="NetworkMonitoring"></div>
       <pre id="WebrtcReport"></pre>

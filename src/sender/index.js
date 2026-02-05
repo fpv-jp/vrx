@@ -1,9 +1,9 @@
-import Constants from './constants.js'
-import ComingSignalingMessage from './sender-websocket.js'
-import CreateVtxDataChannel from './sender-datachannel.js'
-import { senderEncodeTransform } from './stream-handler.js'
+import Constants from '../constants.js'
+import ComingSignalingMessage from './signaling.js'
+import CreateVtxDataChannel from './datachannel.js'
+import { senderEncodeTransform } from '../stream/handler.js'
 
-import * as Utils from './utils.js'
+import * as Utils from '../utils.js'
 
 const RECEIVER = Constants.RECEIVER
 
@@ -11,13 +11,13 @@ const RECEIVER = Constants.RECEIVER
 //
 //-------------------------------------
 export const SenderState = {
-  ws1: null,
-  pc1: null,
+  ws: null,
+  pc: null,
 
   stream: null,
   sensor: null,
 
-  dc1CMD: null,
+  cmd: null,
 
   dummyIntervalId: null,
   gpsWatchId: null,
@@ -30,8 +30,8 @@ const SenderManager = {
   //-------------------------------------
   // WS1 WebSocket Message
   //-------------------------------------
-  handleSignalingMessage: async function (ws1, message) {
-    SenderState.ws1 = ws1
+  handleSignalingMessage: async function (ws, message) {
+    SenderState.ws = ws
     ComingSignalingMessage(message, this.initSenderPeerConnection)
   },
 
@@ -39,10 +39,10 @@ const SenderManager = {
   // PC1 Peer Connection
   //-------------------------------------
   initSenderPeerConnection: function () {
-    let pc1 = new RTCPeerConnection({ iceServers: Constants.ICE_SERVERS })
-    SenderState.pc1 = pc1
+    let pc = new RTCPeerConnection({ iceServers: Constants.ICE_SERVERS })
+    SenderState.pc = pc
 
-    pc1.addEventListener('connectionstatechange', (e) => {
+    pc.addEventListener('connectionstatechange', (e) => {
       const s = Utils.stats(e)
       switch (s.connectionState) {
         case 'connecting':
@@ -58,22 +58,22 @@ const SenderManager = {
           SenderState?.stream.getTracks().forEach((track) => track.stop())
           SenderState.stream = null
 
-          SenderState?.pc1.close()
-          SenderState.pc1 = null
+          SenderState?.pc.close()
+          SenderState.pc = null
           break
       }
     })
 
-    pc1.addEventListener('icecandidate', ({ candidate }) => {
+    pc.addEventListener('icecandidate', ({ candidate }) => {
       if (candidate && Utils.isIPv4(candidate.address)) {
-        Utils.sendSignalingMessage(SenderState.ws1, RECEIVER.ICE, { candidate })
+        Utils.sendSignalingMessage(SenderState.ws, RECEIVER.ICE, { candidate })
       }
     })
 
-    CreateVtxDataChannel(pc1)
+    CreateVtxDataChannel(pc)
 
     SenderState.stream.getTracks().forEach((track) => {
-      const sender = pc1.addTrack(track, SenderState.stream)
+      const sender = pc.addTrack(track, SenderState.stream)
       if (track.kind === 'video') {
         senderEncodeTransform(sender)
       }
