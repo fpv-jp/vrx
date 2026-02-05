@@ -1,25 +1,21 @@
-import * as C from './component'
-import { setListOptions } from './list-utils.js'
+import Alpine from 'alpinejs'
+import { setListOptions } from './utils/list-utils.js'
 
 export function initNetworkList() {
-  const network = C.MenuParams.message.network
-  if (network === 'none') return []
+  const network = Alpine.store('menu').message.network
+  if (network === 'none') return
 
-  let options = []
+  const options = []
   network.forEach((nic) => {
-    let { up, running } = nic
-    if (up && running) {
-      if (nic.iw) {
-        let label = `${nic.name} [${nic.address}]`
-        options.push({ text: `${label} channel: ${nic.iw.channel}`, value: nic.name })
-      }
-      if (nic.ethtool) {
-        let label = `${nic.name} [${nic.address}]`
-        let Speed = nic.ethtool.find((e) => e.key === 'Speed').value
-        options.push({ text: `${label} : ${Speed}`, value: nic.name })
-      }
+    if (!nic.up || !nic.running) return
+    if (nic.iw) {
+      options.push({ text: `${nic.name} [${nic.address}] channel: ${nic.iw.channel}`, value: nic.name })
+    }
+    if (nic.ethtool) {
+      const Speed = nic.ethtool.find((e) => e.key === 'Speed').value
+      options.push({ text: `${nic.name} [${nic.address}] : ${Speed}`, value: nic.name })
     }
   })
 
-  setListOptions(C.NetworkDeviceList, options)
+  setListOptions('network_interface', 'network_options', options)
 }
