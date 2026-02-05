@@ -59,6 +59,7 @@ body {
 #TweakpaneMenu,
 #HeadUpDisplay,
 #Aircraft,
+#SenderQR,
 #AudioVisualizer,
 #NetworkMonitoring,
 #WebrtcReport,
@@ -119,6 +120,12 @@ body {
 }
 
 /* ---------- 右上 ---------- */
+#SenderQR {
+  top: 0;
+  right: 0;
+  pointer-events: none;
+}
+
 #Aircraft {
   top: 7.5%;
   transform: translateY(-10%);
