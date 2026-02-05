@@ -13,7 +13,6 @@ const Command = Constants.Command
 //-------------------------------------
 export default async function OpenVtxDataChannel(channel) {
   switch (channel.label) {
-
     // ----------------------------------------
     // PC2 Command Channel Message
     // ----------------------------------------
@@ -74,7 +73,7 @@ export default async function OpenVtxDataChannel(channel) {
     // ----------------------------------------
     // Sensors in Flight controller Multiwii Serial Protocol (MSP)
     // ----------------------------------------
-    case ChannelLabel.MSP_RAW_IMU:
+    case ChannelLabel.MSP_RAW_IMU: // 生データ
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -104,12 +103,31 @@ export default async function OpenVtxDataChannel(channel) {
           view.getInt16(offset + 2, true),
           view.getInt16(offset + 4, true),
         ]
-
-        telemetryData = { ...telemetryData, acc, gyro, mag }
+        // telemetryData = { ...telemetryData, acc, gyro, mag }
+        // console.log('MSP_RAW_IMU(acc):', acc)
+        // console.log('MSP_RAW_IMU(gyro):', gyro)
+        // console.log('MSP_RAW_IMU(mag):', mag)
       }
       break
 
-    case ChannelLabel.MSP_RAW_GPS:
+    case ChannelLabel.MSP_ATTITUDE: // 姿勢
+      channel.onmessage = ({ data }) => {
+        const view = new DataView(data)
+        let offset = 0
+
+        const roll = view.getInt16(offset, true) / 10.0
+        const pitch = view.getInt16(offset + 2, true) / 10.0
+        const yaw = view.getInt16(offset + 4, true) // heading
+
+        /// update HeadUpDisplay //////////////////////////////
+        telemetryData.videoText = ReceiverState.videoText
+        telemetryData.telemetryInfo = MonitorState.telemetryInfo
+        telemetryData = { ...telemetryData, ...{ roll, pitch, yaw } }
+        ReceiverState.headUpDisplay.MSP(telemetryData)
+      }
+      break
+
+    case ChannelLabel.MSP_RAW_GPS: // GPS座標・高度・速度
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -132,10 +150,11 @@ export default async function OpenVtxDataChannel(channel) {
         }
 
         telemetryData.gps = gps
+        // console.log('MSP_RAW_GPS:', telemetryData.gps)
       }
       break
 
-    case ChannelLabel.MSP_COMP_GPS:
+    case ChannelLabel.MSP_COMP_GPS: // ホームへの距離・ホームへの方位
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -145,39 +164,32 @@ export default async function OpenVtxDataChannel(channel) {
           directionToHome: view.getUint16(offset + 2, true),
           update: view.getUint8(offset + 4),
         }
+        // console.log('MSP_COMP_GPS:', telemetryData.compGps)
       }
       break
 
-    case ChannelLabel.MSP_ATTITUDE:
-      channel.onmessage = ({ data }) => {
-        const view = new DataView(data)
-        let offset = 0
-
-        const roll = view.getInt16(offset, true) / 10.0
-        const pitch = view.getInt16(offset + 2, true) / 10.0
-        const yaw = view.getInt16(offset + 4, true)
-
-        /// update HeadUpDisplay //////////////////////////////
-        telemetryData.videoText = ReceiverState.videoText
-        telemetryData.telemetryInfo = MonitorState.telemetryInfo
-        telemetryData = { ...telemetryData, ...{ roll, pitch, yaw } }
-        ReceiverState.headUpDisplay.MSP(telemetryData)
-      }
-      break
-
-    case ChannelLabel.MSP_ALTITUDE:
+    case ChannelLabel.MSP_ALTITUDE: // 高度
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         telemetryData.altitude = parseFloat((view.getInt32(0, true) / 100.0).toFixed(2))
+        // console.log('MSP_ALTITUDE:', telemetryData.altitude)
       }
       break
 
-    case ChannelLabel.MSP_ANALOG:
+    case ChannelLabel.MSP_SONAR: // LiDAR/Ultrasonic distance sensor 
+      channel.onmessage = ({ data }) => {
+        const view = new DataView(data)
+        telemetryData.sonar = view.getInt32(0, true)
+        // console.log('MSP_SONAR:', telemetryData.sonar)
+      }
+      break
+
+    case ChannelLabel.MSP_ANALOG: // バッテリー(アナログ)
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
 
-        telemetryData.altitude = {
+        telemetryData.analog = {
           //
           voltage: view.getUint8(offset++) / 10.0,
           mAhdrawn: view.getUint16(offset, true),
@@ -186,17 +198,11 @@ export default async function OpenVtxDataChannel(channel) {
           voltageNew: view.getUint16(offset + 6, true) / 100,
           timestamp: performance.now(),
         }
+        console.log('MSP_ANALOG:', telemetryData.analog)
       }
       break
 
-    case ChannelLabel.MSP_SONAR:
-      channel.onmessage = ({ data }) => {
-        const view = new DataView(data)
-        telemetryData.sonar = view.getInt32(0, true)
-      }
-      break
-
-    case ChannelLabel.MSP_BATTERY_STATE:
+    case ChannelLabel.MSP_BATTERY_STATE: // バッテリー
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -210,6 +216,7 @@ export default async function OpenVtxDataChannel(channel) {
           batteryState: view.getUint8(offset + 7),
           // voltage: view.getUint16(offset + 8, true) / 100,
         }
+        console.log('MSP_BATTERY_STATE:', telemetryData.battery)
       }
       break
 

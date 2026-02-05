@@ -84,11 +84,16 @@ function setMediaDeviceList(message) {
   if (message.source === 'gstreamer') {
     // Network Device
     initNetworkList()
-    U.showComponent(C.Network)
 
     // Bord Device
     initBordList()
-    U.showComponent(C.Bord)
+
+    U.showComponent(C.Network, C.Bord)
+
+  } else {
+
+    U.hideComponent(C.Network, C.Bord)
+
   }
 
   // Camera / Microphone
@@ -154,13 +159,17 @@ function connectionEstablishment() {
   U.showComponent(C.SubControl)
   C.ConnectionButton.title = C.ConnectionText.Hangup
   U.contractionComponent(C.ConnectionMenu, ...MainComponent)
+  const senderQR = document.getElementById('SenderQR')
+  if (senderQR) senderQR.style.display = 'none'
 }
 
 // initialize -----------------------------------------------
 function initialize() {
   U.enableComponent(...ParameterEditorComponent)
   C.ConnectionButton.title = C.ConnectionText.Start
-  
+  const senderQR = document.getElementById('SenderQR')
+  if (senderQR && import.meta.env.MODE === 'production') senderQR.style.display = 'block'
+
   C.initializeMenuParams()
 
   U.expandComponent(C.ConnectionMenu)

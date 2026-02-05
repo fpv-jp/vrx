@@ -26,6 +26,9 @@ export default (canvas, stream) => {
   const freqs = new Uint8Array(bufferLength)
   const times = new Uint8Array(bufferLength)
 
+  // barWidth はリサイズ時のみ変化するのでキャッシュ
+  let barWidth = width / bufferLength
+
   // draw ------------------------------
   function draw() {
     analyser.getByteFrequencyData(freqs)
@@ -37,28 +40,19 @@ export default (canvas, stream) => {
     ctx.fillStyle = 'rgba(0, 255, 0, 1)'
     ctx.fillText(audioText, 5, 15)
 
-    const barWidth = width / bufferLength
     ctx.fillStyle = 'rgba(0, 255, 0, 0.7)'
     for (let i = 0; i < bufferLength; i++) {
       const barHeight = (freqs[i] / 256) * height
-      const y = height - barHeight
-      ctx.fillRect(i * barWidth, y, barWidth, barHeight)
+      ctx.fillRect(i * barWidth, height - barHeight, barWidth, barHeight)
     }
 
     ctx.strokeStyle = 'rgba(0, 255, 0, 1)'
     ctx.beginPath()
-    for (let i = 0; i < bufferLength; i++) {
-      const v = times[i] / 128.0
-      const y = (v * height) / 2
-      const x = i * barWidth
-      if (i === 0) {
-        ctx.moveTo(x, y)
-      } else {
-        ctx.lineTo(x, y)
-      }
+    ctx.moveTo(0, (times[0] / 128.0 * height) / 2)
+    for (let i = 1; i < bufferLength; i++) {
+      ctx.lineTo(i * barWidth, (times[i] / 128.0 * height) / 2)
     }
     ctx.stroke()
-    ctx.closePath()
 
     animationId = requestAnimationFrame(draw)
   }
@@ -68,6 +62,7 @@ export default (canvas, stream) => {
     let devicePixelRatio = window.devicePixelRatio || 1
     width = w
     height = h
+    barWidth = w / bufferLength
     canvas.width = w * devicePixelRatio
     canvas.height = h * devicePixelRatio
     canvas.style.width = `${w}px`
