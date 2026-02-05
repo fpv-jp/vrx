@@ -59,6 +59,7 @@ body {
 #TweakpaneMenu,
 #HeadUpDisplay,
 #Aircraft,
+#SenderQR,
 #AudioVisualizer,
 #NetworkMonitoring,
 #WebrtcReport,
@@ -119,6 +120,26 @@ body {
 }
 
 /* ---------- 右上 ---------- */
+#SenderQR {
+  top: 0;
+  right: 0;
+  text-align: right;
+  pointer-events: none;
+  display: none;
+}
+
+#SenderQR img {
+  display: block;
+  margin-left: auto;
+}
+
+#SenderQR p {
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
 #Aircraft {
   top: 7.5%;
   transform: translateY(-10%);
