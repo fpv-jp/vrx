@@ -1,21 +1,21 @@
-import Constants from './constants.js'
-import ComingSignalingMessage from './receiver-websocket.js'
-import OpenVtxDataChannel from './receiver-datachannel.js'
+import Constants from '../constants.js'
+import ComingSignalingMessage from './signaling.js'
+import OpenVtxDataChannel from './datachannel.js'
 
-import { receiverDecodeTransform } from './stream-handler.js'
-import ConnectionMonitoring from './widgets/monitoring.js'
-import TelemetryOverlay from './widgets/telemetry-overlay.js'
-import SearchRadar from './widgets/search-radar.js'
-import * as Menu from './menu'
-import * as Widgets from './widgets'
-import * as Utils from './utils.js'
+import { receiverDecodeTransform } from '../stream/handler.js'
+import ConnectionMonitoring from '../widgets/monitoring.js'
+import TelemetryOverlay from '../widgets/telemetry-overlay.js'
+import SearchRadar from '../widgets/search-radar.js'
+import * as Menu from '../menu'
+import * as Widgets from '../widgets'
+import * as Utils from '../utils.js'
 
 //-------------------------------------
 //
 //-------------------------------------
 export const ReceiverState = {
-  ws2: null,
-  pc2: null,
+  ws: null,
+  pc: null,
 
   stream: null,
   audio: null,
@@ -27,7 +27,7 @@ export const ReceiverState = {
 
   searchRadar: SearchRadar(RadarMap),
 
-  dc2CMD: null,
+  cmd: null,
 }
 
 const SENDER = Constants.SENDER
@@ -39,8 +39,8 @@ const ReceiverManager = {
   //-------------------------------------
   // PC2 WebSocket Message
   //-------------------------------------
-  handleSignalingMessage: async function (ws2, message) {
-    ReceiverState.ws2 = ws2
+  handleSignalingMessage: async function (ws, message) {
+    ReceiverState.ws = ws
     ComingSignalingMessage(message)
   },
 
@@ -48,11 +48,11 @@ const ReceiverManager = {
   // PC2 Peer Connection
   //-------------------------------------
   initReceiverPeerConnection: function () {
-    // let pc2 = new RTCPeerConnection({ iceServers: Constants.ICE_SERVERS })
-    let pc2 = new RTCPeerConnection()
-    ReceiverState.pc2 = pc2
+    // let pc = new RTCPeerConnection({ iceServers: Constants.ICE_SERVERS })
+    let pc = new RTCPeerConnection()
+    ReceiverState.pc = pc
 
-    pc2.addEventListener('connectionstatechange', (e) => {
+    pc.addEventListener('connectionstatechange', (e) => {
       const s = Utils.stats(e)
       switch (s.connectionState) {
         case 'connecting':
@@ -75,7 +75,7 @@ const ReceiverManager = {
       }
     })
 
-    pc2.addEventListener('icecandidate', ({ candidate }) => {
+    pc.addEventListener('icecandidate', ({ candidate }) => {
       if (candidate) {
         const ice = Utils.parseICE(candidate.candidate)
         if (ice) {
@@ -83,11 +83,11 @@ const ReceiverManager = {
         } else {
           console.log(`<<< ${SENDER.ICE} SENDER.ICE: ${candidate.candidate}`)
         }
-        Utils.sendSignalingMessage(ReceiverState.ws2, SENDER.ICE, { candidate })
+        Utils.sendSignalingMessage(ReceiverState.ws, SENDER.ICE, { candidate })
       }
     })
 
-    pc2.addEventListener('track', ({ receiver, streams, track }) => {
+    pc.addEventListener('track', ({ receiver, streams, track }) => {
       if (track.kind === 'video') {
         receiverDecodeTransform(receiver)
       } else if (track.kind === 'audio') {
@@ -103,7 +103,7 @@ const ReceiverManager = {
     //-------------------------------------
     //
     //-------------------------------------
-    pc2.addEventListener('datachannel', ({ channel }) => {
+    pc.addEventListener('datachannel', ({ channel }) => {
       OpenVtxDataChannel(channel)
     })
   },

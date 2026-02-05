@@ -208,7 +208,7 @@ const TelemetryRenderer = {
 
   // Altitude
   // ---------------------------
-  Altitude(ctx, position, altitude, currentDisplayAltitude, canvasWidth) {
+  Altitude(ctx, position, _altitude, currentDisplayAltitude, canvasWidth) {
     let { width, height, center } = position
 
     // スタイル設定
@@ -269,7 +269,7 @@ const TelemetryRenderer = {
 
   // Speed
   // ---------------------------
-  Speed(ctx, position, speed, currentDisplaySpeed, canvasWidth) {
+  Speed(ctx, position, _speed, currentDisplaySpeed, canvasWidth) {
     let { width, height, center } = position
 
     // スタイル設定
@@ -412,6 +412,75 @@ const TelemetryRenderer = {
     })
   },
 
+  // HomeIndicator
+  // ---------------------------
+  HomeIndicator(ctx, position, directionToHome, distanceToHome, heading) {
+    const { center } = position
+    const radius = position.width / 2
+
+    // Relative bearing: angle from current heading to home
+    const relBearing = ((directionToHome - heading) + 360) % 360
+    const angle = ((relBearing - 90) * Math.PI) / 180
+
+    // Circle
+    ctx.beginPath()
+    ctx.arc(center.x, center.y, radius, 0, Math.PI * 2)
+    ctx.strokeStyle = Styles.cyaan
+    ctx.lineWidth = Styles.thickLineWidth
+    ctx.stroke()
+
+    // H label
+    ctx.fillStyle = Styles.cyaan
+    ctx.font = `bold ${Math.round(radius * 1.1)}px monospace`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('H', center.x, center.y)
+
+    // Arrow pointing toward home
+    const arrowStart = radius + 4
+    const arrowEnd = radius + radius * 0.9
+    const ax = center.x + Math.cos(angle) * arrowEnd
+    const ay = center.y + Math.sin(angle) * arrowEnd
+
+    ctx.beginPath()
+    ctx.moveTo(center.x + Math.cos(angle) * arrowStart, center.y + Math.sin(angle) * arrowStart)
+    ctx.lineTo(ax, ay)
+    ctx.strokeStyle = Styles.cyaan
+    ctx.lineWidth = Styles.thickLineWidth
+    ctx.stroke()
+
+    // Arrowhead
+    const headLen = radius * 0.4
+    const headAngle = Math.PI / 5
+    ctx.beginPath()
+    ctx.moveTo(ax, ay)
+    ctx.lineTo(ax - headLen * Math.cos(angle - headAngle), ay - headLen * Math.sin(angle - headAngle))
+    ctx.moveTo(ax, ay)
+    ctx.lineTo(ax - headLen * Math.cos(angle + headAngle), ay - headLen * Math.sin(angle + headAngle))
+    ctx.stroke()
+
+    // Distance text
+    const dist = distanceToHome >= 1000 ? `${(distanceToHome / 1000).toFixed(1)}km` : `${distanceToHome}m`
+    ctx.font = Styles.fontSmall2
+    ctx.fillStyle = Styles.cyaan
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top'
+    ctx.fillText(dist, center.x, center.y + radius + 4)
+  },
+
+  // SonarDistance
+  // ---------------------------
+  SonarDistance(ctx, position, sonar) {
+    const { center } = position
+    const dist = (sonar / 100).toFixed(2)
+
+    ctx.fillStyle = Styles.yellow
+    ctx.font = Styles.font
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.fillText(`◆ ${dist}m`, center.x, center.y)
+  },
+
   // DebugParameter
   // ---------------------------
   DebugParameter(ctx, position, lines) {
@@ -445,12 +514,33 @@ export default (hud) => {
 
     currentDisplayAltitude: 0,
     currentDisplaySpeed: 0,
+
+    pendingData: null,
+    pendingType: null,
+    dirty: false,
+    animationId: null,
   }
 
   const TelemetryOverlay = {
-    // update
+    // update - データを保存してdirtyフラグを立てるだけ
     // ---------------------------
     update(telemetryData = {}) {
+      state.pendingData = telemetryData
+      state.pendingType = 'update'
+      state.dirty = true
+    },
+
+    // MSP - データを保存してdirtyフラグを立てるだけ
+    // ---------------------------
+    MSP(telemetryData = {}) {
+      state.pendingData = telemetryData
+      state.pendingType = 'MSP'
+      state.dirty = true
+    },
+
+    // _drawUpdate - update の実際の描画処理
+    // ---------------------------
+    _drawUpdate(telemetryData) {
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
 
       let { heading, pitch, roll, gps, battery, videoText, telemetryInfo } = telemetryData
@@ -466,31 +556,67 @@ export default (hud) => {
       this.drawDebugParameter(telemetryData)
     },
 
-    // MSP
+    // _drawMSP - MSP の実際の描画処理
     // ---------------------------
-    MSP(telemetryData = {}) {
+    _drawMSP(telemetryData) {
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
 
-      // console.log(JSON.stringify(telemetryData, null, 2))
-      let { acc, gyro, mag, roll, pitch, yaw, altitude, sonar, analog, battery, gps, compGps, videoText, telemetryInfo } = telemetryData
+      let { roll, pitch, yaw, altitude, analog, battery, gps, compGps, sonar, videoText, telemetryInfo } = telemetryData
 
-      let level = 0.89//this.calculateBatteryLevel(analog, battery)
-      // this.drawCompass(heading ?? 0)
+      // yaw from MSP_ATTITUDE = heading (0-360 degrees)
+      const level = analog && battery ? this.calculateBatteryLevel(analog, battery) : 0
+      this.drawCompass(yaw ?? 0)
       this.drawCrosshair()
       this.drawPitchLadder(pitch ?? 0, roll ?? 0)
       this.drawRollIndicator(roll ?? 0)
-      this.drawAltitude(altitude ?? 0) // gps.alt
-      this.drawSpeed(gps?.speed ?? 0)
-      this.drawBattery(level ?? 0, false, videoText ?? '')
+      this.drawAltitude(altitude ?? 0)          // MSP_ALTITUDE (meters)
+      this.drawSpeed(gps?.speed ?? 0)           // MSP_RAW_GPS speed (cm/s)
+      this.drawBattery(level, false, videoText ?? '')
+      if (compGps?.update) this.drawHomeIndicator(compGps.directionToHome, compGps.distanceToHome, yaw ?? 0)
+      if (sonar != null) this.drawSonarDistance(sonar)
       this.drawTelemetryInfo(telemetryInfo)
       this.drawDebugParameter(telemetryData)
+    },
+
+    // _renderFrame - dirty なときだけ描画
+    // ---------------------------
+    _renderFrame() {
+      if (!state.dirty || !state.pendingData) return
+      state.dirty = false
+      const data = state.pendingData
+      if (state.pendingType === 'MSP') {
+        this._drawMSP(data)
+      } else {
+        this._drawUpdate(data)
+      }
+    },
+
+    // start - RAF ループ開始（ループ関数は一度だけ生成）
+    // ---------------------------
+    start() {
+      if (!state.animationId) {
+        const loop = () => {
+          this._renderFrame()
+          state.animationId = requestAnimationFrame(loop)
+        }
+        loop()
+      }
+    },
+
+    // stop - RAF ループ停止
+    // ---------------------------
+    stop() {
+      if (state.animationId) {
+        cancelAnimationFrame(state.animationId)
+        state.animationId = null
+      }
     },
 
     // calculateBatteryLevel
     // ---------------------------
     calculateBatteryLevel(mspAnalog, mspBatteryState) {
       const { voltage, mAhdrawn } = mspAnalog
-      const { cellCount, capacity, batteryState } = mspBatteryState
+      const { cellCount, capacity } = mspBatteryState
       let level = 0
       if (capacity > 0 && mAhdrawn >= 0) {
         const remaining = capacity - mAhdrawn
@@ -507,6 +633,7 @@ export default (hud) => {
     // clear
     // ---------------------------
     clear() {
+      this.stop()
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
     },
 
@@ -617,6 +744,25 @@ export default (hud) => {
             //
             x: state.width - width,
             y: height * 1.25,
+          }
+          const x = center.x - width / 2
+          const y = center.y - height / 2
+          return { x, y, width, height, center }
+        }
+        case 'SonarDistance': {
+          const center = {
+            x: state.center.x,
+            y: state.height - state.height / 12,
+          }
+          return { center }
+        }
+        case 'HomeIndicator': {
+          // Right side, below battery
+          const width = state.width / 18
+          const height = width
+          const center = {
+            x: state.width - width * 1.5,
+            y: state.height / 8,
           }
           const x = center.x - width / 2
           const y = center.y - height / 2
@@ -763,6 +909,38 @@ export default (hud) => {
       try {
         TelemetryRenderer.Speed(state.ctx, position, speed, state.currentDisplaySpeed, state.canvas.width)
         // this.print(current, position, 'rgba(0, 0, 0, 0.3)', 'rgba(0, 255, 0, 1)')
+      } catch (e) {
+        console.error(current, ' : ', e)
+      } finally {
+        state.ctx.restore()
+      }
+    },
+
+    // drawSonarDistance
+    // ---------------------------
+    drawSonarDistance(sonar) {
+      let current = 'SonarDistance'
+      let position = this.renderPosition(current)
+
+      state.ctx.save()
+      try {
+        TelemetryRenderer.SonarDistance(state.ctx, position, sonar)
+      } catch (e) {
+        console.error(current, ' : ', e)
+      } finally {
+        state.ctx.restore()
+      }
+    },
+
+    // drawHomeIndicator
+    // ---------------------------
+    drawHomeIndicator(directionToHome, distanceToHome, heading) {
+      let current = 'HomeIndicator'
+      let position = this.renderPosition(current)
+
+      state.ctx.save()
+      try {
+        TelemetryRenderer.HomeIndicator(state.ctx, position, directionToHome, distanceToHome, heading)
       } catch (e) {
         console.error(current, ' : ', e)
       } finally {

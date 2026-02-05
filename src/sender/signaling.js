@@ -1,8 +1,8 @@
-import Constants from './constants.js'
-import { SenderState } from './sender.js'
-import StreamHandler, { PostMessageType } from './stream-handler.js'
+import Constants from '../constants.js'
+import { SenderState } from './index.js'
+import StreamHandler, { PostMessageType } from '../stream/handler.js'
 
-import * as Utils from './utils.js'
+import * as Utils from '../utils.js'
 
 const SENDER = Constants.SENDER
 const RECEIVER = Constants.RECEIVER
@@ -15,7 +15,7 @@ export default async function comingSignalingMessage(message, initSenderPeerConn
 
   switch (type) {
     case SENDER.SESSION_ID_ISSUANCE:
-      SenderState.ws1.id = message.sessionId
+      SenderState.ws.id = message.sessionId
       console.log(`assigned session id : ${message.sessionId}`)
       SenderId.textContent = `Your Sender Id: ${message.sessionId}`
 
@@ -26,33 +26,33 @@ export default async function comingSignalingMessage(message, initSenderPeerConn
         platform: 'BROWSER',
         gpu: browserInfo,
       }
-      SenderState.ws1.originalSend(JSON.stringify(platformInfo))
+      SenderState.ws.originalSend(JSON.stringify(platformInfo))
       console.log(`<<< ${SENDER.PLATFORM_INFO} SENDER_PLATFORM_INFO:`, platformInfo)
       break
 
     case SENDER.MEDIA_DEVICE_LIST_REQUEST:
-      SenderState.ws1.pair = ws2Id
+      SenderState.ws.pair = ws2Id
       const devices = await Utils.getInputMediaDevicesList()
       const codecs = Utils.getCapabilityCodecs()
       let source = 'browser'
-      Utils.sendSignalingMessage(SenderState.ws1, RECEIVER.MEDIA_DEVICE_LIST_RESPONSE, { source, devices, codecs })
+      Utils.sendSignalingMessage(SenderState.ws, RECEIVER.MEDIA_DEVICE_LIST_RESPONSE, { source, devices, codecs })
       break
 
     case SENDER.MEDIA_STREAM_START:
-      SenderState.ws1.pair = ws2Id
+      SenderState.ws.pair = ws2Id
       const { constraints, video_codec, audio_codec } = message
 
       SenderState.stream = await navigator.mediaDevices.getUserMedia(constraints)
 
       initSenderPeerConnection()
 
-      Utils.setSenderPriority(SenderState.pc1.getSenders())
-      Utils.setCapabilityCodec(SenderState.pc1.getTransceivers(), video_codec, audio_codec)
+      Utils.setSenderPriority(SenderState.pc.getSenders())
+      Utils.setCapabilityCodec(SenderState.pc.getTransceivers(), video_codec, audio_codec)
 
-      const offer = await SenderState.pc1.createOffer()
-      await SenderState.pc1.setLocalDescription(offer)
+      const offer = await SenderState.pc.createOffer()
+      await SenderState.pc.setLocalDescription(offer)
 
-      Utils.sendSignalingMessage(SenderState.ws1, RECEIVER.SDP_OFFER, { offer })
+      Utils.sendSignalingMessage(SenderState.ws, RECEIVER.SDP_OFFER, { offer })
 
       StreamHandler.postMessage({
         //
@@ -63,11 +63,11 @@ export default async function comingSignalingMessage(message, initSenderPeerConn
       break
 
     case SENDER.SDP_ANSWER:
-      await SenderState.pc1.setRemoteDescription(new RTCSessionDescription(message.answer))
+      await SenderState.pc.setRemoteDescription(new RTCSessionDescription(message.answer))
       break
 
     case SENDER.ICE:
-      await SenderState.pc1.addIceCandidate(new RTCIceCandidate(message.candidate))
+      await SenderState.pc.addIceCandidate(new RTCIceCandidate(message.candidate))
       break
 
     case SENDER.RECEIVER_CLOSE:
@@ -76,8 +76,8 @@ export default async function comingSignalingMessage(message, initSenderPeerConn
       SenderState?.stream.getTracks().forEach((track) => track.stop())
       SenderState.stream = null
 
-      SenderState?.pc1.close()
-      SenderState.pc1 = null
+      SenderState?.pc.close()
+      SenderState.pc = null
 
       break
 

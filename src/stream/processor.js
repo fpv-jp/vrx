@@ -3,10 +3,15 @@ const PostMessageType = Object.freeze({
   KeyFrame: 'KeyFrame',
   Offer: 'Offer',
   Terminate: 'Terminate',
+  StartRecord: 'StartRecord',
+  StopRecord: 'StopRecord',
+  RecordFrame: 'RecordFrame',
 })
 
 let offer, answer
-let RemoteVideo, RemoteVideoContext2D, pixelRatio
+let RemoteVideo, RemoteVideoContext, pixelRatio
+let rendering = false
+let isRecording = false
 
 //--------------------------------------------------------------------------
 // PC1 Encoder
@@ -43,10 +48,31 @@ const encodeAudio = (frame, controller) => {
 
 // --- Receiver VideoDecoder ----------------------------
 const videoDecoder = new VideoDecoder({
-  output: (frame) => {
-    // RemoteVideoContext2D.drawImage(frame, 0, 0, RemoteVideo.width / pixelRatio, RemoteVideo.height / pixelRatio)
-    RemoteVideoContext2D.drawImage(frame, 0, 0, RemoteVideo.width, RemoteVideo.height)
-    frame.close()
+  output: async (frame) => {
+    const recordFrame = isRecording ? frame.clone() : null
+
+    if (rendering) {
+      frame.close()
+    } else {
+      rendering = true
+      let bitmap
+      try {
+        bitmap = await createImageBitmap(frame)
+      } catch (e) {
+        console.error('VideoDecoder render error:', e)
+      } finally {
+        frame.close()
+        rendering = false
+      }
+      if (bitmap) {
+        RemoteVideoContext.transferFromImageBitmap(bitmap)
+        bitmap.close()
+      }
+    }
+
+    if (recordFrame) {
+      postMessage({ type: PostMessageType.RecordFrame, frame: recordFrame }, [recordFrame])
+    }
   },
   error: (e) => console.error('VideoDecoder error:', e),
 })
@@ -119,12 +145,7 @@ async function onPostMessage(data) {
     // --- RemoteVideo -------------------------
     case PostMessageType.RemoteVideo:
       RemoteVideo = data.offscreen
-      RemoteVideoContext2D = data.offscreen.getContext('2d')
-      // RemoteVideoContext2D.imageSmoothingQuality = 'high'
-      // RemoteVideoContext2D.mozImageSmoothingEnabled = true
-      // RemoteVideoContext2D.webkitImageSmoothingEnabled = true
-      // RemoteVideoContext2D.msImageSmoothingEnabled = true
-      // RemoteVideoContext2D.imageSmoothingEnabled = true
+      RemoteVideoContext = data.offscreen.getContext('bitmaprenderer')
       answer = data.answer
       pixelRatio = data.devicePixelRatio
       break
@@ -132,11 +153,17 @@ async function onPostMessage(data) {
     case PostMessageType.Offer:
       offer = data.offer
       break
+    // --- StartRecord -------------------------
+    case PostMessageType.StartRecord:
+      isRecording = true
+      break
+    // --- StopRecord -------------------------
+    case PostMessageType.StopRecord:
+      isRecording = false
+      break
     // --- Terminate -------------------------
     case PostMessageType.Terminate:
-      // if (RemoteVideo) {
-      //   RemoteVideo.clearRect(0, 0, RemoteVideo.width, RemoteVideo.height)
-      // }
+      isRecording = false
       break
 
     default:

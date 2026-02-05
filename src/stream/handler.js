@@ -3,17 +3,24 @@ export const PostMessageType = Object.freeze({
   KeyFrame: 'KeyFrame',
   Offer: 'Offer',
   Terminate: 'Terminate',
+  StartRecord: 'StartRecord',
+  StopRecord: 'StopRecord',
+  RecordFrame: 'RecordFrame',
 })
 
 // Hooks encoding and decoding
 // --------------------------------------------------------------------------------------------
-const StreamHandler = new Worker(new URL('./stream-processor.js', import.meta.url), {
+const StreamHandler = new Worker(new URL('./processor.js', import.meta.url), {
   type: 'module',
   name: 'Encode/Decode worker',
 })
 
 StreamHandler.onerror = (e) => console.error('StreamHandler load error:', e.message)
-StreamHandler.onmessage = (e) => console.log('StreamHandler message:', e.data)
+StreamHandler.addEventListener('message', ({ data }) => {
+  if (data.type !== PostMessageType.RecordFrame && data.type !== PostMessageType.KeyFrame) {
+    console.log('StreamHandler message:', data)
+  }
+})
 
 // encode
 export function senderEncodeTransform(sender) {

@@ -16,13 +16,13 @@ function displayNone(...elements) {
   })
 }
 
-import SenderManager from '../sender.js'
-import ReceiverManager from '../receiver.js'
+import SenderManager from '../sender'
+import ReceiverManager from '../receiver'
 import AudioStreamVisualizer from './audio-visualizer.js'
-import { ReceiverState } from '../receiver.js'
+import { ReceiverState } from '../receiver'
 import * as Utils from '../utils.js'
 import ConnectionMonitoring from '../widgets/monitoring.js'
-import StreamHandler, { PostMessageType } from '../stream-handler.js'
+import StreamHandler, { PostMessageType } from '../stream/handler.js'
 
 // initializeUnknown -----------------------------------------------
 function initializeUnknown() {
@@ -73,6 +73,8 @@ function initializeReceiver() {
     RadarMap,
   )
 
+  if (import.meta.env.MODE === 'production') SenderQR.style.display = 'block'
+
   window.addEventListener('unload', (e) => {
     ReceiverManager.onunload(e)
   })
@@ -98,6 +100,8 @@ function connectionEstablishment() {
     // WebrtcReport,
     // RadarMap,
   )
+
+  ReceiverState.headUpDisplay.start()
 }
 
 // attachAudioStream -----------------------------------------------
@@ -131,7 +135,7 @@ function destroyReceiver() {
     const { id, tagName } = child
 
     switch (id) {
-      case 'TweakpaneMenu':
+      case 'AlpineMenu':
         break
 
       case 'RemoteVideo':
@@ -144,6 +148,9 @@ function destroyReceiver() {
         break
 
       case 'Aircraft':
+        break
+
+      case 'SenderQR':
         break
 
       case 'AudioVisualizer':

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -17,10 +18,299 @@
     </div>
 
     <div id="ReceiverContainer" class="receiver-container">
-      <div id="TweakpaneMenu"></div>
+      <div id="AlpineMenu" x-data>
+        <details open>
+          <summary>Menu</summary>
+
+          <div class="field">
+            <label>Sender ID</label>
+            <select x-model="$store.menu.sender"
+                    @change="window.dispatchEvent(new CustomEvent('menu:sender-change'))"
+                    :disabled="$store.menu.formDisabled">
+              <option value="none">-- please select --</option>
+              <template x-for="s in $store.menu.senders" :key="s.id">
+                <option :value="s.id" x-text="s.label"></option>
+              </template>
+            </select>
+          </div>
+
+          <details x-show="$store.menu.showNetwork" open>
+            <summary>Network setting</summary>
+            <div class="field">
+              <label>Interface</label>
+              <select x-model="$store.menu.network_interface" :disabled="$store.menu.formDisabled">
+                <option value="none">-- please select --</option>
+                <template x-for="o in $store.menu.network_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+          </details>
+
+          <details x-show="$store.menu.showBord" open>
+            <summary>Flight controller setting</summary>
+            <div class="field">
+              <label>Board</label>
+              <select x-model="$store.menu.flight_controller" :disabled="$store.menu.formDisabled">
+                <option value="none">-- please select --</option>
+                <template x-for="o in $store.menu.bord_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+          </details>
+
+          <details x-show="$store.menu.showVideo" open>
+            <summary>Video setting</summary>
+            <div class="field">
+              <label>Camera</label>
+              <select x-model="$store.menu.video_device"
+                      @change="window.dispatchEvent(new CustomEvent('menu:video-device-change'))"
+                      :disabled="$store.menu.formDisabled">
+                <option value="none">-- please select --</option>
+                <template x-for="o in $store.menu.video_camera_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field" x-show="!$store.menu.video_codec_hidden">
+              <label>Encoder</label>
+              <select x-model="$store.menu.video_codec"
+                      @change="window.dispatchEvent(new CustomEvent('menu:video-codec-change'))"
+                      :disabled="$store.menu.formDisabled">
+                <option value="none">-- please select --</option>
+                <template x-for="o in $store.menu.video_codec_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field">
+              <label>Capture</label>
+              <select x-model="$store.menu.video_capture"
+                      @change="window.dispatchEvent(new CustomEvent('menu:video-capture-change'))"
+                      :disabled="$store.menu.formDisabled">
+                <option value="none">-- please select --</option>
+                <template x-for="o in $store.menu.video_capture_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <hr x-show="$store.menu.video_mimetype_show">
+            <div class="field" x-show="$store.menu.video_mimetype_show">
+              <label>MimeType</label>
+              <input type="text" readonly :value="$store.menu.video_mimetype">
+            </div>
+            <div class="field" x-show="$store.menu.video_format_mode === 'list'">
+              <label>Format</label>
+              <select x-model="$store.menu.video_format" :disabled="$store.menu.formDisabled">
+                <template x-for="o in $store.menu.video_format_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field" x-show="$store.menu.video_format_mode === 'text'">
+              <label>Format</label>
+              <input type="text" readonly :value="$store.menu.video_format">
+            </div>
+            <div class="field" x-show="$store.menu.video_drm_format_mode === 'list'">
+              <label>DRM Format</label>
+              <select x-model="$store.menu.video_drm_format" :disabled="$store.menu.formDisabled">
+                <template x-for="o in $store.menu.video_drm_format_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field" x-show="$store.menu.video_drm_format_mode === 'text'">
+              <label>DRM Format</label>
+              <input type="text" readonly :value="$store.menu.video_drm_format">
+            </div>
+            <div class="field" x-show="$store.menu.video_width_mode === 'list'">
+              <label>Width</label>
+              <select x-model="$store.menu.video_width" :disabled="$store.menu.formDisabled">
+                <template x-for="o in $store.menu.video_width_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field" x-show="$store.menu.video_width_mode === 'slider'">
+              <label>Width <span x-text="$store.menu.video_width"></span></label>
+              <input type="range" x-model.number="$store.menu.video_width"
+                     :min="$store.menu.video_width_min" :max="$store.menu.video_width_max" :step="$store.menu.video_width_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.video_width_mode === 'text'">
+              <label>Width</label>
+              <input type="text" readonly :value="$store.menu.video_width">
+            </div>
+            <div class="field" x-show="$store.menu.video_height_mode === 'list'">
+              <label>Height</label>
+              <select x-model="$store.menu.video_height" :disabled="$store.menu.formDisabled">
+                <template x-for="o in $store.menu.video_height_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field" x-show="$store.menu.video_height_mode === 'slider'">
+              <label>Height <span x-text="$store.menu.video_height"></span></label>
+              <input type="range" x-model.number="$store.menu.video_height"
+                     :min="$store.menu.video_height_min" :max="$store.menu.video_height_max" :step="$store.menu.video_height_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.video_height_mode === 'text'">
+              <label>Height</label>
+              <input type="text" readonly :value="$store.menu.video_height">
+            </div>
+            <div class="field" x-show="$store.menu.video_framerate_mode === 'list'">
+              <label>Framerate</label>
+              <select x-model="$store.menu.video_framerate" :disabled="$store.menu.formDisabled">
+                <template x-for="o in $store.menu.video_framerate_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field" x-show="$store.menu.video_framerate_mode === 'slider'">
+              <label>Framerate <span x-text="$store.menu.video_framerate"></span></label>
+              <input type="range" x-model.number="$store.menu.video_framerate"
+                     :min="$store.menu.video_framerate_min" :max="$store.menu.video_framerate_max" :step="$store.menu.video_framerate_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.video_framerate_mode === 'text'">
+              <label>Framerate</label>
+              <input type="text" readonly :value="$store.menu.video_framerate">
+            </div>
+          </details>
+
+          <details x-show="$store.menu.showAudio" open>
+            <summary>Audio setting</summary>
+            <div class="field">
+              <label>Microphone</label>
+              <select x-model="$store.menu.audio_device"
+                      @change="window.dispatchEvent(new CustomEvent('menu:audio-device-change'))"
+                      :disabled="$store.menu.formDisabled">
+                <option value="none">-- please select --</option>
+                <template x-for="o in $store.menu.audio_microphone_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field">
+              <label>Encoder</label>
+              <select x-model="$store.menu.audio_codec"
+                      @change="window.dispatchEvent(new CustomEvent('menu:audio-codec-change'))"
+                      :disabled="$store.menu.formDisabled">
+                <option value="none">-- please select --</option>
+                <template x-for="o in $store.menu.audio_codec_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field">
+              <label>Sampling</label>
+              <select x-model="$store.menu.audio_sampling"
+                      @change="window.dispatchEvent(new CustomEvent('menu:audio-sampling-change'))"
+                      :disabled="$store.menu.formDisabled">
+                <option value="none">-- please select --</option>
+                <template x-for="o in $store.menu.audio_sampling_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <hr x-show="$store.menu.audio_mimetype_show">
+            <div class="field" x-show="$store.menu.audio_mimetype_show">
+              <label>MimeType</label>
+              <input type="text" readonly :value="$store.menu.audio_mimetype">
+            </div>
+            <div class="field" x-show="$store.menu.audio_format_mode === 'list'">
+              <label>Format</label>
+              <select x-model="$store.menu.audio_format" :disabled="$store.menu.formDisabled">
+                <template x-for="o in $store.menu.audio_format_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field" x-show="$store.menu.audio_format_mode === 'text'">
+              <label>Format</label>
+              <input type="text" readonly :value="$store.menu.audio_format">
+            </div>
+            <div class="field" x-show="$store.menu.audio_rate_mode === 'list'">
+              <label>Rate</label>
+              <select x-model="$store.menu.audio_rate" :disabled="$store.menu.formDisabled">
+                <template x-for="o in $store.menu.audio_rate_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field" x-show="$store.menu.audio_rate_mode === 'slider'">
+              <label>Rate <span x-text="$store.menu.audio_rate"></span></label>
+              <input type="range" x-model.number="$store.menu.audio_rate"
+                     :min="$store.menu.audio_rate_min" :max="$store.menu.audio_rate_max" :step="$store.menu.audio_rate_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.audio_rate_mode === 'text'">
+              <label>Rate</label>
+              <input type="text" readonly :value="$store.menu.audio_rate">
+            </div>
+            <div class="field" x-show="$store.menu.audio_channels_mode === 'list'">
+              <label>Channels</label>
+              <select x-model="$store.menu.audio_channels" :disabled="$store.menu.formDisabled">
+                <template x-for="o in $store.menu.audio_channels_options" :key="o.value">
+                  <option :value="o.value" x-text="o.text"></option>
+                </template>
+              </select>
+            </div>
+            <div class="field" x-show="$store.menu.audio_channels_mode === 'slider'">
+              <label>Channels <span x-text="$store.menu.audio_channels"></span></label>
+              <input type="range" x-model.number="$store.menu.audio_channels"
+                     :min="$store.menu.audio_channels_min" :max="$store.menu.audio_channels_max" :step="$store.menu.audio_channels_step"
+                     :disabled="$store.menu.formDisabled">
+            </div>
+            <div class="field" x-show="$store.menu.audio_channels_mode === 'text'">
+              <label>Channels</label>
+              <input type="text" readonly :value="$store.menu.audio_channels">
+            </div>
+          </details>
+
+          <div x-show="$store.menu.showConnection">
+            <button @click="window.dispatchEvent(new CustomEvent('menu:connection-click'))"
+                    :disabled="$store.menu.connectionDisabled"
+                    x-text="$store.menu.connectionText">
+            </button>
+          </div>
+
+          <details x-show="$store.menu.showSubControl" open>
+            <summary>Sub Control</summary>
+            <div class="field">
+              <label><input type="checkbox" x-model="$store.menu.grayscale"
+                            @change="window.dispatchEvent(new CustomEvent('menu:grayscale-change'))"> Grayscale</label>
+            </div>
+            <div class="field">
+              <label><input type="checkbox" x-model="$store.menu.mute"
+                            @change="window.dispatchEvent(new CustomEvent('menu:mute-change'))"> Mute</label>
+            </div>
+            <div class="field">
+              <button @click="window.dispatchEvent(new CustomEvent('menu:fullscreen-click'))">Fullscreen</button>
+            </div>
+            <div class="field">
+              <button @click="window.dispatchEvent(new CustomEvent('menu:webrtc-report-click'))">Webrtc Report</button>
+            </div>
+            <div class="field">
+              <button @click="window.dispatchEvent(new CustomEvent('menu:search-radar-click'))">Search Radar</button>
+            </div>
+            <div class="field">
+              <button @click="window.dispatchEvent(new CustomEvent('menu:record-click'))"
+                      x-text="$store.menu.recording ? '⏹ Stop Recording' : '⏺ Record'"></button>
+            </div>
+          </details>
+        </details>
+      </div>
+
       <canvas id="RemoteVideo"></canvas>
       <canvas id="HeadUpDisplay"></canvas>
-      <img id="Aircraft" src="src/image/Helion10-O4P-6.jpg" />
+      <img id="Aircraft" src="/image/Helion10-O4P-6.jpg" />
+      <div id="SenderQR" style="display: none">
+        <img src="/image/sender.png" />
+        <p>To register as a Sender,<br />scan this QR code on your<br />smartphone or tablet.</p>
+      </div>
       <canvas id="AudioVisualizer"></canvas>
       <div id="NetworkMonitoring"></div>
       <pre id="WebrtcReport"></pre>

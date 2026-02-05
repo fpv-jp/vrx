@@ -1,24 +1,24 @@
-import Constants from './constants.js'
-import { SenderState } from './sender.js'
-import { AbsoluteOrientationSensor } from './thirdparty/motion-sensors.js'
+import Constants from '../constants.js'
+import { SenderState } from './index.js'
+import { AbsoluteOrientationSensor } from '../thirdparty/motion-sensors.js'
 
 const ChannelLabel = Constants.ChannelLabel
 const Command = Constants.Command
 
 //-------------------------------------
-// DC1 Data Channel
+// Sender Data Channels
 //-------------------------------------
-export default async function CreateVtxDataChannel(pc1) {
+export default async function CreateVtxDataChannel(pc) {
   // --- CMD Channel ------------------------------------
-  let dc1CMD = SenderState.pc1.createDataChannel(ChannelLabel.CMD, {
+  let cmd = SenderState.pc.createDataChannel(ChannelLabel.CMD, {
     ordered: true,
     reliable: true,
   })
 
-  SenderState.dc1CMD = dc1CMD
+  SenderState.cmd = cmd
 
-  dc1CMD.onopen = () => {
-    dc1CMD.onmessage = ({ data }) => {
+  cmd.onopen = () => {
+    cmd.onmessage = ({ data }) => {
       // PC1 Command Channel Message -------------------------------------
       const message = JSON.parse(data)
       switch (message.cmd) {
@@ -26,17 +26,17 @@ export default async function CreateVtxDataChannel(pc1) {
           SenderState?.stream.getTracks().forEach((track) => track.stop())
           SenderState.stream = null
 
-          SenderState?.pc1.close()
-          SenderState.pc1 = null
+          SenderState?.pc.close()
+          SenderState.pc = null
           break
 
         case Command.PING:
           let cmd = Command.PONG
-          dc1CMD.send(JSON.stringify({ cmd }))
+          cmd.send(JSON.stringify({ cmd }))
           break
 
         // case Command.SEND_KEYFRAME_REQUEST:
-        //   Utils.sendKeyFrameRequest(pc1)
+        //   Utils.sendKeyFrameRequest(pc)
         //   break
 
         default:
@@ -46,13 +46,13 @@ export default async function CreateVtxDataChannel(pc1) {
   }
 
   // --- IMU Channel ------------------------------------
-  let dc1IMU = pc1.createDataChannel(ChannelLabel.IMU, {
+  let imu = pc.createDataChannel(ChannelLabel.IMU, {
     ordered: false,
     reliable: false,
     maxPacketLifeTime: 50,
   })
 
-  dc1IMU.onclosing = () => {
+  imu.onclosing = () => {
     console.log('DataChannel IMU closing...')
     SenderState.sensor.stop()
     if (SenderState.dummyIntervalId) {
@@ -61,7 +61,7 @@ export default async function CreateVtxDataChannel(pc1) {
     }
   }
 
-  dc1IMU.onopen = () => {
+  imu.onopen = () => {
     SenderState.sensor = new AbsoluteOrientationSensor({ frequency: 60, coordinateSystem: 'world' })
 
     SenderState.sensor.onreading = () => {
@@ -71,7 +71,7 @@ export default async function CreateVtxDataChannel(pc1) {
         SenderState.sensor.quaternion[2],
         SenderState.sensor.quaternion[3],
       ])
-      dc1IMU.send(quaternion.buffer)
+      imu.send(quaternion.buffer)
     }
 
     SenderState.sensor.onerror = ({ error }) => {
@@ -87,8 +87,8 @@ export default async function CreateVtxDataChannel(pc1) {
             ε * (Math.random() - 0.5),
             1 + ε * (Math.random() - 0.5),
           ])
-          if (dc1IMU && dc1IMU.readyState == 'open') {
-            dc1IMU.send(q.buffer)
+          if (imu && imu.readyState == 'open') {
+            imu.send(q.buffer)
           }
         }, 1000 / 15) // 15 Hz
       }
@@ -98,13 +98,13 @@ export default async function CreateVtxDataChannel(pc1) {
   }
 
   // --- GNSS Channel ------------------------------------
-  let dc1GNSS = pc1.createDataChannel(ChannelLabel.GNSS, {
+  let gnss = pc.createDataChannel(ChannelLabel.GNSS, {
     ordered: true,
     reliable: true,
     maxRetransmits: 3,
   })
 
-  dc1GNSS.onclosing = () => {
+  gnss.onclosing = () => {
     console.log('DataChannel GNSS closing...')
     if (SenderState.gpsWatchId) {
       navigator.geolocation.clearWatch(SenderState.gpsWatchId)
@@ -118,7 +118,7 @@ export default async function CreateVtxDataChannel(pc1) {
     timeout: 5000,
   }
 
-  dc1GNSS.onopen = async () => {
+  gnss.onopen = async () => {
     try {
       const status = await navigator.permissions?.query({ name: 'geolocation' })
       if (status && status.state === 'denied') {
@@ -132,7 +132,7 @@ export default async function CreateVtxDataChannel(pc1) {
     SenderState.gpsWatchId = navigator.geolocation.watchPosition(
       (position) => {
         const { accuracy, altitude, altitudeAccuracy, heading, latitude, longitude, speed } = position.coords
-        dc1GNSS.send(JSON.stringify({ accuracy, altitude, altitudeAccuracy, heading, latitude, longitude, speed }))
+        gnss.send(JSON.stringify({ accuracy, altitude, altitudeAccuracy, heading, latitude, longitude, speed }))
       },
       (err) => console.error('GNSS Error 2:', err.code, err.message),
       options,
@@ -141,7 +141,7 @@ export default async function CreateVtxDataChannel(pc1) {
 
   // --- BAT Channel ------------------------------------
   if (navigator.getBattery) {
-    let dc1BAT = pc1.createDataChannel(ChannelLabel.BAT, {
+    let bat = pc.createDataChannel(ChannelLabel.BAT, {
       ordered: true,
       reliable: true,
       maxRetransmits: 3,
@@ -150,21 +150,21 @@ export default async function CreateVtxDataChannel(pc1) {
     // send
     const sendBattery = (battery) => {
       let { charging, chargingTime, dischargingTime, level } = battery
-      if (dc1BAT?.readyState === 'open') {
-        dc1BAT.send(JSON.stringify({ charging, chargingTime, dischargingTime, level }))
+      if (bat?.readyState === 'open') {
+        bat.send(JSON.stringify({ charging, chargingTime, dischargingTime, level }))
       }
     }
 
     let batteryController = new AbortController()
     const { signal } = batteryController
 
-    dc1BAT.onclosing = () => {
+    bat.onclosing = () => {
       console.log('DataChannel BAT closing...')
       batteryController.abort()
       batteryController = null
     }
 
-    dc1BAT.onopen = () => {
+    bat.onopen = () => {
       navigator.getBattery().then((battery) => {
         battery.addEventListener('chargingchange', () => sendBattery(battery), { signal })
         battery.addEventListener('levelchange', () => sendBattery(battery), { signal })
