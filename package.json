@@ -19,23 +19,26 @@
     "japan"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "npm run build:production && npm run build:development",
-    "build:production": "vite build --mode production",
-    "build:development": "vite build --mode development",
+    "dev": "vite --mode private",
+    "build": "npm run build:public && npm run build:private",
+    "build:public": "vite build --mode public",
+    "build:private": "vite build --mode private",
     "preview": "vite preview --host",
-    "fmt": "prettier --write \"./**/*.{js,css,html}\""
+    "fmt": "prettier --write \"./**/*.{js,css,html}\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
-    "@ffmpeg/core": "^0.12.10",
-    "@ffmpeg/ffmpeg": "^0.12.15",
-    "@ffmpeg/util": "^0.12.2",
-    "tweakpane": "^4.0.5"
+    "alpinejs": "^3.15.12"
   },
   "devDependencies": {
-    "prettier": "^3.8.0",
-    "vite": "^7.3.1",
-    "vite-plugin-static-copy": "^3.1.4"
+    "prettier": "^3.8.2",
+    "vite": "^8.0.8",
+    "vitepress": "^1.6.4",
+    "vitest": "^4.1.8"
   },
   "prettier": {
     "trailingComma": "all",
