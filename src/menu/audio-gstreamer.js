@@ -78,7 +78,7 @@ export function showSubMenu() {
   const channels = P.getAudioSamplingParameter('channels')
   if (channels != null) {
     if (channels.startsWith('{')) {
-      P.setListParameterOption(C.AudioChannels, channels)
+      P.setListParameterOption(C.AudioChannelsList, channels)
     } else if (channels.startsWith('[')) {
       C.MenuParams.audio_channels = 1
       C.AudioChannels.refresh()

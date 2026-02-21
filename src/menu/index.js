@@ -168,7 +168,7 @@ function initialize() {
   U.enableComponent(...ParameterEditorComponent)
   C.ConnectionButton.title = C.ConnectionText.Start
   const senderQR = document.getElementById('SenderQR')
-  if (senderQR) senderQR.style.display = 'block'
+  if (senderQR && import.meta.env.MODE === 'production') senderQR.style.display = 'block'
 
   C.initializeMenuParams()
 
