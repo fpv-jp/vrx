@@ -100,6 +100,8 @@ function connectionEstablishment() {
     // WebrtcReport,
     // RadarMap,
   )
+
+  ReceiverState.headUpDisplay.start()
 }
 
 // attachAudioStream -----------------------------------------------
