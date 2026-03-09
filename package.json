@@ -33,9 +33,9 @@
     "tweakpane": "^4.0.5"
   },
   "devDependencies": {
-    "prettier": "^3.8.0",
+    "prettier": "^3.8.1",
     "vite": "^7.3.1",
-    "vite-plugin-static-copy": "^3.1.4"
+    "vite-plugin-static-copy": "^3.2.0"
   },
   "prettier": {
     "trailingComma": "all",
