@@ -20,9 +20,9 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:production && npm run build:development",
-    "build:production": "vite build --mode production",
-    "build:development": "vite build --mode development",
+    "build": "npm run build:public && npm run build:private",
+    "build:public": "vite build --mode public",
+    "build:private": "vite build --mode private",
     "preview": "vite preview --host",
     "fmt": "prettier --write \"./**/*.{js,css,html}\""
   },
