@@ -19,7 +19,7 @@
     "japan"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --mode private",
     "build": "npm run build:public && npm run build:private",
     "build:public": "vite build --mode public",
     "build:private": "vite build --mode private",
