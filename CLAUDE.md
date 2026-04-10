@@ -7,7 +7,7 @@ WebRTCを使用してリモートドローン（VTX）からビデオ・オー�
 
 ```bash
 npm run dev              # Vite開発サーバー起動
-npm run build            # production + development 両方ビルド
+npm run build            # public + private 両方ビルド
 npm run fmt              # Prettier フォーマット
 ```
 
@@ -17,12 +17,12 @@ npm run fmt              # Prettier フォーマット
 
 ### ビルドモード
 
-| モード | ホスト先 | ターゲット |
-|--------|---------|-----------|
-| **production** | クラウド | スマホ・タブレットPC |
-| **development** | SBC内（ローカル） | [fpv-jp/vtx](https://github.com/fpv-jp/vtx) と組み合わせて使用 |
+| モード | コマンド | 出力先 | ホスト先 | ターゲット |
+|--------|---------|--------|---------|-----------|
+| **public** | `npm run build:public` | `vrx/public` | クラウド | スマホ・タブレットPC |
+| **private** | `npm run build:private` | `vrx/private` | SBC内（ローカル） | [fpv-jp/vtx](https://github.com/fpv-jp/vtx) と組み合わせて使用 |
 
-環境変数は `.env.development` / `.env.production` で `VITE_SIGNALING_ENDPOINT` を設定。
+環境変数は `.env.public` / `.env.private` で `VITE_SIGNALING_ENDPOINT` を設定。
 
 ## Senderの2種類
 
