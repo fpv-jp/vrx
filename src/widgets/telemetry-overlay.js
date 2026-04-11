@@ -208,7 +208,7 @@ const TelemetryRenderer = {
 
   // Altitude
   // ---------------------------
-  Altitude(ctx, position, altitude, currentDisplayAltitude, canvasWidth) {
+  Altitude(ctx, position, _altitude, currentDisplayAltitude, canvasWidth) {
     let { width, height, center } = position
 
     // スタイル設定
@@ -269,7 +269,7 @@ const TelemetryRenderer = {
 
   // Speed
   // ---------------------------
-  Speed(ctx, position, speed, currentDisplaySpeed, canvasWidth) {
+  Speed(ctx, position, _speed, currentDisplaySpeed, canvasWidth) {
     let { width, height, center } = position
 
     // スタイル設定
@@ -492,17 +492,17 @@ export default (hud) => {
     _drawMSP(telemetryData) {
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
 
-      // console.log(JSON.stringify(telemetryData, null, 2))
-      let { acc, gyro, mag, roll, pitch, yaw, altitude, sonar, analog, battery, gps, compGps, videoText, telemetryInfo } = telemetryData
+      let { roll, pitch, yaw, altitude, analog, battery, gps, videoText, telemetryInfo } = telemetryData
 
-      let level = 0.89//this.calculateBatteryLevel(analog, battery)
-      // this.drawCompass(heading ?? 0)
+      // yaw from MSP_ATTITUDE = heading (0-360 degrees)
+      const level = analog && battery ? this.calculateBatteryLevel(analog, battery) : 0
+      this.drawCompass(yaw ?? 0)
       this.drawCrosshair()
       this.drawPitchLadder(pitch ?? 0, roll ?? 0)
       this.drawRollIndicator(roll ?? 0)
-      this.drawAltitude(altitude ?? 0) // gps.alt
-      this.drawSpeed(gps?.speed ?? 0)
-      this.drawBattery(level ?? 0, false, videoText ?? '')
+      this.drawAltitude(altitude ?? 0)          // MSP_ALTITUDE (meters)
+      this.drawSpeed(gps?.speed ?? 0)           // MSP_RAW_GPS speed (cm/s)
+      this.drawBattery(level, false, videoText ?? '')
       this.drawTelemetryInfo(telemetryInfo)
       this.drawDebugParameter(telemetryData)
     },
@@ -545,7 +545,7 @@ export default (hud) => {
     // ---------------------------
     calculateBatteryLevel(mspAnalog, mspBatteryState) {
       const { voltage, mAhdrawn } = mspAnalog
-      const { cellCount, capacity, batteryState } = mspBatteryState
+      const { cellCount, capacity } = mspBatteryState
       let level = 0
       if (capacity > 0 && mAhdrawn >= 0) {
         const remaining = capacity - mAhdrawn
