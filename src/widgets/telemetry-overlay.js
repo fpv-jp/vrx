@@ -412,6 +412,75 @@ const TelemetryRenderer = {
     })
   },
 
+  // HomeIndicator
+  // ---------------------------
+  HomeIndicator(ctx, position, directionToHome, distanceToHome, heading) {
+    const { center } = position
+    const radius = position.width / 2
+
+    // Relative bearing: angle from current heading to home
+    const relBearing = ((directionToHome - heading) + 360) % 360
+    const angle = ((relBearing - 90) * Math.PI) / 180
+
+    // Circle
+    ctx.beginPath()
+    ctx.arc(center.x, center.y, radius, 0, Math.PI * 2)
+    ctx.strokeStyle = Styles.cyaan
+    ctx.lineWidth = Styles.thickLineWidth
+    ctx.stroke()
+
+    // H label
+    ctx.fillStyle = Styles.cyaan
+    ctx.font = `bold ${Math.round(radius * 1.1)}px monospace`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('H', center.x, center.y)
+
+    // Arrow pointing toward home
+    const arrowStart = radius + 4
+    const arrowEnd = radius + radius * 0.9
+    const ax = center.x + Math.cos(angle) * arrowEnd
+    const ay = center.y + Math.sin(angle) * arrowEnd
+
+    ctx.beginPath()
+    ctx.moveTo(center.x + Math.cos(angle) * arrowStart, center.y + Math.sin(angle) * arrowStart)
+    ctx.lineTo(ax, ay)
+    ctx.strokeStyle = Styles.cyaan
+    ctx.lineWidth = Styles.thickLineWidth
+    ctx.stroke()
+
+    // Arrowhead
+    const headLen = radius * 0.4
+    const headAngle = Math.PI / 5
+    ctx.beginPath()
+    ctx.moveTo(ax, ay)
+    ctx.lineTo(ax - headLen * Math.cos(angle - headAngle), ay - headLen * Math.sin(angle - headAngle))
+    ctx.moveTo(ax, ay)
+    ctx.lineTo(ax - headLen * Math.cos(angle + headAngle), ay - headLen * Math.sin(angle + headAngle))
+    ctx.stroke()
+
+    // Distance text
+    const dist = distanceToHome >= 1000 ? `${(distanceToHome / 1000).toFixed(1)}km` : `${distanceToHome}m`
+    ctx.font = Styles.fontSmall2
+    ctx.fillStyle = Styles.cyaan
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top'
+    ctx.fillText(dist, center.x, center.y + radius + 4)
+  },
+
+  // SonarDistance
+  // ---------------------------
+  SonarDistance(ctx, position, sonar) {
+    const { center } = position
+    const dist = (sonar / 100).toFixed(2)
+
+    ctx.fillStyle = Styles.yellow
+    ctx.font = Styles.font
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.fillText(`◆ ${dist}m`, center.x, center.y)
+  },
+
   // DebugParameter
   // ---------------------------
   DebugParameter(ctx, position, lines) {
@@ -492,7 +561,7 @@ export default (hud) => {
     _drawMSP(telemetryData) {
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
 
-      let { roll, pitch, yaw, altitude, analog, battery, gps, videoText, telemetryInfo } = telemetryData
+      let { roll, pitch, yaw, altitude, analog, battery, gps, compGps, sonar, videoText, telemetryInfo } = telemetryData
 
       // yaw from MSP_ATTITUDE = heading (0-360 degrees)
       const level = analog && battery ? this.calculateBatteryLevel(analog, battery) : 0
@@ -503,6 +572,8 @@ export default (hud) => {
       this.drawAltitude(altitude ?? 0)          // MSP_ALTITUDE (meters)
       this.drawSpeed(gps?.speed ?? 0)           // MSP_RAW_GPS speed (cm/s)
       this.drawBattery(level, false, videoText ?? '')
+      if (compGps?.update) this.drawHomeIndicator(compGps.directionToHome, compGps.distanceToHome, yaw ?? 0)
+      if (sonar != null) this.drawSonarDistance(sonar)
       this.drawTelemetryInfo(telemetryInfo)
       this.drawDebugParameter(telemetryData)
     },
@@ -678,6 +749,25 @@ export default (hud) => {
           const y = center.y - height / 2
           return { x, y, width, height, center }
         }
+        case 'SonarDistance': {
+          const center = {
+            x: state.center.x,
+            y: state.height - state.height / 12,
+          }
+          return { center }
+        }
+        case 'HomeIndicator': {
+          // Right side, below battery
+          const width = state.width / 18
+          const height = width
+          const center = {
+            x: state.width - width * 1.5,
+            y: state.height / 8,
+          }
+          const x = center.x - width / 2
+          const y = center.y - height / 2
+          return { x, y, width, height, center }
+        }
       }
     },
 
@@ -819,6 +909,38 @@ export default (hud) => {
       try {
         TelemetryRenderer.Speed(state.ctx, position, speed, state.currentDisplaySpeed, state.canvas.width)
         // this.print(current, position, 'rgba(0, 0, 0, 0.3)', 'rgba(0, 255, 0, 1)')
+      } catch (e) {
+        console.error(current, ' : ', e)
+      } finally {
+        state.ctx.restore()
+      }
+    },
+
+    // drawSonarDistance
+    // ---------------------------
+    drawSonarDistance(sonar) {
+      let current = 'SonarDistance'
+      let position = this.renderPosition(current)
+
+      state.ctx.save()
+      try {
+        TelemetryRenderer.SonarDistance(state.ctx, position, sonar)
+      } catch (e) {
+        console.error(current, ' : ', e)
+      } finally {
+        state.ctx.restore()
+      }
+    },
+
+    // drawHomeIndicator
+    // ---------------------------
+    drawHomeIndicator(directionToHome, distanceToHome, heading) {
+      let current = 'HomeIndicator'
+      let position = this.renderPosition(current)
+
+      state.ctx.save()
+      try {
+        TelemetryRenderer.HomeIndicator(state.ctx, position, directionToHome, distanceToHome, heading)
       } catch (e) {
         console.error(current, ' : ', e)
       } finally {
