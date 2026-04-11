@@ -49,6 +49,7 @@ body {
 #RemoteVideo {
   width: 100%;
   height: auto;
+  max-height: 100svh;
   display: block;
   background: black;
 }

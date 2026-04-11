@@ -34,7 +34,7 @@ function transferRemoteVideoWorker(answer) {
     switch (data.type) {
       // --- KeyFrame -------------------------
       case PostMessageType.KeyFrame:
-        // console.log('PostMessageType.KeyFrame')
+        RemoteVideo.style.aspectRatio = `${data.width} / ${data.height}`
         break
     }
   }
