@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
           key: fs.readFileSync(path.resolve(__dirname, 'server-key.pem')),
           cert: fs.readFileSync(path.resolve(__dirname, 'server-cert.pem')),
         },
-        hmr: {
+        hmr: mode === 'private' ? false : {
           protocol: 'wss',
           host: 'fpv',
           port: 4443,
