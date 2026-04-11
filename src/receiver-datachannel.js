@@ -172,7 +172,7 @@ export default async function OpenVtxDataChannel(channel) {
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         telemetryData.altitude = parseFloat((view.getInt32(0, true) / 100.0).toFixed(2))
-        console.log('MSP_ALTITUDE:', telemetryData.altitude)
+        // console.log('MSP_ALTITUDE:', telemetryData.altitude)
       }
       break
 
@@ -180,7 +180,7 @@ export default async function OpenVtxDataChannel(channel) {
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         telemetryData.sonar = view.getInt32(0, true)
-        console.log('MSP_SONAR:', telemetryData.sonar)
+        // console.log('MSP_SONAR:', telemetryData.sonar)
       }
       break
 
