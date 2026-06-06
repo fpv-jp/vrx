@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
 import fs from 'fs'
 import path from 'path'
 
@@ -10,26 +9,9 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: mode === 'public' ? 'vrx/public' : 'vrx/private',
     },
-    optimizeDeps: {
-      exclude: ['@ffmpeg/core', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
-    },
     worker: {
       format: 'es',
     },
-    plugins: [
-      viteStaticCopy({
-        targets: [
-          {
-            src: 'node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js',
-            dest: 'assets/ffmpeg',
-          },
-          {
-            src: 'node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.wasm',
-            dest: 'assets/ffmpeg',
-          },
-        ],
-      }),
-    ],
     ...(isDev && {
       server: {
         host: true,
