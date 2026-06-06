@@ -7,6 +7,7 @@ import { initVideoList } from './video.js'
 import { initAudioList } from './audio.js'
 import './connection.js'
 
+
 function resetSubFields() {
   const store = Alpine.store('menu')
   store.video_mimetype_show = false
