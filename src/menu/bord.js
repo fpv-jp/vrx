@@ -1,5 +1,5 @@
 import Alpine from 'alpinejs'
-import { setListOptions } from './list-utils.js'
+import { setListOptions } from './utils/list-utils.js'
 
 export function initBordList() {
   const flight_controllers = Alpine.store('menu').message.flight_controllers

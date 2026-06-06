@@ -1,8 +1,8 @@
 import Alpine from 'alpinejs'
-import * as P from './parameter-utils.js'
-import { browserCodecList, sortByOrder } from './codec-utils.js'
-import { checkRequiredKeys } from './parameter-utils.js'
-import { setListOptions } from './list-utils.js'
+import * as P from './utils/parameter-utils.js'
+import { browserCodecList, sortByOrder } from './utils/codec-utils.js'
+import { checkRequiredKeys } from './utils/parameter-utils.js'
+import { setListOptions } from './utils/list-utils.js'
 
 function getCodecList(source, codecs) {
   if (source === 'browser') return browserCodecList(codecs)
