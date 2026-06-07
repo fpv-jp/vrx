@@ -77,7 +77,72 @@ Alpine.store('menu', {
   grayscale: false,
   mute: false,
   recording: false,
+
+  selectedFont: "'Share Tech Mono', monospace",
+  fontOptions: [
+    { value: "'Share Tech Mono', monospace", text: 'Share Tech Mono' },
+    { value: "'Fira Code', monospace", text: 'Fira Code' },
+    { value: "'JetBrains Mono', monospace", text: 'JetBrains Mono' },
+    { value: "'VT323', monospace", text: 'VT323' },
+  ],
 })
+
+Alpine.data('xSelect', ({ model, storeOptions, options: staticOpts, onChange, placeholder, formDisabled: useFormDisabled = false, valueKey = 'value', textKey = 'text' }) => ({
+  open: false,
+  triggerRect: null,
+
+  init() {
+    this._closeOnScroll = () => { this.open = false }
+    window.addEventListener('scroll', this._closeOnScroll, true)
+  },
+
+  destroy() {
+    window.removeEventListener('scroll', this._closeOnScroll, true)
+  },
+
+  get _rawOptions() {
+    return storeOptions ? (Alpine.store('menu')[storeOptions] || []) : (staticOpts || [])
+  },
+
+  get options() {
+    const mapped = this._rawOptions.map(o => ({ value: o[valueKey], text: o[textKey] }))
+    return placeholder ? [{ value: 'none', text: placeholder }, ...mapped] : mapped
+  },
+
+  get currentText() {
+    const val = Alpine.store('menu')[model]
+    const found = this.options.find(o => String(o.value) === String(val))
+    return found ? found.text : (placeholder || '—')
+  },
+
+  get disabled() {
+    return useFormDisabled && (Alpine.store('menu').formDisabled ?? false)
+  },
+
+  get listStyle() {
+    if (!this.triggerRect) return ''
+    const { bottom, left, width } = this.triggerRect
+    return `position:fixed; top:${bottom + 1}px; left:${left}px; min-width:${width}px;`
+  },
+
+  toggle(triggerEl) {
+    if (this.disabled) return
+    if (!this.open) {
+      this.triggerRect = triggerEl.getBoundingClientRect()
+    }
+    this.open = !this.open
+  },
+
+  select(val) {
+    Alpine.store('menu')[model] = val
+    this.open = false
+    if (onChange) window.dispatchEvent(new CustomEvent(onChange))
+  },
+
+  isSelected(val) {
+    return String(Alpine.store('menu')[model]) === String(val)
+  },
+}))
 
 Alpine.start()
 
