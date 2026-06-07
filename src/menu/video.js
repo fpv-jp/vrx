@@ -126,7 +126,11 @@ function initCaptureList() {
 }
 
 export function initVideoList() {
-  const { source, codecs } = Alpine.store('menu').message
+  const store = Alpine.store('menu')
+  const { source, codecs } = store.message
   setListOptions('video_codec', 'video_codec_options', getCodecList(source, codecs.video))
+  if (source === 'browser') {
+    store.video_codec_hidden = false
+  }
   initCaptureList()
 }

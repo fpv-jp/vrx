@@ -2,6 +2,7 @@
 
 import './style.css'
 import Alpine from 'alpinejs'
+import Constants from './constants.js'
 
 Alpine.store('menu', {
   sender: 'none',
@@ -77,12 +78,95 @@ Alpine.store('menu', {
   grayscale: false,
   mute: false,
   recording: false,
+
+  selectedColor: 'green',
+  colorOptions: [
+    { value: 'green', text: 'Green'  },
+    { value: 'amber', text: 'Amber'  },
+    { value: 'cyan',  text: 'Cyan'   },
+    { value: 'white', text: 'White'  },
+    { value: 'red',   text: 'Red'    },
+  ],
+
+  selectedFont: "'Share Tech Mono', monospace",
+  fontOptions: [
+    { value: "'Share Tech Mono', monospace", text: 'Share Tech Mono' },
+    { value: "'Fira Code', monospace", text: 'Fira Code' },
+    { value: "'JetBrains Mono', monospace", text: 'JetBrains Mono' },
+    { value: "'VT323', monospace", text: 'VT323' },
+  ],
 })
+
+Alpine.data('xSelect', ({ model, storeOptions, options: staticOpts, onChange, placeholder, formDisabled: useFormDisabled = false, valueKey = 'value', textKey = 'text' }) => ({
+  open: false,
+  triggerRect: null,
+
+  init() {
+    this._closeOnScroll = (e) => {
+      if (this.$el.contains(e.target)) return
+      this.open = false
+    }
+    window.addEventListener('scroll', this._closeOnScroll, true)
+  },
+
+  destroy() {
+    window.removeEventListener('scroll', this._closeOnScroll, true)
+  },
+
+  get _rawOptions() {
+    return storeOptions ? (Alpine.store('menu')[storeOptions] || []) : (staticOpts || [])
+  },
+
+  get options() {
+    const mapped = this._rawOptions.map(o => ({ value: o[valueKey], text: o[textKey] }))
+    return placeholder ? [{ value: 'none', text: placeholder }, ...mapped] : mapped
+  },
+
+  get currentText() {
+    const val = Alpine.store('menu')[model]
+    const found = this.options.find(o => String(o.value) === String(val))
+    return found ? found.text : (placeholder || '—')
+  },
+
+  get disabled() {
+    return useFormDisabled && (Alpine.store('menu').formDisabled ?? false)
+  },
+
+  get listStyle() {
+    if (!this.triggerRect) return ''
+    const { bottom, left, width } = this.triggerRect
+    return `position:fixed; top:${bottom + 1}px; left:${left}px; min-width:${width}px;`
+  },
+
+  toggle(triggerEl) {
+    if (this.disabled) return
+    if (!this.open) {
+      this.triggerRect = triggerEl.getBoundingClientRect()
+    }
+    this.open = !this.open
+  },
+
+  select(val) {
+    Alpine.store('menu')[model] = val
+    this.open = false
+    if (onChange) window.dispatchEvent(new CustomEvent(onChange))
+  },
+
+  isSelected(val) {
+    return String(Alpine.store('menu')[model]) === String(val)
+  },
+}))
 
 Alpine.start()
 
+const _msgTypeNames = {}
+for (const [k, v] of Object.entries(Constants.SENDER))   _msgTypeNames[v] = `SENDER_${k}`
+for (const [k, v] of Object.entries(Constants.RECEIVER)) _msgTypeNames[v] = `RECEIVER_${k}`
+const _msgName = (type) => _msgTypeNames[type] ?? String(type)
+
 WebSocket.prototype.originalSend = WebSocket.prototype.send
 WebSocket.prototype.send = function (type, ws1Id, ws2Id, data) {
+  if (Number.isFinite(type)) console.info('<<<', type, _msgName(type))
   this.originalSend(JSON.stringify({ type, ws1Id, ws2Id, ...data }))
 }
 
@@ -135,7 +219,9 @@ export const SignalingManager = {
     ws.addEventListener('open', () => {
       console.info('WebSocket connected')
       ws.addEventListener('message', ({ data }) => {
-        SenderManager.handleSignalingMessage(ws, JSON.parse(data))
+        const message = JSON.parse(data)
+        if (Number.isFinite(message.type)) console.info('>>>', message.type, _msgName(message.type))
+        SenderManager.handleSignalingMessage(ws, message)
       })
     })
   },
@@ -152,7 +238,9 @@ export const SignalingManager = {
     ws.addEventListener('open', () => {
       console.info('WebSocket connected')
       ws.addEventListener('message', ({ data }) => {
-        ReceiverManager.handleSignalingMessage(ws, JSON.parse(data))
+        const message = JSON.parse(data)
+        if (Number.isFinite(message.type)) console.info('>>>', message.type, _msgName(message.type))
+        ReceiverManager.handleSignalingMessage(ws, message)
       })
     })
   },

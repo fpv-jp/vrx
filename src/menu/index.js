@@ -77,8 +77,6 @@ export function setMediaDeviceList(message) {
     store.video_mimetype_show = false
     store.audio_mimetype_show = false
   }
-
-  store.connectionDisabled = true
 }
 
 export function connectionEstablishment() {
@@ -105,6 +103,7 @@ export function initialize() {
   store.showAudio = false
   store.showConnection = false
   store.showSubControl = false
+  store.showDebug = true
 
   store.network_interface = 'none'
   store.network_options = []

@@ -12,6 +12,8 @@ let offer, answer
 let RemoteVideo, RemoteVideoContext, pixelRatio
 let rendering = false
 let isRecording = false
+let currentDisplayWidth = 0
+let currentDisplayHeight = 0
 
 //--------------------------------------------------------------------------
 // PC1 Encoder
@@ -50,6 +52,7 @@ const encodeAudio = (frame, controller) => {
 const videoDecoder = new VideoDecoder({
   output: async (frame) => {
     const recordFrame = isRecording ? frame.clone() : null
+    const { displayWidth, displayHeight } = frame
 
     if (rendering) {
       frame.close()
@@ -65,6 +68,13 @@ const videoDecoder = new VideoDecoder({
         rendering = false
       }
       if (bitmap) {
+        if (displayWidth !== currentDisplayWidth || displayHeight !== currentDisplayHeight) {
+          currentDisplayWidth = displayWidth
+          currentDisplayHeight = displayHeight
+          RemoteVideo.width = displayWidth
+          RemoteVideo.height = displayHeight
+          postMessage({ type: PostMessageType.KeyFrame, width: displayWidth, height: displayHeight })
+        }
         RemoteVideoContext.transferFromImageBitmap(bitmap)
         bitmap.close()
       }
@@ -80,32 +90,13 @@ const videoDecoder = new VideoDecoder({
 // --- Receiver Decode Video ----------------------------
 const decodeVideo = (frame, controller) => {
   if (frame.type === 'key') {
-    const { width, height, mimeType, payloadType } = frame.getMetadata()
-
+    const { mimeType, payloadType } = frame.getMetadata()
     const codec = inferCodecString(answer.sdp, mimeType, payloadType)
-    // console.log(`Decode keyFrame: ${mimeType} ${width}x${height} ${codec}`)
     try {
       videoDecoder.configure({ codec })
     } catch (err) {
       console.error(err)
     }
-
-    // RemoteVideo.width = width * pixelRatio
-    // RemoteVideo.height = height * pixelRatio
-    RemoteVideo.width = width
-    RemoteVideo.height = height
-
-    postMessage({
-      //
-      type: PostMessageType.KeyFrame,
-      width,
-      height,
-      mimeType,
-      payloadType,
-      codec,
-    })
-
-    // RemoteVideoContext2D.scale(pixelRatio, pixelRatio)
   }
 
   let { type, timestamp, data } = frame
