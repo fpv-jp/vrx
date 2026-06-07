@@ -288,6 +288,10 @@
                             @change="window.dispatchEvent(new CustomEvent('menu:mute-change'))"> Mute</label>
             </div>
             <div class="field">
+              <label><input type="checkbox" x-model="$store.menu.showDebug"
+                            @change="window.dispatchEvent(new CustomEvent('menu:debug-change'))"> Debug</label>
+            </div>
+            <div class="field">
               <button @click="window.dispatchEvent(new CustomEvent('menu:fullscreen-click'))">Fullscreen</button>
             </div>
             <div class="field">

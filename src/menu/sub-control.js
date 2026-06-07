@@ -12,6 +12,10 @@ window.addEventListener('menu:mute-change', () => {
   if (ReceiverState.audio) ReceiverState.audio.muted = Alpine.store('menu').mute
 })
 
+window.addEventListener('menu:debug-change', () => {
+  ReceiverState.headUpDisplay.setDebugVisible(Alpine.store('menu').showDebug)
+})
+
 window.addEventListener('menu:fullscreen-click', () => {
   const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement
   if (isFullscreen) {

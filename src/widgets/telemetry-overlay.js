@@ -519,6 +519,7 @@ export default (hud) => {
     pendingType: null,
     dirty: false,
     animationId: null,
+    showDebug: true,
   }
 
   const TelemetryOverlay = {
@@ -988,9 +989,18 @@ export default (hud) => {
       }
     },
 
+    // setDebugVisible
+    // ---------------------------
+    setDebugVisible(visible) {
+      state.showDebug = visible
+      state.dirty = true
+    },
+
     // drawDebugParameter
     // ---------------------------
     drawDebugParameter(telemetryData) {
+      if (!state.showDebug) return
+
       let current = 'Debug'
 
       let filtered = Object.fromEntries(Object.entries(telemetryData).filter(([key]) => key !== 'telemetryInfo' && key !== 'videoText'))
@@ -1024,7 +1034,10 @@ export default (hud) => {
           lines.push(`${paddedKey}:`)
           this.collectLines(value, lines, indent + 1)
         } else {
-          lines.push(`${paddedKey}: ${value}`)
+          const formatted = typeof value === 'number' && !Number.isInteger(value)
+            ? value.toFixed(4)
+            : value
+          lines.push(`${paddedKey}: ${formatted}`)
         }
       })
     },
