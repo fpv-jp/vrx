@@ -43,7 +43,116 @@ body {
   top: 10px;
   left: 10px;
   z-index: 11;
-  width: 300px;
+  width: 320px;
+  background: rgba(0, 0, 0, 0.82);
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px 8px;
+  max-height: 90vh;
+  overflow-y: auto;
+  font-size: 11px;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+#AlpineMenu::-webkit-scrollbar { width: 4px; }
+#AlpineMenu::-webkit-scrollbar-track { background: transparent; }
+#AlpineMenu::-webkit-scrollbar-thumb { background: rgba(0, 255, 0, 0.3); border-radius: 2px; }
+
+/* ─── details / summary ─── */
+#AlpineMenu details {
+  margin-top: 4px;
+}
+#AlpineMenu summary {
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(0, 255, 0, 0.7);
+  padding: 3px 0 2px;
+  border-bottom: 1px solid rgba(0, 255, 0, 0.15);
+  margin-bottom: 3px;
+  user-select: none;
+}
+#AlpineMenu summary:hover {
+  color: rgba(0, 255, 0, 1);
+}
+
+/* ─── field row ─── */
+.field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+}
+.field > label:not(:has(input)) {
+  flex-shrink: 0;
+  width: 5.5em;
+  font-size: 10px;
+  color: rgba(0, 255, 0, 0.55);
+}
+.field > select,
+.field > input[type="text"],
+.field > input[type="range"] {
+  flex: 1;
+  min-width: 0;
+}
+.field > button {
+  flex: 1;
+}
+
+/* ─── controls ─── */
+#AlpineMenu select,
+#AlpineMenu input[type="text"] {
+  background: rgba(0, 12, 0, 0.85);
+  color: rgba(0, 255, 0, 1);
+  border: 1px solid rgba(0, 255, 0, 0.28);
+  border-radius: 2px;
+  font-family: monospace;
+  font-size: 10px;
+  padding: 1px 4px;
+  box-sizing: border-box;
+  outline: none;
+}
+#AlpineMenu select:focus,
+#AlpineMenu input[type="text"]:focus {
+  border-color: rgba(0, 255, 0, 0.65);
+}
+#AlpineMenu input[type="text"][readonly] {
+  opacity: 0.55;
+  border-style: dashed;
+}
+#AlpineMenu input[type="range"] {
+  accent-color: #00ff00;
+}
+#AlpineMenu input[type="checkbox"] {
+  accent-color: #00ff00;
+  margin: 0;
+}
+
+#AlpineMenu button {
+  background: rgba(0, 12, 0, 0.85);
+  color: rgba(0, 255, 0, 1);
+  border: 1px solid rgba(0, 255, 0, 0.32);
+  border-radius: 2px;
+  font-family: monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+#AlpineMenu button:hover:not(:disabled) {
+  background: rgba(0, 255, 0, 0.1);
+}
+#AlpineMenu button:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+#AlpineMenu hr {
+  border: none;
+  border-top: 1px solid rgba(0, 255, 0, 0.15);
+  margin: 4px 0;
 }
 
 /* ---------- 中央全面 ---------- */
