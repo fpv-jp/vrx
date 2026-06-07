@@ -2,6 +2,7 @@
 
 import './style.css'
 import Alpine from 'alpinejs'
+import Constants from './constants.js'
 
 Alpine.store('menu', {
   sender: 'none',
@@ -158,8 +159,14 @@ Alpine.data('xSelect', ({ model, storeOptions, options: staticOpts, onChange, pl
 
 Alpine.start()
 
+const _msgTypeNames = {}
+for (const [k, v] of Object.entries(Constants.SENDER))   _msgTypeNames[v] = `SENDER_${k}`
+for (const [k, v] of Object.entries(Constants.RECEIVER)) _msgTypeNames[v] = `RECEIVER_${k}`
+const _msgName = (type) => _msgTypeNames[type] ?? String(type)
+
 WebSocket.prototype.originalSend = WebSocket.prototype.send
 WebSocket.prototype.send = function (type, ws1Id, ws2Id, data) {
+  if (Number.isFinite(type)) console.info('<<<', type, _msgName(type))
   this.originalSend(JSON.stringify({ type, ws1Id, ws2Id, ...data }))
 }
 
@@ -212,7 +219,9 @@ export const SignalingManager = {
     ws.addEventListener('open', () => {
       console.info('WebSocket connected')
       ws.addEventListener('message', ({ data }) => {
-        SenderManager.handleSignalingMessage(ws, JSON.parse(data))
+        const message = JSON.parse(data)
+        if (Number.isFinite(message.type)) console.info('>>>', message.type, _msgName(message.type))
+        SenderManager.handleSignalingMessage(ws, message)
       })
     })
   },
@@ -229,7 +238,9 @@ export const SignalingManager = {
     ws.addEventListener('open', () => {
       console.info('WebSocket connected')
       ws.addEventListener('message', ({ data }) => {
-        ReceiverManager.handleSignalingMessage(ws, JSON.parse(data))
+        const message = JSON.parse(data)
+        if (Number.isFinite(message.type)) console.info('>>>', message.type, _msgName(message.type))
+        ReceiverManager.handleSignalingMessage(ws, message)
       })
     })
   },
