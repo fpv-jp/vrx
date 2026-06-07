@@ -31,8 +31,7 @@ export default async function CreateVtxDataChannel(pc) {
           break
 
         case Command.PING:
-          let cmd = Command.PONG
-          cmd.send(JSON.stringify({ cmd }))
+          cmd.send(JSON.stringify({ cmd: Command.PONG }))
           break
 
         // case Command.SEND_KEYFRAME_REQUEST:

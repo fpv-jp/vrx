@@ -275,7 +275,7 @@ const ConnectionMonitoring = {
 
       case 'data-channel':
         const { label, state, messages } = r
-        let channelInfo = `Ping ${MonitorState.ping} ms`
+        let channelInfo = `Ping ${MonitorState.ping ?? '--'} ms`
         if (label !== 'CMD') {
           channelInfo = `${state} (${messages}Hz)`
         }
