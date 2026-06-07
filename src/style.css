@@ -1,12 +1,15 @@
 :root {
   --ui-font: 'Share Tech Mono', monospace;
+  --ui-r: 0;
+  --ui-g: 255;
+  --ui-b: 0;
 }
 
 body {
   margin: 0;
   height: 100vh;
   background: rgba(50, 50, 50, 1);
-  color: rgba(0, 255, 0, 1);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
 
 .receiver-container {
@@ -39,7 +42,7 @@ body {
   z-index: 10;
   pointer-events: auto;
   font-family: var(--ui-font);
-  color: rgba(0, 255, 0, 1);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
 
 /* ---------- 左上 ---------- */
@@ -49,7 +52,7 @@ body {
   z-index: 11;
   width: 320px;
   background: rgba(30, 30, 30, 0.3);
-  border: 1px solid rgba(0, 255, 0, 0.3);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.3);
   border-radius: 4px;
   padding: 4px 8px 8px;
   max-height: 90vh;
@@ -61,7 +64,7 @@ body {
 
 #AlpineMenu::-webkit-scrollbar { width: 4px; }
 #AlpineMenu::-webkit-scrollbar-track { background: transparent; }
-#AlpineMenu::-webkit-scrollbar-thumb { background: rgba(0, 255, 0, 0.3); border-radius: 2px; }
+#AlpineMenu::-webkit-scrollbar-thumb { background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.3); border-radius: 2px; }
 
 /* ─── details / summary ─── */
 #AlpineMenu details {
@@ -73,14 +76,14 @@ body {
   font-weight: bold;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(0, 255, 0, 0.7);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.7);
   padding: 3px 0 2px;
-  border-bottom: 1px solid rgba(0, 255, 0, 0.15);
+  border-bottom: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.15);
   margin-bottom: 3px;
   user-select: none;
 }
 #AlpineMenu summary:hover {
-  color: rgba(0, 255, 0, 1);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
 
 /* ─── field row ─── */
@@ -94,7 +97,7 @@ body {
   flex-shrink: 0;
   width: 5.5em;
   font-size: 12px;
-  color: rgba(0, 255, 0, 0.55);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.55);
 }
 .field > select,
 .field > input[type="text"],
@@ -119,8 +122,8 @@ body {
   align-items: center;
   width: 100%;
   background: rgba(0, 12, 0, 0.85);
-  color: rgba(0, 255, 0, 1);
-  border: 1px solid rgba(0, 255, 0, 0.28);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.28);
   border-radius: 2px;
   font-family: var(--ui-font);
   font-size: 12px;
@@ -132,7 +135,7 @@ body {
 }
 
 .x-select-trigger:focus {
-  border-color: rgba(0, 255, 0, 0.65);
+  border-color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.65);
   outline: none;
 }
 
@@ -160,7 +163,7 @@ body {
   margin: 0;
   padding: 2px 0;
   background: rgba(0, 18, 0, 0.97);
-  border: 1px solid rgba(0, 255, 0, 0.4);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.4);
   border-radius: 2px;
   max-height: 220px;
   overflow-y: auto;
@@ -168,25 +171,25 @@ body {
 
 .x-select-list::-webkit-scrollbar { width: 4px; }
 .x-select-list::-webkit-scrollbar-track { background: transparent; }
-.x-select-list::-webkit-scrollbar-thumb { background: rgba(0, 255, 0, 0.3); border-radius: 2px; }
+.x-select-list::-webkit-scrollbar-thumb { background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.3); border-radius: 2px; }
 
 .x-select-option {
   padding: 3px 8px;
   font-family: var(--ui-font);
   font-size: 12px;
-  color: rgba(0, 255, 0, 0.85);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.85);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .x-select-option:hover {
-  background: rgba(0, 255, 0, 0.12);
-  color: rgba(0, 255, 0, 1);
+  background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.12);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
 
 .x-select-cur {
-  color: rgba(0, 255, 0, 1);
-  background: rgba(0, 255, 0, 0.07);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.07);
 }
 
 .x-select-cur::before {
@@ -196,8 +199,8 @@ body {
 /* ─── controls ─── */
 #AlpineMenu input[type="text"] {
   background: rgba(0, 12, 0, 0.85);
-  color: rgba(0, 255, 0, 1);
-  border: 1px solid rgba(0, 255, 0, 0.28);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.28);
   border-radius: 2px;
   font-family: var(--ui-font);
   font-size: 12px;
@@ -207,7 +210,7 @@ body {
 }
 #AlpineMenu select:focus,
 #AlpineMenu input[type="text"]:focus {
-  border-color: rgba(0, 255, 0, 0.65);
+  border-color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.65);
 }
 #AlpineMenu input[type="text"][readonly] {
   opacity: 0.55;
@@ -223,8 +226,8 @@ body {
 
 #AlpineMenu button {
   background: rgba(0, 12, 0, 0.85);
-  color: rgba(0, 255, 0, 1);
-  border: 1px solid rgba(0, 255, 0, 0.32);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.32);
   border-radius: 2px;
   font-family: var(--ui-font);
   font-size: 12px;
@@ -232,7 +235,7 @@ body {
   cursor: pointer;
 }
 #AlpineMenu button:hover:not(:disabled) {
-  background: rgba(0, 255, 0, 0.1);
+  background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.1);
 }
 #AlpineMenu button:disabled {
   opacity: 0.32;
@@ -241,7 +244,7 @@ body {
 
 #AlpineMenu hr {
   border: none;
-  border-top: 1px solid rgba(0, 255, 0, 0.15);
+  border-top: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.15);
   margin: 4px 0;
 }
 
@@ -257,7 +260,7 @@ body {
   padding: 10px 20px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 255, 0, 1);
+  border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
 
 #HeadUpDisplay {
@@ -340,13 +343,13 @@ body {
 
 #NetworkMonitoring svg {
   font: 10px sans-serif;
-  fill: rgba(0, 255, 0, 1);
+  fill: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
 
 #NetworkMonitoring .chart-axis path,
 #NetworkMonitoring .chart-axis line {
   fill: none;
-  stroke: rgba(0, 255, 0, 1);
+  stroke: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
   shape-rendering: crispEdges;
 }
 
@@ -356,26 +359,26 @@ body {
 
 #NetworkMonitoring .chart-line {
   fill: none;
-  stroke: rgba(0, 255, 0, 0.8);
+  stroke: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.8);
   stroke-width: 0.8px;
 }
 
 #NetworkMonitoring .chart-bar {
-  fill: rgba(0, 255, 0, 0.6);
+  fill: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.6);
 }
 
 #NetworkMonitoring .chart-area {
-  fill: rgba(0, 255, 0, 0.4);
+  fill: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.4);
 }
 
 #NetworkMonitoring .chart-grid-x {
-  stroke: rgba(0, 255, 0, 0.5);
+  stroke: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.5);
   stroke-width: 0.5;
   stroke-dasharray: 3, 6;
 }
 
 #NetworkMonitoring .chart-grid-y {
-  stroke: rgba(0, 255, 0, 0.8);
+  stroke: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.8);
   stroke-width: 0.5;
 }
 

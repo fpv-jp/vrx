@@ -78,6 +78,15 @@ Alpine.store('menu', {
   mute: false,
   recording: false,
 
+  selectedColor: 'green',
+  colorOptions: [
+    { value: 'green', text: 'Green'  },
+    { value: 'amber', text: 'Amber'  },
+    { value: 'cyan',  text: 'Cyan'   },
+    { value: 'white', text: 'White'  },
+    { value: 'red',   text: 'Red'    },
+  ],
+
   selectedFont: "'Share Tech Mono', monospace",
   fontOptions: [
     { value: "'Share Tech Mono', monospace", text: 'Share Tech Mono' },
@@ -92,7 +101,10 @@ Alpine.data('xSelect', ({ model, storeOptions, options: staticOpts, onChange, pl
   triggerRect: null,
 
   init() {
-    this._closeOnScroll = () => { this.open = false }
+    this._closeOnScroll = (e) => {
+      if (this.$el.contains(e.target)) return
+      this.open = false
+    }
     window.addEventListener('scroll', this._closeOnScroll, true)
   },
 

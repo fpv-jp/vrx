@@ -996,6 +996,12 @@ export default (hud) => {
       state.dirty = true
     },
 
+    setColor(r, g, b) {
+      Styles.green = `rgba(${r}, ${g}, ${b}, 1)`
+      Styles.greenAlpha = `rgba(${r}, ${g}, ${b}, 0.2)`
+      state.dirty = true
+    },
+
     setFont(fontFamily) {
       Styles.font = `18px ${fontFamily}`
       Styles.fontBold = `bold 20px ${fontFamily}`

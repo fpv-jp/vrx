@@ -24,6 +24,18 @@
           <summary>Menu</summary>
 
           <div class="field">
+            <label>Color</label>
+            <div x-data="xSelect({ model: 'selectedColor', storeOptions: 'colorOptions', onChange: 'menu:color-change' })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
+              <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
+              <ul class="x-select-list" x-show="open" :style="listStyle">
+                <template x-for="opt in options" :key="opt.value">
+                  <li @click="select(opt.value)" class="x-select-option" :class="{'x-select-cur':isSelected(opt.value)}" x-text="opt.text"></li>
+                </template>
+              </ul>
+            </div>
+          </div>
+
+          <div class="field">
             <label>Font</label>
             <div x-data="xSelect({ model: 'selectedFont', storeOptions: 'fontOptions', onChange: 'menu:font-change' })" class="x-select" :class="{'x-select-disabled':disabled}" @click.outside="open=false">
               <button type="button" class="x-select-trigger" @click="toggle($el)"><span class="x-select-text" x-text="currentText"></span><span class="x-select-arrow">▾</span></button>
