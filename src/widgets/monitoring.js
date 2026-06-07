@@ -294,9 +294,8 @@ const ConnectionMonitoring = {
     // ping
     let { cmd } = ReceiverState
     if (cmd && cmd.readyState == 'open') {
-      let cmd = Command.PING
       MonitorState.pingStartTime = window.performance.now()
-      cmd.send(JSON.stringify({ cmd }))
+      cmd.send(JSON.stringify({ cmd: Command.PING }))
     }
 
     ReceiverState.pc.getStats(null).then((stats) => {
