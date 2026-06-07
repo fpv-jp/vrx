@@ -14,11 +14,11 @@ const Styles = {
 
   red: 'red',
   white: 'rgba(255, 255, 255, 1)',
-  font: '18px monospace',
-  fontBold: 'bold 20px monospace',
+  font: "18px 'Share Tech Mono', monospace",
+  fontBold: "bold 20px 'Share Tech Mono', monospace",
 
   fontSmall: '11px Arial',
-  fontSmall2: '11px monospace',
+  fontSmall2: "11px 'Share Tech Mono', monospace",
 
   fontBattery: 'bold 12px Arial',
   fontVideoText: '12px Arial',
@@ -431,7 +431,7 @@ const TelemetryRenderer = {
 
     // H label
     ctx.fillStyle = Styles.cyaan
-    ctx.font = `bold ${Math.round(radius * 1.1)}px monospace`
+    ctx.font = `bold ${Math.round(radius * 1.1)}px 'Share Tech Mono', monospace`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText('H', center.x, center.y)
@@ -993,6 +993,13 @@ export default (hud) => {
     // ---------------------------
     setDebugVisible(visible) {
       state.showDebug = visible
+      state.dirty = true
+    },
+
+    setFont(fontFamily) {
+      Styles.font = `18px ${fontFamily}`
+      Styles.fontBold = `bold 20px ${fontFamily}`
+      Styles.fontSmall2 = `11px ${fontFamily}`
       state.dirty = true
     },
 

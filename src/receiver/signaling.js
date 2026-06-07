@@ -48,6 +48,7 @@ export default async function comingSignalingMessage(message) {
     case RECEIVER.SESSION_ID_ISSUANCE:
       ReceiverState.ws.id = message.sessionId
       console.log(`assigned session id : ${message.sessionId}`)
+      break
 
     case RECEIVER.CHANGE_SENDER_ENTRIES:
       Menu.setSenderEntryList(message.senders)

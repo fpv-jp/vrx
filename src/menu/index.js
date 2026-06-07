@@ -104,6 +104,7 @@ export function initialize() {
   store.showConnection = false
   store.showSubControl = false
   store.showDebug = true
+  store.selectedFont = "'Share Tech Mono', monospace"
 
   store.network_interface = 'none'
   store.network_options = []

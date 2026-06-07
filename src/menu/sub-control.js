@@ -16,6 +16,12 @@ window.addEventListener('menu:debug-change', () => {
   ReceiverState.headUpDisplay.setDebugVisible(Alpine.store('menu').showDebug)
 })
 
+window.addEventListener('menu:font-change', () => {
+  const fontFamily = Alpine.store('menu').selectedFont
+  document.documentElement.style.setProperty('--ui-font', fontFamily)
+  ReceiverState.headUpDisplay.setFont(fontFamily)
+})
+
 window.addEventListener('menu:fullscreen-click', () => {
   const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement
   if (isFullscreen) {
