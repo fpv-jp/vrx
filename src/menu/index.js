@@ -77,8 +77,6 @@ export function setMediaDeviceList(message) {
     store.video_mimetype_show = false
     store.audio_mimetype_show = false
   }
-
-  store.connectionDisabled = true
 }
 
 export function connectionEstablishment() {
