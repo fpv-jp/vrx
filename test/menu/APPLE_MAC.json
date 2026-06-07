@@ -1,0 +1,325 @@
+{
+    "type": 202,
+    "ws1Id": "3Z9K-hQR",
+    "ws2Id": "2rlAzvL6",
+    "source": "gstreamer",
+    "platform": "APPLE_MAC",
+    "network": [
+        {
+            "name": "lo0",
+            "address": "127.0.0.1",
+            "up": true,
+            "running": true
+        },
+        {
+            "name": "gif0",
+            "up": false,
+            "running": false
+        },
+        {
+            "name": "stf0",
+            "up": false,
+            "running": false
+        },
+        {
+            "name": "XHC20",
+            "up": false,
+            "running": false
+        },
+        {
+            "name": "XHC1",
+            "up": false,
+            "running": false
+        },
+        {
+            "name": "XHC0",
+            "up": false,
+            "running": false
+        },
+        {
+            "name": "VHC128",
+            "up": false,
+            "running": false
+        },
+        {
+            "name": "en5",
+            "up": true,
+            "running": true
+        },
+        {
+            "name": "en3",
+            "up": true,
+            "running": true
+        },
+        {
+            "name": "en4",
+            "up": true,
+            "running": true
+        },
+        {
+            "name": "en1",
+            "up": true,
+            "running": true
+        },
+        {
+            "name": "en2",
+            "up": true,
+            "running": true
+        },
+        {
+            "name": "ap1",
+            "up": true,
+            "running": true
+        },
+        {
+            "name": "en0",
+            "address": "192.168.86.56",
+            "up": true,
+            "running": true
+        }
+    ],
+    "devices": [
+        {
+            "name": "FaceTime HDカメラ（内蔵）",
+            "klass": "Video/Source",
+            "caps": [
+                "video/x-raw(memory:GLMemory), width=1280, height=720, format={ UYVY, YUY2 }, framerate={ 1/1, 2/1, 3/1, 4/1, 5/1, 6/1, 7/1, 8/1, 9/1, 10/1, 11/1, 12/1, 13/1, 14/1, 15/1, 16/1, 17/1, 18/1, 19/1, 20/1, 21/1, 22/1, 23/1, 24/1, 25/1, 26/1, 27/1, 28/1, 29/1, 30/1 }, texture-target=rectangle",
+                "video/x-raw(memory:GLMemory), width=640, height=480, format={ UYVY, YUY2 }, framerate={ 1/1, 2/1, 3/1, 4/1, 5/1, 6/1, 7/1, 8/1, 9/1, 10/1, 11/1, 12/1, 13/1, 14/1, 15/1, 16/1, 17/1, 18/1, 19/1, 20/1, 21/1, 22/1, 23/1, 24/1, 25/1, 26/1, 27/1, 28/1, 29/1, 30/1 }, texture-target=rectangle",
+                "video/x-raw, width=1280, height=720, format={ UYVY, YUY2, NV12, ARGB, BGRA }, framerate={ 1/1, 2/1, 3/1, 4/1, 5/1, 6/1, 7/1, 8/1, 9/1, 10/1, 11/1, 12/1, 13/1, 14/1, 15/1, 16/1, 17/1, 18/1, 19/1, 20/1, 21/1, 22/1, 23/1, 24/1, 25/1, 26/1, 27/1, 28/1, 29/1, 30/1 }",
+                "video/x-raw, width=640, height=480, format={ UYVY, YUY2, NV12, ARGB, BGRA }, framerate={ 1/1, 2/1, 3/1, 4/1, 5/1, 6/1, 7/1, 8/1, 9/1, 10/1, 11/1, 12/1, 13/1, 14/1, 15/1, 16/1, 17/1, 18/1, 19/1, 20/1, 21/1, 22/1, 23/1, 24/1, 25/1, 26/1, 27/1, 28/1, 29/1, 30/1 }"
+            ],
+            "properties": {
+                "avf.has_flash": "false (gboolean)",
+                "avf.has_torch": "false (gboolean)",
+                "avf.manufacturer": "Apple Inc.",
+                "device.api": "avf",
+                "avf.model_id": "UVC Camera VendorID_1452 ProductID_34068",
+                "avf.unique_id": "0x8020000005ac8514"
+            },
+            "launch": "avfvideosrc device-index=0 ! ..."
+        },
+        {
+            "name": "‎iPhone 16 Pro Maxのカメラ",
+            "klass": "Video/Source",
+            "caps": [
+                "video/x-raw(memory:GLMemory), width=1920, height={ 1080, 1440 }, format={ UYVY, YUY2 }, framerate=[ 1/1, 60/1 ], texture-target=rectangle",
+                "video/x-raw(memory:GLMemory), width=1280, height=720, format={ UYVY, YUY2 }, framerate=[ 1/1, 60/1 ], texture-target=rectangle",
+                "video/x-raw(memory:GLMemory), width=640, height=480, format={ UYVY, YUY2 }, framerate=[ 1/1, 60/1 ], texture-target=rectangle",
+                "video/x-raw, width=1920, height={ 1080, 1440 }, format={ UYVY, YUY2, NV12, ARGB, BGRA }, framerate=[ 1/1, 60/1 ]",
+                "video/x-raw, width=1280, height=720, format={ UYVY, YUY2, NV12, ARGB, BGRA }, framerate=[ 1/1, 60/1 ]",
+                "video/x-raw, width=640, height=480, format={ UYVY, YUY2, NV12, ARGB, BGRA }, framerate=[ 1/1, 60/1 ]"
+            ],
+            "properties": {
+                "avf.has_flash": "true (gboolean)",
+                "avf.has_torch": "false (gboolean)",
+                "avf.manufacturer": "",
+                "device.api": "avf",
+                "avf.model_id": "iPhone17,2",
+                "avf.unique_id": "9909ACC9-553A-4416-A9A5-3FC100000001"
+            },
+            "launch": "avfvideosrc device-index=1 ! ..."
+        },
+        {
+            "name": "NoMachine Microphone Adapter",
+            "klass": "Audio/Source",
+            "caps": [
+                "audio/x-raw, format=F32LE, layout=interleaved, rate=44100, channels=2, channel-mask=0x0000000000000003",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=44100, channels=2, channel-mask=0x0000000000000003",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=44100, channels=1"
+            ],
+            "properties": {
+                "unique-id": "NMAudioMicDevice_UID",
+                "transport": "virt",
+                "is-default": "false (gboolean)"
+            },
+            "launch": "osxaudiosrc unique-id='NMAudioMicDevice_UID' ! ..."
+        },
+        {
+            "name": "NoMachine Audio Adapter",
+            "klass": "Audio/Source",
+            "caps": [
+                "audio/x-raw, format=F32LE, layout=interleaved, rate=44100, channels=2, channel-mask=0x0000000000000003",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=44100, channels=2, channel-mask=0x0000000000000003",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=44100, channels=1"
+            ],
+            "properties": {
+                "unique-id": "NMAudioDevice_UID",
+                "transport": "virt",
+                "is-default": "false (gboolean)"
+            },
+            "launch": "osxaudiosrc unique-id='NMAudioDevice_UID' ! ..."
+        },
+        {
+            "name": "Microsoft Teams Audio",
+            "klass": "Audio/Source",
+            "caps": [
+                "audio/x-raw, format=F32LE, layout=interleaved, rate=48000, channels=1",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=48000, channels=2, channel-mask=0x0000000000000003",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=48000, channels=1"
+            ],
+            "properties": {
+                "unique-id": "MSLoopbackDriverDevice_UID",
+                "transport": "virt",
+                "is-default": "false (gboolean)"
+            },
+            "launch": "osxaudiosrc unique-id='MSLoopbackDriverDevice_UID' ! ..."
+        },
+        {
+            "name": "MacBook Proのマイク",
+            "klass": "Audio/Source",
+            "caps": [
+                "audio/x-raw, format=F32LE, layout=interleaved, rate=48000, channels=1",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=48000, channels=2, channel-mask=0x0000000000000003",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=48000, channels=1"
+            ],
+            "properties": {
+                "unique-id": "BuiltInMicrophoneDevice",
+                "transport": "bltn",
+                "is-default": "false (gboolean)"
+            },
+            "launch": "osxaudiosrc unique-id=BuiltInMicrophoneDevice ! ..."
+        },
+        {
+            "name": "BlackHole 2ch",
+            "klass": "Audio/Source",
+            "caps": [
+                "audio/x-raw, format=F32LE, layout=interleaved, rate=48000, channels=2, channel-mask=0x0000000000000003",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=48000, channels=2, channel-mask=0x0000000000000003",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=48000, channels=1"
+            ],
+            "properties": {
+                "unique-id": "BlackHole2ch_UID",
+                "transport": "virt",
+                "is-default": "true (gboolean)"
+            },
+            "launch": "osxaudiosrc unique-id='BlackHole2ch_UID' ! ..."
+        },
+        {
+            "name": "BlackHole 16ch",
+            "klass": "Audio/Source",
+            "caps": [
+                "audio/x-raw, format=F32LE, layout=interleaved, rate=48000, channels=16, channel-mask=0x0000000000000000",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=48000, channels=16"
+            ],
+            "properties": {
+                "unique-id": "BlackHole16ch_UID",
+                "transport": "virt",
+                "is-default": "false (gboolean)"
+            },
+            "launch": "osxaudiosrc unique-id='BlackHole16ch_UID' ! ..."
+        },
+        {
+            "name": "‎iPhone 16 Pro Maxのマイク",
+            "klass": "Audio/Source",
+            "caps": [
+                "audio/x-raw, format=F32LE, layout=interleaved, rate=48000, channels=1",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=48000, channels=2, channel-mask=0x0000000000000003",
+                "audio/x-raw, format={ F64LE, F64BE, F32LE, F32BE, S32LE, S32BE, U32LE, U32BE, S24_32LE, S24_32BE, U24_32LE, U24_32BE, S24LE, S24BE, U24LE, U24BE, S20_32LE, S20_32BE, U20_32LE, U20_32BE, S20LE, S20BE, U20LE, U20BE, S18LE, S18BE, U18LE, U18BE, S16LE, S16BE, U16LE, U16BE, S8, U8 }, layout=interleaved, rate=48000, channels=1"
+            ],
+            "properties": {
+                "unique-id": "9909ACC9-553A-4416-A9A5-3FC100000003",
+                "transport": "ccwd",
+                "is-default": "false (gboolean)"
+            },
+            "launch": "osxaudiosrc unique-id='9909ACC9-553A-4416-A9A5-3FC100000003' ! ..."
+        }
+    ],
+    "codecs": {
+        "video": [
+            {
+                "name": "vp8enc",
+                "format": [
+                    "I420"
+                ],
+                "width": "[1,16383]",
+                "height": "[1,16383]",
+                "framerate": "[ 0/1, 2147483647/1 ]",
+                "mimeType": "video/x-raw"
+            },
+            {
+                "name": "vp9enc",
+                "format": [
+                    "I420",
+                    "YV12",
+                    "Y444",
+                    "I420_10LE",
+                    "I420_12LE",
+                    "I422_10LE",
+                    "I422_12LE",
+                    "Y444_10LE",
+                    "Y444_12LE"
+                ],
+                "width": "[1,2147483647]",
+                "height": "[1,2147483647]",
+                "framerate": "[ 0/1, 2147483647/1 ]",
+                "mimeType": "video/x-raw"
+            },
+            {
+                "name": "vtenc_h264_hw",
+                "format": [
+                    "AYUV64",
+                    "UYVY",
+                    "NV12",
+                    "I420",
+                    "P010_10LE",
+                    "ARGB64_BE",
+                    "RGBA64_LE"
+                ],
+                "width": "[1,2147483647]",
+                "height": "[1,2147483647]",
+                "framerate": "[ 0/1, 2147483647/1 ]",
+                "mimeType": "video/x-raw"
+            },
+            {
+                "name": "vtenc_h265_hw",
+                "format": [
+                    "AYUV64",
+                    "UYVY",
+                    "NV12",
+                    "I420",
+                    "P010_10LE",
+                    "ARGB64_BE",
+                    "RGBA64_LE"
+                ],
+                "width": "[1,2147483647]",
+                "height": "[1,2147483647]",
+                "framerate": "[ 0/1, 2147483647/1 ]",
+                "mimeType": "video/x-raw"
+            },
+            {
+                "name": "svtav1enc",
+                "format": [
+                    "I420",
+                    "I420_10LE"
+                ],
+                "width": "[64,16384]",
+                "height": "[64,8704]",
+                "framerate": "[ 0/1, 2147483647/1 ]",
+                "mimeType": "video/x-raw"
+            }
+        ],
+        "audio": [
+            {
+                "name": "mulawenc",
+                "format": [
+                    "S16LE"
+                ],
+                "layout": "interleaved",
+                "rate": "[8000,192000]",
+                "channels": "[1,2]",
+                "mimeType": "audio/x-raw"
+            },
+            {
+                "name": "opusenc",
+                "format": [
+                    "S16LE"
+                ],
+                "layout": "interleaved",
+                "rate": 48000,
+                "channels": "[1,255]",
+                "mimeType": "audio/x-raw"
+            }
+        ]
+    },
+    "flight_controllers": []
+}

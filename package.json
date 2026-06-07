@@ -24,7 +24,9 @@
     "build:public": "vite build --mode public",
     "build:private": "vite build --mode private",
     "preview": "vite preview --host",
-    "fmt": "prettier --write \"./**/*.{js,css,html}\""
+    "fmt": "prettier --write \"./**/*.{js,css,html}\"",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "alpinejs": "^3.15.12",
@@ -32,7 +34,8 @@
   },
   "devDependencies": {
     "prettier": "^3.8.2",
-    "vite": "^8.0.8"
+    "vite": "^8.0.8",
+    "vitest": "^4.1.8"
   },
   "prettier": {
     "trailingComma": "all",
