@@ -188,9 +188,7 @@ const RtcStats = {
 
       case 'data-channel': {
         const { label, state: chState, messages } = r
-        if (label === 'CMD') {
-          MonitorState.dataChannelInfo[label] = `Ping ${MonitorState.ping ?? '--'} ms`
-        } else {
+        if (label !== 'CMD') {
           MonitorState.dataChannelInfo[label] = `${chState ?? '?'} ${messages ?? 0}Hz`
         }
         break

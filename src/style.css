@@ -239,6 +239,9 @@ body {
 #AlpineMenu button:hover:not(:disabled) {
   background: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.1);
 }
+#AlpineMenu button:focus {
+  outline: none;
+}
 #AlpineMenu button:disabled {
   opacity: 0.32;
   cursor: default;
