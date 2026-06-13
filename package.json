@@ -32,8 +32,7 @@
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
-    "alpinejs": "^3.15.12",
-    "mp4-muxer": "^5.2.2"
+    "alpinejs": "^3.15.12"
   },
   "devDependencies": {
     "prettier": "^3.8.2",
