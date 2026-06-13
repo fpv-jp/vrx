@@ -14,8 +14,8 @@ npm run test:watch       # Vitest（ウォッチモード）
 ```
 
 ブラウザアクセス:
-- `https://fpv:4443/` または `https://fpv:4443/?p=r` — Receiver（デフォルト）
-- `https://fpv:4443/?p=s` — Sender（VRXをSender側として使う場合）
+- `https://fpv:4443/` または `https://fpv:4443/receiver` — Receiver（デフォルト）
+- `https://fpv:4443/sender` — Sender（VRXをSender側として使う場合）
 
 ### ビルドモード
 

@@ -37,6 +37,7 @@ import * as Utils from '../utils.js'
 import RtcStats from '../stats/index.js'
 import NetworkMonitor from './network-monitor.js'
 import StreamHandler, { PostMessageType } from '../stream/handler.js'
+import * as VtxConsole from './vtx-console.js'
 
 /** 不明なモード（?p= なし）のときに Receiver・Sender コンテナを非表示にする */
 function initializeUnknown() {
@@ -166,6 +167,8 @@ function destroyReceiver() {
     WebrtcReport,
     RadarMap,
   )
+  VtxConsole.hide()
+  VtxConsole.clear()
 
   for (const child of ReceiverContainer.children) {
     const { id, tagName } = child

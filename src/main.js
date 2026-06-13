@@ -217,28 +217,22 @@ import './menu/sub-control.js'
 const SIGNALING_ENDPOINT = import.meta.env.VITE_SIGNALING_ENDPOINT
 console.log('Signaling endpoint:', SIGNALING_ENDPOINT)
 
-/** URL パラメータ ?p=r/s に基づき Receiver または Sender として WebSocket 接続を初期化する */
+/** パスベースのルーティングで Receiver または Sender として WebSocket 接続を初期化する */
 export const SignalingManager = {
   /**
-   * URL パラメータ ?p を読み取り、Sender/Receiver どちらとして起動するかを決定する
-   * デフォルトは Receiver（p='r'）
+   * URL パスを読み取り、Sender/Receiver どちらとして起動するかを決定する
+   * /sender → Sender、/ または /receiver → Receiver（デフォルト）
    */
   init() {
-    const searchParams = new URLSearchParams(window.location.search)
-    let p = searchParams.get('p')
-    p = p ?? 'r'
+    const pathname = window.location.pathname
+    const isSender = pathname === '/sender' || pathname.startsWith('/sender/')
 
-    switch (p) {
-      case 's':
-        Widgets.initializeSender()
-        this.initSenderSignaling(SIGNALING_ENDPOINT)
-        break
-      case 'r':
-        Widgets.initializeReceiver()
-        this.initReceiverSignaling(SIGNALING_ENDPOINT)
-        break
-      default:
-        Widgets.initializeUnknown()
+    if (isSender) {
+      Widgets.initializeSender()
+      this.initSenderSignaling(SIGNALING_ENDPOINT)
+    } else {
+      Widgets.initializeReceiver()
+      this.initReceiverSignaling(SIGNALING_ENDPOINT)
     }
   },
 

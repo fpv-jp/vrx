@@ -3,6 +3,7 @@ import Constants from '../constants.js'
 import { ReceiverState } from './index.js'
 import { MonitorState } from '../stats/index.js'
 import * as Utils from '../utils.js'
+import * as VtxConsole from '../widgets/vtx-console.js'
 
 let telemetryData = {}
 
@@ -17,8 +18,14 @@ const { BROWSER, GSTREAMER } = Constants.Source
 export default async function OpenVtxDataChannel(channel) {
   const source = Alpine.store('menu').message?.source
   switch (source) {
-    case BROWSER:   openBrowserDataChannel(channel);   break
-    case GSTREAMER: openGstreamerDataChannel(channel); break
+    case BROWSER:
+      VtxConsole.show()
+      openBrowserDataChannel(channel)
+      break
+    case GSTREAMER:
+      VtxConsole.show()
+      openGstreamerDataChannel(channel)
+      break
   }
 }
 
@@ -29,10 +36,12 @@ export default async function OpenVtxDataChannel(channel) {
  * @param {RTCDataChannel} channel
  */
 function openCmdChannel(channel) {
+  VtxConsole.log('CMD open')
   channel.onmessage = ({ data }) => {
     const message = JSON.parse(data)
     switch (message.cmd) {
       case Command.HANG_UP:
+        VtxConsole.log('HANG_UP')
         break
 
       case Command.PONG:
@@ -60,6 +69,7 @@ function openBrowserDataChannel(channel) {
       break
 
     case ChannelLabel.IMU:
+      VtxConsole.log('IMU open')
       channel.onmessage = ({ data }) => {
         const quaternion = new Float32Array(data)
 
@@ -81,14 +91,24 @@ function openBrowserDataChannel(channel) {
       break
 
     case ChannelLabel.GNSS:
+      VtxConsole.log('GNSS open')
       channel.onmessage = ({ data }) => {
-        telemetryData.gps = Object.fromEntries(Object.entries(JSON.parse(data)).filter(([_, v]) => v !== null))
+        const gps = Object.fromEntries(Object.entries(JSON.parse(data)).filter(([_, v]) => v !== null))
+        telemetryData.gps = gps
+        if (gps.latitude != null && gps.longitude != null) {
+          VtxConsole.log(`GNSS lat:${gps.latitude.toFixed(5)} lon:${gps.longitude.toFixed(5)}`)
+        }
       }
       break
 
     case ChannelLabel.BAT:
+      VtxConsole.log('BAT open')
       channel.onmessage = ({ data }) => {
-        telemetryData.battery = Object.fromEntries(Object.entries(JSON.parse(data)).filter(([_, v]) => v !== null))
+        const battery = Object.fromEntries(Object.entries(JSON.parse(data)).filter(([_, v]) => v !== null))
+        telemetryData.battery = battery
+        if (battery.voltage != null) {
+          VtxConsole.log(`BAT ${battery.voltage}V ${battery.percentage ?? '--'}%`)
+        }
       }
       break
   }
@@ -108,6 +128,7 @@ function openGstreamerDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_RAW_IMU:
+      VtxConsole.log('MSP_RAW_IMU open')
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -139,6 +160,7 @@ function openGstreamerDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_ATTITUDE:
+      VtxConsole.log('MSP_ATTITUDE open')
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -156,6 +178,7 @@ function openGstreamerDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_RAW_GPS:
+      VtxConsole.log('MSP_RAW_GPS open')
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -171,16 +194,17 @@ function openGstreamerDataChannel(channel) {
         }
         offset += 14
 
-        // Optional: positionalDop (API v1.46+)
         if (data.byteLength > offset) {
           gps.positionalDop = view.getUint16(offset, true)
         }
 
         telemetryData.gps = gps
+        VtxConsole.log(`GPS fix:${gps.fix} sat:${gps.numSat} lat:${(gps.latitude / 1e7).toFixed(5)} lon:${(gps.longitude / 1e7).toFixed(5)} alt:${gps.alt}m`)
       }
       break
 
     case ChannelLabel.MSP_COMP_GPS:
+      VtxConsole.log('MSP_COMP_GPS open')
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -193,6 +217,7 @@ function openGstreamerDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_ALTITUDE:
+      VtxConsole.log('MSP_ALTITUDE open')
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         telemetryData.altitude = parseFloat((view.getInt32(0, true) / 100.0).toFixed(2))
@@ -200,6 +225,7 @@ function openGstreamerDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_SONAR:
+      VtxConsole.log('MSP_SONAR open')
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         telemetryData.sonar = view.getInt32(0, true)
@@ -207,6 +233,7 @@ function openGstreamerDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_ANALOG:
+      VtxConsole.log('MSP_ANALOG open')
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
@@ -224,10 +251,11 @@ function openGstreamerDataChannel(channel) {
       break
 
     case ChannelLabel.MSP_BATTERY_STATE:
+      VtxConsole.log('MSP_BATTERY_STATE open')
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         let offset = 0
-        telemetryData.battery = {
+        const battery = {
           cellCount:    view.getUint8(offset++),
           capacity:     view.getUint16(offset, true),
           voltageOld:   view.getUint8(offset + 2) / 10.0,
@@ -235,11 +263,13 @@ function openGstreamerDataChannel(channel) {
           amperage:     view.getUint16(offset + 5, true) / 100,
           batteryState: view.getUint8(offset + 7),
         }
-        console.log('MSP_BATTERY_STATE:', telemetryData.battery)
+        telemetryData.battery = battery
+        VtxConsole.log(`BAT ${battery.voltageOld}V ${battery.cellCount}S mAh:${battery.mAhDrawn} A:${battery.amperage} state:${battery.batteryState}`)
       }
       break
 
     case ChannelLabel.WPA_SUPPLICANT:
+      VtxConsole.log('WPA_SUPPLICANT open')
       channel.onmessage = ({ data }) => {
         let wifi = JSON.parse(data)
         wifi.status = { ...wifi.status, ...Utils.frequencyToWifiChannel(wifi.status.freq) }
