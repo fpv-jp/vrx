@@ -24,7 +24,12 @@ npm run test:watch       # Vitest（ウォッチモード）
 | **public** | `npm run build:public` | `vrx/public` | クラウド | スマホ・タブレットPC |
 | **private** | `npm run build:private` | `vrx/private` | SBC内（ローカル） | [fpv-jp/vtx](https://github.com/fpv-jp/vtx) と組み合わせて使用 |
 
-環境変数は `.env.public` / `.env.private` で `VITE_SIGNALING_ENDPOINT` を設定。
+環境変数は `.env.public` / `.env.private` で以下を設定。
+
+| 変数 | public | private | 説明 |
+|------|--------|---------|------|
+| `VITE_SIGNALING_ENDPOINT` | `wss://fpv.jp/signaling` | `wss://fpv:8443/signaling` 等 | シグナリングサーバーURL |
+| `VITE_PIN_AUTH` | `true` | `false` | PIN認証機能の有効化（publicのみ） |
 
 ## Senderの2種類
 
@@ -86,8 +91,7 @@ VTX(Sender)  VRX(Receiver)
 
 | ファイル | 役割 |
 |---------|------|
-| [index.js](src/record/index.js) | 録画コーディネーター。`stream/processor.js` からの `RecordFrame` を受け取りHUDと合成してWorkerへ転送 |
-| [worker.js](src/record/worker.js) | `mp4-muxer` + `VideoEncoder` でH.264 MP4生成、完了時にダウンロード |
+| [index.js](src/record/index.js) | 録画コーディネーター。`stream/processor.js` からの `RecordFrame` を受け取り、各オーバーレイ要素と合成して `MediaRecorder` で WebM 出力 |
 
 ### メニュー ([src/menu/](src/menu/))
 
@@ -171,14 +175,38 @@ WebRTC track (EncodedVideoChunk)
 ```
 src/record/index.js
   ← PostMessageType.RecordFrame (VideoFrame clone from stream/processor.js)
-  → createImageBitmap(#HeadUpDisplay) で HUD スナップショット取得
-  → record/worker.js へ { videoFrame, hudBitmap } を転送
+  → 最初のフレームで document.createElement('canvas') を初期化
+  → canvas.captureStream(30) → 映像トラック取得
+  → ReceiverState.audio.srcObject → 音声トラック取得
+  → MediaStream(映像+音声) → MediaRecorder(WebM VP9/VP8, 10Mbps)
+  → 毎フレーム canvas に合成:
+      1. VideoFrame（映像本体）
+      2. #HeadUpDisplay（テレメトリ HUD）
+      3. #Aircraft（機体画像、CSS opacity/filter 適用）
+      4. #AudioVisualizer（波形キャンバス）
+      5. #NetworkMonitoring（D3 SVG → 200ms ごとに ImageBitmap へ変換してキャッシュ）
+  → 停止時: mediaRecorder.stop() → Blob → .webm ダウンロード
+```
 
-record/worker.js
-  → OffscreenCanvas で video + HUD を合成
-  → VideoEncoder (H.264 avc1.640028, 10Mbps)
-  → mp4-muxer (ArrayBufferTarget)
-  → 停止時: encoder.flush() → muxer.finalize() → Blob ダウンロード
+## PIN 認証（public ビルドのみ）
+
+`VITE_PIN_AUTH=true` のビルドと `--pin-auth` フラグつきサーバーの組み合わせで有効になるペアリング機能。
+
+```
+Sender 接続時
+  → サーバー: nanoid 2桁数字 PIN を生成・保存
+  → SESSION_ID_ISSUANCE に "pin" フィールドを付与して送信
+  → VRX Sender画面: #SenderPin に桁ごとの <span class="pin-digit"> で表示
+  → VTX (GStreamer): ターミナルに "=== Access PIN: XX ===" を出力
+
+Receiver が Sender 選択
+  → PIN入力フォーム表示 (pinRequired = true)
+  → 確認後 MEDIA_DEVICE_LIST_REQUEST に "pin" フィールドを付与して送信
+
+サーバー検証
+  → PIN 一致: そのまま中継
+  → PIN 不一致: type 209 + "Invalid PIN" を Receiver へ返す
+  → Receiver: pinError = 'Invalid PIN' を表示
 ```
 
 ## テレメトリ処理（IMU Quaternion → Euler角）
@@ -194,10 +222,10 @@ Float32Array[x, y, z, w]  // センサーから受信
 
 ## グローバル状態
 
-- `ReceiverState` — `pc`（RTCPeerConnection）、`ws`（WebSocket）、`cmd`/`headUpDisplay` 等
+- `ReceiverState` — `pc`（RTCPeerConnection）、`ws`（WebSocket）、`cmd`/`headUpDisplay`/`audio` 等
 - `SenderState` — `pc`、`ws`、`cmd`/`imu`/`gnss`/`bat` 等
 - `MonitorState` — ping、WiFi情報、トラフィックチャート
-- `Alpine.store('menu')` — メニューUIの全状態（デバイス選択・コーデック・接続状態・録画中フラグ等）
+- `Alpine.store('menu')` — メニューUIの全状態（デバイス選択・コーデック・接続状態・録画中フラグ・`pinRequired`/`pinInput`/`pinError` 等）
 
 ## 接続フロー（Receiver側）
 
