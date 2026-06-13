@@ -60,9 +60,11 @@ export default async function comingSignalingMessage(message) {
       break
 
     case RECEIVER.MEDIA_DEVICE_LIST_RESPONSE: {
-      const store = Alpine.store('menu')
-      store.pinRequired = false
-      store.pinError = ''
+      if (import.meta.env.VITE_PIN_AUTH === 'true') {
+        const store = Alpine.store('menu')
+        store.pinRequired = false
+        store.pinError = ''
+      }
       Menu.setMediaDeviceList(message)
       break
     }
@@ -93,7 +95,7 @@ export default async function comingSignalingMessage(message) {
 
     case RECEIVER.SYSTEM_ERROR:
       console.error('Error message type:', message.type, message.message)
-      if (message.message === 'Invalid PIN') {
+      if (import.meta.env.VITE_PIN_AUTH === 'true' && message.message === 'Invalid PIN') {
         Alpine.store('menu').pinError = 'Invalid PIN'
       }
       break

@@ -51,6 +51,8 @@ function setSenderEntryList(senders) {
   }
 }
 
+const PIN_AUTH = import.meta.env.VITE_PIN_AUTH === 'true'
+
 window.addEventListener('menu:sender-change', () => {
   const store = Alpine.store('menu')
   const sender = store.sender
@@ -58,9 +60,13 @@ window.addEventListener('menu:sender-change', () => {
 
   if (senderIds.includes(sender)) {
     ReceiverState.ws.pair = sender
-    store.pinInput = ''
-    store.pinError = ''
-    store.pinRequired = true
+    if (PIN_AUTH) {
+      store.pinInput = ''
+      store.pinError = ''
+      store.pinRequired = true
+    } else {
+      Utils.sendSignalingMessage(ReceiverState.ws, SENDER.MEDIA_DEVICE_LIST_REQUEST)
+    }
   } else {
     Menu.initialize()
     store.sender = 'none'

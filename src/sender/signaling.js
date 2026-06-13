@@ -22,7 +22,7 @@ export default async function comingSignalingMessage(message, initSenderPeerConn
       console.log(`assigned session id : ${message.sessionId}`)
       SenderId.textContent = `Your Sender Id: ${message.sessionId}`
 
-      if (message.pin) {
+      if (message.pin && import.meta.env.VITE_PIN_AUTH === 'true') {
         const pinBox = document.getElementById('SenderPinBox')
         const pinEl = document.getElementById('SenderPin')
         if (pinBox && pinEl) {
