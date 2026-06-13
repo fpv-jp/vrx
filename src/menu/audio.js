@@ -1,8 +1,11 @@
 import Alpine from 'alpinejs'
+import Constants from '../constants.js'
 import * as ParameterUtils from './utils/parameter-utils.js'
 import { browserCodecList, sortByOrder } from './utils/codec-utils.js'
 import { checkRequiredKeys } from './utils/parameter-utils.js'
 import { setListOptions } from './utils/list-utils.js'
+
+const { BROWSER, GSTREAMER } = Constants.Source
 
 /**
  * source に応じた音声コーデックのリストを返す
@@ -11,8 +14,8 @@ import { setListOptions } from './utils/list-utils.js'
  * @returns {{ text: string, value: string }[]}
  */
 function getCodecList(source, codecs) {
-  if (source === 'browser') return browserCodecList(codecs)
-  if (source === 'gstreamer') return sortByOrder(
+  if (source === BROWSER) return browserCodecList(codecs)
+  if (source === GSTREAMER) return sortByOrder(
     codecs.map((codec) => ({ text: codec.name, value: JSON.stringify(codec) })),
     ['opus', 'mulaw'],
   )
@@ -26,12 +29,12 @@ function getCodecList(source, codecs) {
  */
 function getSamplingList(source) {
   const store = Alpine.store('menu')
-  if (source === 'browser') {
+  if (source === BROWSER) {
     if (store.audio_codec === 'none') return []
     const codec = JSON.parse(store.audio_codec)
     return [{ text: `clockRate ${codec.clockRate} channels ${codec.channels}`, value: JSON.stringify(codec) }]
   }
-  if (source === 'gstreamer') {
+  if (source === GSTREAMER) {
     if (store.audio_device === 'none') return []
     const device = JSON.parse(store.audio_device)
     return device.caps.map((cap) => ({ text: cap, value: cap }))
@@ -50,7 +53,7 @@ function showSubMenu(source) {
   store.audio_rate_mode = 'hidden'
   store.audio_channels_mode = 'hidden'
 
-  if (source !== 'gstreamer') return
+  if (source !== GSTREAMER) return
 
   store.audio_mimetype_show = true
   ParameterUtils.setMenuOptionText('audio_mimetype', store.audio_sampling.match(/audio\/([^\s,]+)/)?.[1])

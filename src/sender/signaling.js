@@ -6,6 +6,7 @@ import * as Utils from '../utils.js'
 
 const SENDER = Constants.SENDER
 const RECEIVER = Constants.RECEIVER
+const { BROWSER } = Constants.Source
 
 /**
  * Sender 側のシグナリングメッセージを振り分けて処理する
@@ -45,7 +46,7 @@ export default async function comingSignalingMessage(message, initSenderPeerConn
       SenderState.ws.pair = ws2Id
       const devices = await Utils.getInputMediaDevicesList()
       const codecs = Utils.getCapabilityCodecs()
-      let source = 'browser'
+      let source = BROWSER
       Utils.sendSignalingMessage(SenderState.ws, RECEIVER.MEDIA_DEVICE_LIST_RESPONSE, { source, devices, codecs })
       break
 

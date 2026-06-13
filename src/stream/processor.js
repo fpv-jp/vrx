@@ -3,15 +3,11 @@ const PostMessageType = Object.freeze({
   KeyFrame: 'KeyFrame',
   Offer: 'Offer',
   Terminate: 'Terminate',
-  StartRecord: 'StartRecord',
-  StopRecord: 'StopRecord',
-  RecordFrame: 'RecordFrame',
 })
 
 let offer, answer
 let RemoteVideo, RemoteVideoContext, pixelRatio
 let rendering = false
-let isRecording = false
 let currentDisplayWidth = 0
 let currentDisplayHeight = 0
 
@@ -53,7 +49,6 @@ const encodeAudio = (frame, controller) => {
 
 const videoDecoder = new VideoDecoder({
   output: async (frame) => {
-    const recordFrame = isRecording ? frame.clone() : null
     const { displayWidth, displayHeight } = frame
 
     if (rendering) {
@@ -80,10 +75,6 @@ const videoDecoder = new VideoDecoder({
         RemoteVideoContext.transferFromImageBitmap(bitmap)
         bitmap.close()
       }
-    }
-
-    if (recordFrame) {
-      postMessage({ type: PostMessageType.RecordFrame, frame: recordFrame }, [recordFrame])
     }
   },
   error: (e) => console.error('VideoDecoder error:', e),
@@ -158,17 +149,8 @@ async function onPostMessage(data) {
     case PostMessageType.Offer:
       offer = data.offer
       break
-    // StartRecord
-    case PostMessageType.StartRecord:
-      isRecording = true
-      break
-    // StopRecord
-    case PostMessageType.StopRecord:
-      isRecording = false
-      break
     // Terminate
     case PostMessageType.Terminate:
-      isRecording = false
       break
 
     default:

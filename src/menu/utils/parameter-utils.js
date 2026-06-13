@@ -1,4 +1,7 @@
 import Alpine from 'alpinejs'
+import Constants from '../../constants.js'
+
+const { GSTREAMER } = Constants.Source
 
 /** "30/1" のようなスラッシュ区切り文字列から先頭の整数を返す */
 const parsePart = (s) => parseInt(s.split('/')[0])
@@ -109,7 +112,7 @@ export function checkRequiredKeys() {
   const store = Alpine.store('menu')
   const msg = store.message
   let keys = ['video_capture', 'audio_sampling']
-  if (msg?.source === 'gstreamer') {
+  if (msg?.source === GSTREAMER) {
     keys.push('video_device', 'audio_device', 'audio_codec')
     if (typeof store.video_capture === 'string' && store.video_capture.includes('video/x-raw')) {
       keys.push('video_codec')

@@ -1,5 +1,8 @@
 import Alpine from 'alpinejs'
+import Constants from '../constants.js'
 import { setSenderEntryList } from './sender.js'
+
+const { BROWSER, GSTREAMER } = Constants.Source
 import { initNetworkList } from './network.js'
 import { initBordList } from './bord.js'
 import { initDeviceList } from './device.js'
@@ -29,7 +32,7 @@ function resetSubFields() {
  * @param {object} message - MEDIA_DEVICE_LIST_RESPONSE メッセージ
  */
 export function setMediaDeviceList(message) {
-  if (message.source === 'gstreamer') {
+  if (message.source === GSTREAMER) {
     for (let codec of message.codecs.video) {
       if (!Array.isArray(codec.format)) codec.format = [codec.format]
     }
@@ -61,7 +64,7 @@ export function setMediaDeviceList(message) {
   store.message = message
   console.log('message:', message)
 
-  if (message.source === 'gstreamer') {
+  if (message.source === GSTREAMER) {
     initNetworkList()
     initBordList()
     store.showNetwork = true
@@ -79,7 +82,7 @@ export function setMediaDeviceList(message) {
   store.showAudio = true
   store.showConnection = true
 
-  if (message.source === 'browser') {
+  if (message.source === BROWSER) {
     store.video_mimetype_show = false
     store.audio_mimetype_show = false
   }

@@ -3,9 +3,6 @@ export const PostMessageType = Object.freeze({
   KeyFrame: 'KeyFrame',
   Offer: 'Offer',
   Terminate: 'Terminate',
-  StartRecord: 'StartRecord',
-  StopRecord: 'StopRecord',
-  RecordFrame: 'RecordFrame',
 })
 
 const StreamHandler = new Worker(new URL('./processor.js', import.meta.url), {
@@ -15,7 +12,7 @@ const StreamHandler = new Worker(new URL('./processor.js', import.meta.url), {
 
 StreamHandler.onerror = (e) => console.error('StreamHandler load error:', e.message)
 StreamHandler.addEventListener('message', ({ data }) => {
-  if (data.type !== PostMessageType.RecordFrame && data.type !== PostMessageType.KeyFrame) {
+  if (data.type !== PostMessageType.KeyFrame) {
     console.log('StreamHandler message:', data)
   }
 })

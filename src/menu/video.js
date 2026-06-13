@@ -1,8 +1,11 @@
 import Alpine from 'alpinejs'
+import Constants from '../constants.js'
 import * as ParameterUtils from './utils/parameter-utils.js'
 import { browserCodecList, sortByOrder } from './utils/codec-utils.js'
 import { checkRequiredKeys } from './utils/parameter-utils.js'
 import { setListOptions } from './utils/list-utils.js'
+
+const { BROWSER, GSTREAMER } = Constants.Source
 
 /**
  * source に応じた映像コーデックのリストを返す
@@ -11,8 +14,8 @@ import { setListOptions } from './utils/list-utils.js'
  * @returns {{ text: string, value: string }[]}
  */
 function getCodecList(source, codecs) {
-  if (source === 'browser') return browserCodecList(codecs)
-  if (source === 'gstreamer') return sortByOrder(
+  if (source === BROWSER) return browserCodecList(codecs)
+  if (source === GSTREAMER) return sortByOrder(
     codecs.map((codec) => ({ text: codec.name, value: JSON.stringify(codec) })),
     ['264', '265', 'vp8', 'vp9', 'av1'],
   )
@@ -26,7 +29,7 @@ function getCodecList(source, codecs) {
  */
 function getCaptureList(source) {
   const store = Alpine.store('menu')
-  if (source === 'browser') {
+  if (source === BROWSER) {
     return [
       { width: 1920, height: 1080 },
       { width: 1280, height: 720 },
@@ -37,7 +40,7 @@ function getCaptureList(source) {
       value: JSON.stringify({ frameRate: { ideal: 30, max: 60 }, width: { ideal: width }, height: { ideal: height } }),
     }))
   }
-  if (source === 'gstreamer') {
+  if (source === GSTREAMER) {
     if (store.video_device === 'none') return []
     const device = JSON.parse(store.video_device)
     const order = ['video/x-h264', 'video/x-h265', 'video/x-raw,', 'video/x-raw(']
@@ -65,7 +68,7 @@ function showSubMenu(source) {
   store.video_height_mode = 'hidden'
   store.video_framerate_mode = 'hidden'
 
-  if (source !== 'gstreamer') return
+  if (source !== GSTREAMER) return
 
   store.video_mimetype_show = true
   ParameterUtils.setMenuOptionText('video_mimetype', store.video_capture.match(/video\/([^\s,]+)/)?.[1])
@@ -112,13 +115,13 @@ function onCaptureOrCodecChange() {
   const store = Alpine.store('menu')
   const source = store.message?.source
 
-  if (source === 'gstreamer') {
+  if (source === GSTREAMER) {
     const isRaw = typeof store.video_capture === 'string' && store.video_capture.includes('video/x-raw')
     store.video_codec_hidden = !isRaw
     if (!isRaw) store.video_codec = 'none'
   }
 
-  if (source === 'gstreamer' || store.video_codec !== 'none') showSubMenu(source)
+  if (source === GSTREAMER || store.video_codec !== 'none') showSubMenu(source)
   store.connectionDisabled = checkRequiredKeys()
 }
 
@@ -129,7 +132,7 @@ window.addEventListener('menu:video-device-change', () => {
 window.addEventListener('menu:video-capture-change', () => {
   const store = Alpine.store('menu')
   const source = store.message?.source
-  if (source === 'gstreamer') {
+  if (source === GSTREAMER) {
     const isRaw = typeof store.video_capture === 'string' && store.video_capture.includes('video/x-raw')
     if (isRaw && store.video_codec_options.length > 0 && store.video_codec === 'none') {
       store.video_codec = store.video_codec_options[0].value
@@ -155,7 +158,7 @@ export function initVideoList() {
   const store = Alpine.store('menu')
   const { source, codecs } = store.message
   setListOptions('video_codec', 'video_codec_options', getCodecList(source, codecs.video))
-  if (source === 'browser') {
+  if (source === BROWSER) {
     store.video_codec_hidden = false
   }
   initCaptureList()

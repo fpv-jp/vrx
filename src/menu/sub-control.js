@@ -1,6 +1,6 @@
 import Alpine from 'alpinejs'
 import { ReceiverState } from '../receiver'
-import { startRecording, stopRecording } from '../record'
+import { startScreenRecording, stopScreenRecording } from '../record'
 
 const COLOR_THEMES = {
   green: [0,   255, 0  ],
@@ -72,8 +72,8 @@ window.addEventListener('menu:search-radar-click', () => {
 
 window.addEventListener('menu:record-click', () => {
   if (Alpine.store('menu').recording) {
-    stopRecording()
+    stopScreenRecording()
   } else {
-    startRecording()
+    startScreenRecording()
   }
 })

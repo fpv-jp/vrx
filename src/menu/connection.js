@@ -16,6 +16,7 @@ import * as RADXA_ROCK_5 from './pipeline/RADXA_ROCK_5'
 
 const SENDER = Constants.SENDER
 const Command = Constants.Command
+const { BROWSER, GSTREAMER } = Constants.Source
 
 /**
  * ブラウザ送信用のペイロードを構築する
@@ -98,8 +99,8 @@ window.addEventListener('menu:connection-click', async () => {
   if (store.connectionText === '🎦 Start') {
     let payload
     switch (store.message.source) {
-      case 'browser':   payload = buildBrowserPayload(); break
-      case 'gstreamer': payload = await buildGstreamerPayload(); break
+      case BROWSER:   payload = buildBrowserPayload(); break
+      case GSTREAMER: payload = await buildGstreamerPayload(); break
     }
     console.log('payload:', payload)
     ReceiverManager.initReceiverPeerConnection()

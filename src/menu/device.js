@@ -1,5 +1,8 @@
 import Alpine from 'alpinejs'
+import Constants from '../constants.js'
 import { setListOptions } from './utils/list-utils.js'
+
+const { BROWSER, GSTREAMER } = Constants.Source
 
 /**
  * メッセージのデバイスリストから映像・音声デバイスのオプションを構築して Alpine ストアにセットする
@@ -10,7 +13,7 @@ export function initDeviceList() {
   const videoOptions = []
   const audioOptions = []
 
-  if (source === 'browser') {
+  if (source === BROWSER) {
     let videoIndex = 1
     let audioIndex = 1
     devices.forEach(({ deviceId, kind, label }) => {
@@ -23,7 +26,7 @@ export function initDeviceList() {
           break
       }
     })
-  } else if (source === 'gstreamer') {
+  } else if (source === GSTREAMER) {
     const videoTestSrc = {
       name: 'videotestsrc (pattern=ball)',
       klass: 'Source/Video',
