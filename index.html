@@ -26,7 +26,7 @@
 
     <div id="ReceiverContainer" class="receiver-container">
       <div id="AlpineMenu" x-data>
-        <details :open="$store.menu.menuOpen" @toggle="$store.menu.menuOpen = $el.open" open>
+        <details :open="$store.menu.menuOpen" @toggle="$store.menu.menuOpen = $el.open; if ($el.open) window.dispatchEvent(new CustomEvent('menu:open'))" open>
           <summary>Menu</summary>
 
           <div class="field">
@@ -394,7 +394,7 @@
 
       <canvas id="RemoteVideo"></canvas>
       <canvas id="HeadUpDisplay"></canvas>
-      <img id="Aircraft" src="/image/Helion10.webp" />
+      <img id="Aircraft" src="/image/Helion10.webp" draggable="false" />
       <div id="SenderQR" style="display: none">
         <img src="/image/SenderQR.png" />
         <p>To register as a Sender,<br />scan this QR code on your<br />smartphone or tablet.</p>

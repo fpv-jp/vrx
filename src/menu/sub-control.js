@@ -21,7 +21,17 @@ window.addEventListener('menu:mute-change', () => {
 })
 
 window.addEventListener('menu:debug-change', () => {
-  ReceiverState.headUpDisplay.setDebugVisible(Alpine.store('menu').showDebug)
+  const store = Alpine.store('menu')
+  ReceiverState.headUpDisplay.setDebugVisible(store.showDebug)
+  if (store.showDebug) store.menuOpen = false
+})
+
+window.addEventListener('menu:open', () => {
+  const store = Alpine.store('menu')
+  if (store.showDebug) {
+    store.showDebug = false
+    ReceiverState.headUpDisplay.setDebugVisible(false)
+  }
 })
 
 window.addEventListener('menu:color-change', () => {
