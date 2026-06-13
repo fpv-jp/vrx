@@ -94,7 +94,7 @@ export default async function comingSignalingMessage(message) {
     case RECEIVER.SYSTEM_ERROR:
       console.error('Error message type:', message.type, message.message)
       if (message.message === 'Invalid PIN') {
-        Alpine.store('menu').pinError = 'PINが違います'
+        Alpine.store('menu').pinError = 'Invalid PIN'
       }
       break
 

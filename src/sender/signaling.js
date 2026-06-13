@@ -26,7 +26,7 @@ export default async function comingSignalingMessage(message, initSenderPeerConn
         const pinBox = document.getElementById('SenderPinBox')
         const pinEl = document.getElementById('SenderPin')
         if (pinBox && pinEl) {
-          pinEl.textContent = message.pin
+          pinEl.innerHTML = message.pin.split('').map(d => `<span class="pin-digit">${d}</span>`).join('')
           pinBox.style.display = ''
         }
       }
