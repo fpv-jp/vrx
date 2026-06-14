@@ -5,10 +5,16 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 let map = null
 let droneMarker = null
 let isFollowing = true
+let currentAltitude = null
 
 const DEFAULT_CENTER = [139.6917, 35.6895] // 東京
-const DEFAULT_ZOOM = 17
+const DEFAULT_ZOOM = 15
 const BUILDING_MIN_ZOOM = 15
+
+function altitudeToZoom(altitudeMeters) {
+  const alt = Math.max(1, altitudeMeters)
+  return Math.max(12, Math.min(18, 18 - Math.log2(alt / 10)))
+}
 
 function pmtilesUrl() {
   // VITE_PMTILES_URL 未設定時はサーバーのプロキシエンドポイントを使用
@@ -60,14 +66,36 @@ function styleWithPmtiles(url) {
         paint: { 'fill-color': '#1e3a5f' },
       },
       {
+        id: 'rivers',
+        type: 'line',
+        source: 'protomaps',
+        'source-layer': 'physical_line',
+        filter: ['match', ['get', 'pmap:kind'], ['river', 'stream', 'canal', 'drain'], true, false],
+        paint: {
+          'line-color': '#2a5f8f',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 16, 2],
+        },
+      },
+      {
         id: 'roads-minor',
         type: 'line',
         source: 'protomaps',
         'source-layer': 'roads',
         filter: ['match', ['get', 'pmap:kind'], ['minor_road', 'path', 'track'], true, false],
         paint: {
-          'line-color': '#2a2a4a',
+          'line-color': '#4a4a7a',
           'line-width': ['interpolate', ['linear'], ['zoom'], 14, 0.5, 18, 2],
+        },
+      },
+      {
+        id: 'roads-medium',
+        type: 'line',
+        source: 'protomaps',
+        'source-layer': 'roads',
+        filter: ['match', ['get', 'pmap:kind'], ['medium_road'], true, false],
+        paint: {
+          'line-color': '#6a6aaa',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 18, 3],
         },
       },
       {
@@ -75,10 +103,10 @@ function styleWithPmtiles(url) {
         type: 'line',
         source: 'protomaps',
         'source-layer': 'roads',
-        filter: ['match', ['get', 'pmap:kind'], ['highway', 'major_road', 'medium_road'], true, false],
+        filter: ['match', ['get', 'pmap:kind'], ['highway', 'major_road'], true, false],
         paint: {
-          'line-color': '#3a3a6a',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 18, 4],
+          'line-color': '#9090cc',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 18, 5],
         },
       },
       {
@@ -163,23 +191,30 @@ export function init() {
   map.on('dblclick', () => { isFollowing = true })
 }
 
-export function updatePosition(longitude, latitude, heading) {
+export function updatePosition(longitude, latitude, heading, altitude) {
   if (!map) return
 
-  // マーカー更新
   droneMarker.setLngLat([longitude, latitude])
 
-  // 機首方位をベアリングに反映
-  if (heading != null) {
-    map.setBearing(heading)
-  }
+  if (heading != null) map.setBearing(heading)
+
+  const alt = altitude ?? currentAltitude
+  const zoom = alt != null ? altitudeToZoom(alt) : null
 
   if (isFollowing) {
     map.easeTo({
       center: [longitude, latitude],
+      ...(zoom != null && { zoom }),
       duration: 500,
       easing: (t) => t,
     })
+  }
+}
+
+export function setAltitude(altitude) {
+  currentAltitude = altitude
+  if (map && isFollowing && altitude != null) {
+    map.easeTo({ zoom: altitudeToZoom(altitude), duration: 1000 })
   }
 }
 
@@ -189,5 +224,6 @@ export function destroy() {
     map = null
     droneMarker = null
     isFollowing = true
+    currentAltitude = null
   }
 }

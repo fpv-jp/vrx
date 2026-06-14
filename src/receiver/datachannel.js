@@ -5,6 +5,7 @@ import { MonitorState } from '../stats/index.js'
 import * as Utils from '../utils.js'
 import * as VtxConsole from '../widgets/vtx-console.js'
 import * as DroneMap from '../widgets/map.js'
+const { updatePosition, setAltitude } = DroneMap
 
 let telemetryData = {}
 
@@ -101,7 +102,7 @@ function openBrowserDataChannel(channel) {
         telemetryData.gps = gps
         if (gps.latitude != null && gps.longitude != null) {
           VtxConsole.log(`GNSS lat:${gps.latitude.toFixed(5)} lon:${gps.longitude.toFixed(5)}`)
-          DroneMap.updatePosition(gps.longitude, gps.latitude, telemetryData.heading)
+          updatePosition(gps.longitude, gps.latitude, telemetryData.heading, gps.altitude)
         }
       }
       break
@@ -205,7 +206,7 @@ function openGstreamerDataChannel(channel) {
         telemetryData.gps = gps
         VtxConsole.log(`GPS fix:${gps.fix} sat:${gps.numSat} lat:${(gps.latitude / 1e7).toFixed(5)} lon:${(gps.longitude / 1e7).toFixed(5)} alt:${gps.alt}m`)
         if (gps.fix > 0) {
-          DroneMap.updatePosition(gps.longitude / 1e7, gps.latitude / 1e7, telemetryData.yaw)
+          updatePosition(gps.longitude / 1e7, gps.latitude / 1e7, telemetryData.yaw, gps.alt)
         }
       }
       break
@@ -228,6 +229,7 @@ function openGstreamerDataChannel(channel) {
       channel.onmessage = ({ data }) => {
         const view = new DataView(data)
         telemetryData.altitude = parseFloat((view.getInt32(0, true) / 100.0).toFixed(2))
+        setAltitude(telemetryData.altitude)
       }
       break
 
