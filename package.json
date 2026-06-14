@@ -19,6 +19,7 @@
     "japan"
   ],
   "scripts": {
+    "predev": "vite optimize --force",
     "dev": "vite --mode private",
     "build": "npm run build:public && npm run build:private",
     "build:public": "vite build --mode public",
