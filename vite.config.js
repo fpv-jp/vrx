@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
       outDir: mode === 'public' ? 'vrx/public' : 'vrx/private',
     },
     optimizeDeps: {
-      include: ['maplibre-gl', 'pmtiles'],
+      exclude: ['maplibre-gl', 'pmtiles'],
     },
     worker: {
       format: 'es',
