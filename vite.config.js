@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: mode === 'public' ? 'vrx/public' : 'vrx/private',
     },
+    optimizeDeps: {
+      include: ['maplibre-gl', 'pmtiles'],
+    },
     worker: {
       format: 'es',
     },
@@ -25,6 +28,12 @@ export default defineConfig(({ mode }) => {
           host: 'fpv',
           port: 4443,
           clientPort: 4443,
+        },
+        proxy: {
+          '/tiles': {
+            target: process.env.TILES_PROXY ?? 'http://localhost:8080',
+            changeOrigin: true,
+          },
         },
       },
     }),

@@ -313,11 +313,14 @@ body {
 }
 
 #RadarMap {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0.8;
-  pointer-events: none;
+  top: 10px;
+  right: 10px;
+  width: 480px;
+  height: 360px;
+  opacity: 0.85;
+  border-radius: 6px;
+  overflow: hidden;
+  pointer-events: auto;
 }
 
 /* ---------- 右上 ---------- */
