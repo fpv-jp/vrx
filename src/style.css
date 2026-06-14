@@ -39,6 +39,7 @@ body {
 #BottomLeft,
 #NetworkMonitoring,
 #WebrtcReport,
+#SearchRadarCanvas,
 #RadarMap {
   position: absolute;
   z-index: 10;
@@ -48,11 +49,20 @@ body {
 }
 
 /* ---------- 左上 ---------- */
+#SearchRadarCanvas {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
 #AlpineMenu {
   top: 10px;
   left: 10px;
   z-index: 11;
   width: 320px;
+  user-select: none;
   background: rgba(30, 30, 30, 0.3);
   border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.3);
   border-radius: 4px;
@@ -290,7 +300,6 @@ body {
   top: 40px;
   left: 10px;
   padding: 10px 20px;
-  border-radius: 6px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
 }
@@ -313,11 +322,13 @@ body {
 }
 
 #RadarMap {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0.8;
-  pointer-events: none;
+  top: 55px;
+  left: 10px;
+  width: 360px;
+  height: 270px;
+  opacity: 0.85;
+  overflow: hidden;
+  pointer-events: auto;
 }
 
 /* ---------- 右上 ---------- */
@@ -349,6 +360,8 @@ body {
   opacity: 0.7;
   outline: none;
   cursor: default;
+  pointer-events: none;
+  user-select: none;
   -webkit-user-drag: none;
   filter:
     /* brightness(0.8) */
@@ -363,6 +376,7 @@ body {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+  user-select: none;
 }
 
 #AudioVisualizer {
@@ -381,7 +395,6 @@ body {
   font-size: 10px;
   line-height: 1.5;
   color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.85);
-  border-radius: 3px;
   visibility: hidden;
 }
 
@@ -399,7 +412,6 @@ body {
   bottom: 5px;
   background: rgba(0, 0, 0, 0.4);
   padding: 4px 8px;
-  border-radius: 6px;
 }
 
 /* ------------------------------------

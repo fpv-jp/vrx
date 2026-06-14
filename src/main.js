@@ -101,13 +101,13 @@ Alpine.store('menu', {
     { value: "'VT323', monospace", text: 'VT323' },
   ],
 
-  selectedAircraft: '/image/Helion10.webp',
+  selectedAircraft: '/image/Helion10.png',
   aircraftOptions: [
-    { value: '/image/Helion10.webp',      text: 'Helion10'      },
-    { value: '/image/Protek60.webp',      text: 'Protek60'      },
+    { value: '/image/Helion10.png',      text: 'Helion10'      },
+    { value: '/image/Protek60.png',      text: 'Protek60'      },
+    { value: '/image/Rekon5-Rocket.png',  text: 'Rekon5 Rocket' },
     { value: '/image/ADF-01-Falken.png',  text: 'ADF-01 Falken' },
     { value: '/image/ADF-11F-Raven.png',  text: 'ADF-11F Raven' },
-    { value: '/image/Rekon5-Rocket.png',  text: 'Rekon5 Rocket' },
   ],
 })
 
