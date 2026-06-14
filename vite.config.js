@@ -29,6 +29,12 @@ export default defineConfig(({ mode }) => {
           port: 4443,
           clientPort: 4443,
         },
+        proxy: {
+          '/tiles': {
+            target: process.env.TILES_PROXY ?? 'http://localhost:8080',
+            changeOrigin: true,
+          },
+        },
       },
     }),
   }
