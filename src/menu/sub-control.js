@@ -72,8 +72,8 @@ window.addEventListener('menu:webrtc-report-click', () => {
 
 window.addEventListener('menu:search-radar-click', () => {
   WebrtcReport.style.visibility = 'hidden'
-  RadarMap.style.visibility = RadarMap.style.visibility === 'visible' ? 'hidden' : 'visible'
-  if (RadarMap.style.visibility === 'visible') {
+  SearchRadarCanvas.style.visibility = SearchRadarCanvas.style.visibility === 'visible' ? 'hidden' : 'visible'
+  if (SearchRadarCanvas.style.visibility === 'visible') {
     ReceiverState.searchRadar.start()
   } else {
     ReceiverState.searchRadar.stop()

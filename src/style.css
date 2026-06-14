@@ -39,6 +39,7 @@ body {
 #BottomLeft,
 #NetworkMonitoring,
 #WebrtcReport,
+#SearchRadarCanvas,
 #RadarMap {
   position: absolute;
   z-index: 10;
@@ -48,6 +49,13 @@ body {
 }
 
 /* ---------- 左上 ---------- */
+#SearchRadarCanvas {
+  top: 55px;
+  left: 10px;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
 #AlpineMenu {
   top: 10px;
   left: 10px;

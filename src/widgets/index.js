@@ -92,6 +92,7 @@ function initializeReceiver() {
     AudioVisualizer,
     NetworkMonitoring,
     WebrtcReport,
+    SearchRadarCanvas,
     RadarMap,
   )
 
@@ -166,6 +167,7 @@ function destroyReceiver() {
     AudioVisualizer,
     NetworkMonitoring,
     WebrtcReport,
+    SearchRadarCanvas,
     RadarMap,
   )
   VtxConsole.hide()
@@ -214,8 +216,11 @@ function destroyReceiver() {
       case 'WebrtcReport':
         break
 
-      case 'RadarMap':
+      case 'SearchRadarCanvas':
         ReceiverState?.searchRadar.stop()
+        break
+
+      case 'RadarMap':
         break
 
       default:
