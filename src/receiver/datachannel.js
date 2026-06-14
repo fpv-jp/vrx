@@ -4,6 +4,7 @@ import { ReceiverState } from './index.js'
 import { MonitorState } from '../stats/index.js'
 import * as Utils from '../utils.js'
 import * as VtxConsole from '../widgets/vtx-console.js'
+import * as DroneMap from '../widgets/map.js'
 
 let telemetryData = {}
 
@@ -100,6 +101,7 @@ function openBrowserDataChannel(channel) {
         telemetryData.gps = gps
         if (gps.latitude != null && gps.longitude != null) {
           VtxConsole.log(`GNSS lat:${gps.latitude.toFixed(5)} lon:${gps.longitude.toFixed(5)}`)
+          DroneMap.updatePosition(gps.longitude, gps.latitude, telemetryData.heading)
         }
       }
       break
@@ -202,6 +204,9 @@ function openGstreamerDataChannel(channel) {
 
         telemetryData.gps = gps
         VtxConsole.log(`GPS fix:${gps.fix} sat:${gps.numSat} lat:${(gps.latitude / 1e7).toFixed(5)} lon:${(gps.longitude / 1e7).toFixed(5)} alt:${gps.alt}m`)
+        if (gps.fix > 0) {
+          DroneMap.updatePosition(gps.longitude / 1e7, gps.latitude / 1e7, telemetryData.yaw)
+        }
       }
       break
 

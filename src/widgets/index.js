@@ -38,6 +38,7 @@ import RtcStats, { MonitorState } from '../stats/index.js'
 import NetworkMonitor from './network-monitor.js'
 import StreamHandler, { PostMessageType } from '../stream/handler.js'
 import * as VtxConsole from './vtx-console.js'
+import * as DroneMap from './map.js'
 
 /** 不明なモード（?p= なし）のときに Receiver・Sender コンテナを非表示にする */
 function initializeUnknown() {
@@ -118,8 +119,7 @@ function connectionEstablishment() {
     Aircraft,
     AudioVisualizer,
     NetworkMonitoring,
-    // WebrtcReport,
-    // RadarMap,
+    RadarMap,
   )
 
   const store = Alpine.store('menu')
@@ -127,6 +127,7 @@ function connectionEstablishment() {
   ReceiverState.headUpDisplay.setDebugVisible(store.showDebug)
   RemoteVideo.style.filter = store.grayscale ? 'grayscale(1)' : ''
   RemoteVideo.style.webkitFilter = store.grayscale ? 'grayscale(1)' : ''
+  DroneMap.init()
 }
 
 /**
@@ -169,6 +170,7 @@ function destroyReceiver() {
   )
   VtxConsole.hide()
   VtxConsole.clear()
+  DroneMap.destroy()
 
   for (const child of ReceiverContainer.children) {
     const { id, tagName } = child
