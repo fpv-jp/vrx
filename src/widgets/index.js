@@ -38,6 +38,7 @@ import RtcStats, { MonitorState } from '../stats/index.js'
 import NetworkMonitor from './network-monitor.js'
 import StreamHandler, { PostMessageType } from '../stream/handler.js'
 import * as VtxConsole from './vtx-console.js'
+import * as DroneMap from './map.js'
 
 /** 不明なモード（?p= なし）のときに Receiver・Sender コンテナを非表示にする */
 function initializeUnknown() {
@@ -49,18 +50,24 @@ function initializeUnknown() {
  * Sender モードの初期化を行う
  * iOS の場合は DeviceMotionEvent のパーミッションボタンを設定する
  */
-function initializeSender() {
+async function initializeSender() {
   document.title = 'FPV Japan VTX'
 
-  if (Utils.isIOS()) {
+  if (Utils.isIOS() && typeof DeviceMotionEvent.requestPermission === 'function') {
+    // If already granted, no button needed (can call without user gesture)
+    try {
+      const state = await DeviceMotionEvent.requestPermission()
+      if (state === 'granted') {
+        hidden(PermissionButton)
+      }
+    } catch (_) {
+      // Not yet granted: requires user gesture, keep button visible
+    }
+
     PermissionButton.onclick = async () => {
-      if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        let permissionState = await DeviceMotionEvent.requestPermission()
-        if (permissionState === 'granted') {
-          console.log('Motion permission granted!')
-        } else {
-          console.error('Motion permission denied.')
-        }
+      const state = await DeviceMotionEvent.requestPermission()
+      if (state === 'granted') {
+        hidden(PermissionButton)
       }
     }
   } else {
@@ -91,6 +98,7 @@ function initializeReceiver() {
     AudioVisualizer,
     NetworkMonitoring,
     WebrtcReport,
+    SearchRadarCanvas,
     RadarMap,
   )
 
@@ -118,8 +126,7 @@ function connectionEstablishment() {
     Aircraft,
     AudioVisualizer,
     NetworkMonitoring,
-    // WebrtcReport,
-    // RadarMap,
+    RadarMap,
   )
 
   const store = Alpine.store('menu')
@@ -127,6 +134,7 @@ function connectionEstablishment() {
   ReceiverState.headUpDisplay.setDebugVisible(store.showDebug)
   RemoteVideo.style.filter = store.grayscale ? 'grayscale(1)' : ''
   RemoteVideo.style.webkitFilter = store.grayscale ? 'grayscale(1)' : ''
+  DroneMap.init()
 }
 
 /**
@@ -165,10 +173,12 @@ function destroyReceiver() {
     AudioVisualizer,
     NetworkMonitoring,
     WebrtcReport,
+    SearchRadarCanvas,
     RadarMap,
   )
   VtxConsole.hide()
   VtxConsole.clear()
+  DroneMap.destroy()
 
   for (const child of ReceiverContainer.children) {
     const { id, tagName } = child
@@ -212,8 +222,11 @@ function destroyReceiver() {
       case 'WebrtcReport':
         break
 
-      case 'RadarMap':
+      case 'SearchRadarCanvas':
         ReceiverState?.searchRadar.stop()
+        break
+
+      case 'RadarMap':
         break
 
       default:

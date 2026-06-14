@@ -63,6 +63,7 @@ const NetworkMonitor = {
       width: 400,
       height: 100,
       yAxisTicks: 5,
+      yAxisTickFormat: d => Math.round(d),
       showGridX: true,
       showGridY: true,
     }

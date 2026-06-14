@@ -364,7 +364,7 @@ const TelemetryRenderer = {
      * @param {boolean} charging
      * @param {string} videoText - コーデック情報などの補足テキスト
      */
-  Battery(ctx, position, level, charging, videoText) {
+  Battery(ctx, position, level, charging, videoText, info) {
     let { x, y, width, height, center } = position
 
     if (Number.isNaN(width) || Number.isNaN(height)) return
@@ -419,6 +419,15 @@ const TelemetryRenderer = {
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText(`${percentage}%`, x + width / 2, y + height / 2)
+    }
+
+    // Battery info text (left of icon)
+    if (info) {
+      ctx.font = Styles.fontBattery
+      ctx.textAlign = 'right'
+      ctx.textBaseline = 'middle'
+      ctx.fillStyle = colors[0]
+      ctx.fillText(info, x - 8, y + height / 2)
     }
 
     // Video text
@@ -619,7 +628,8 @@ export default (hud) => {
       this.drawRollIndicator(roll ?? 0)
       this.drawAltitude(gps?.altitude ?? 0)
       this.drawSpeed(gps?.speed ?? 0)
-      this.drawBattery(battery?.level ?? 0, battery?.charging ?? false, videoText ?? '')
+      const batteryInfo = battery?.voltage != null ? `${battery.voltage.toFixed(1)}V` : ''
+      this.drawBattery(battery?.level ?? 0, battery?.charging ?? false, videoText ?? '', batteryInfo)
       this.drawTelemetryInfo(telemetryInfo)
       this.drawDebugParameter(telemetryData)
     },
@@ -638,7 +648,10 @@ export default (hud) => {
       this.drawRollIndicator(roll ?? 0)
       this.drawAltitude(altitude ?? 0)          // MSP_ALTITUDE (meters)
       this.drawSpeed(gps?.speed ?? 0)           // MSP_RAW_GPS speed (cm/s)
-      this.drawBattery(level, false, videoText ?? '')
+      const voltage = analog?.voltageNew ?? analog?.voltage
+      const mah = analog?.mAhdrawn != null ? `${analog.mAhdrawn}mAh` : ''
+      const mspBatteryInfo = voltage != null ? `${voltage.toFixed(1)}V${mah ? ' ' + mah : ''}` : ''
+      this.drawBattery(level, false, videoText ?? '', mspBatteryInfo)
       if (compGps?.update) this.drawHomeIndicator(compGps.directionToHome, compGps.distanceToHome, yaw ?? 0)
       if (sonar != null) this.drawSonarDistance(sonar)
       this.drawTelemetryInfo(telemetryInfo)
@@ -823,9 +836,8 @@ export default (hud) => {
           const width = state.width / 30
           const height = state.height / 35
           const center = {
-            //
             x: state.width - width,
-            y: height * 1.25,
+            y: height * 1.25 + 10,
           }
           const x = center.x - width / 2
           const y = center.y - height / 2
@@ -1066,13 +1078,13 @@ export default (hud) => {
          * @param {boolean} charging
          * @param {string} videoText
          */
-    drawBattery(level, charging, videoText) {
+    drawBattery(level, charging, videoText, info = '') {
       let current = 'Battery'
       let position = this.renderPosition(current)
 
       state.ctx.save()
       try {
-        TelemetryRenderer.Battery(state.ctx, position, level, charging, videoText)
+        TelemetryRenderer.Battery(state.ctx, position, level, charging, videoText, info)
         // this.print(current, position, 'rgba(0, 0, 0, 0.3)', 'rgba(0, 255, 0, 1)')
       } catch (e) {
         console.error(current, ' : ', e)

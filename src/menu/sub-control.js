@@ -10,6 +10,7 @@ const COLOR_THEMES = {
   red:   [255, 50,  50 ],
 }
 
+
 window.addEventListener('menu:grayscale-change', () => {
   const gray = Alpine.store('menu').grayscale
   RemoteVideo.style.filter = gray ? 'grayscale(1)' : ''
@@ -43,6 +44,8 @@ window.addEventListener('menu:color-change', () => {
   root.style.setProperty('--ui-b', b)
   ReceiverState.headUpDisplay.setColor(r, g, b)
   ReceiverState.audioVisualizer?.setColor(r, g, b)
+  const el = document.getElementById('Aircraft')
+  if (el) el.className = `theme-${key}`
 })
 
 window.addEventListener('menu:font-change', () => {
@@ -72,8 +75,8 @@ window.addEventListener('menu:webrtc-report-click', () => {
 
 window.addEventListener('menu:search-radar-click', () => {
   WebrtcReport.style.visibility = 'hidden'
-  RadarMap.style.visibility = RadarMap.style.visibility === 'visible' ? 'hidden' : 'visible'
-  if (RadarMap.style.visibility === 'visible') {
+  SearchRadarCanvas.style.visibility = SearchRadarCanvas.style.visibility === 'visible' ? 'hidden' : 'visible'
+  if (SearchRadarCanvas.style.visibility === 'visible') {
     ReceiverState.searchRadar.start()
   } else {
     ReceiverState.searchRadar.stop()
@@ -87,3 +90,4 @@ window.addEventListener('menu:record-click', () => {
     startScreenRecording()
   }
 })
+

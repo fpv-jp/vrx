@@ -3,7 +3,7 @@
 
 class Chart {
   constructor(id, config, xDomain) {
-    const { dataPointCount, duration, margin, width, height, yAxisTicks, showGridX, showGridY } = config
+    const { dataPointCount, duration, margin, width, height, yAxisTicks, yAxisTickFormat, showGridX, showGridY } = config
 
     this.id = id
     this.data = d3.range(dataPointCount).map(() => 0)
@@ -18,12 +18,13 @@ class Chart {
     this.showGridX = showGridX
     this.showGridY = showGridY
     this.yAxisTicks = yAxisTicks
+    this.yAxisTickFormat = yAxisTickFormat || null
 
     this.initialize()
   }
 
   initialize() {
-    const { duration, lastIndex, width, height, margin, data, xDomain, yAxisTicks } = this
+    const { duration, lastIndex, width, height, margin, data, xDomain, yAxisTicks, yAxisTickFormat } = this
     const now = new Date(Date.now() - duration)
 
     this.timeScale = d3.time
@@ -54,7 +55,8 @@ class Chart {
       .attr('width', width)
       .attr('height', height)
 
-    const yAxis = d3.svg.axis().scale(this.yScale).ticks(yAxisTicks).orient('left')
+    let yAxis = d3.svg.axis().scale(this.yScale).ticks(yAxisTicks).orient('left')
+    if (yAxisTickFormat) yAxis = yAxis.tickFormat(yAxisTickFormat)
     this.yScale.axis = yAxis
     this.yAxisGroup = this.chartGroup
       .append('g')

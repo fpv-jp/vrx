@@ -30,7 +30,6 @@ body {
 }
 
 /* ----- 共通 Overlay ----- */
-#PermissionButton,
 #SenderId,
 #AlpineMenu,
 #HeadUpDisplay,
@@ -39,6 +38,7 @@ body {
 #BottomLeft,
 #NetworkMonitoring,
 #WebrtcReport,
+#SearchRadarCanvas,
 #RadarMap {
   position: absolute;
   z-index: 10;
@@ -48,11 +48,20 @@ body {
 }
 
 /* ---------- 左上 ---------- */
+#SearchRadarCanvas {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
 #AlpineMenu {
   top: 10px;
   left: 10px;
   z-index: 11;
   width: 320px;
+  user-select: none;
   background: rgba(30, 30, 30, 0.3);
   border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.3);
   border-radius: 4px;
@@ -287,12 +296,15 @@ body {
 }
 
 #PermissionButton {
-  top: 40px;
-  left: 10px;
+  margin-top: 1em;
   padding: 10px 20px;
-  border-radius: 6px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  border-radius: 8px;
+  font-family: var(--ui-font);
+  color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 1);
+  font-size: 1em;
+  cursor: pointer;
 }
 
 #HeadUpDisplay {
@@ -313,11 +325,13 @@ body {
 }
 
 #RadarMap {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0.8;
-  pointer-events: none;
+  top: 55px;
+  left: 10px;
+  width: 360px;
+  height: 270px;
+  opacity: 0.85;
+  overflow: hidden;
+  pointer-events: auto;
 }
 
 /* ---------- 右上 ---------- */
@@ -342,18 +356,23 @@ body {
 }
 
 #Aircraft {
-  top: 7.5%;
+  top: calc(7.5% + 20px);
   transform: translateY(-10%);
   right: 10px;
   width: 160px;
   opacity: 0.7;
   outline: none;
   cursor: default;
+  pointer-events: none;
+  user-select: none;
   -webkit-user-drag: none;
-  filter:
-    /* brightness(0.8) */
-    sepia(1) hue-rotate(60deg) saturate(2.5);
+  filter: sepia(1) hue-rotate(60deg) saturate(2.5);
 }
+#Aircraft.theme-green { filter: sepia(1) hue-rotate(60deg)  saturate(2.5); }
+#Aircraft.theme-amber { filter: sepia(1) hue-rotate(0deg)   saturate(2);   }
+#Aircraft.theme-cyan  { filter: sepia(1) hue-rotate(155deg) saturate(3);   }
+#Aircraft.theme-white { filter: grayscale(1) brightness(1.5);              }
+#Aircraft.theme-red   { filter: sepia(1) hue-rotate(323deg) saturate(3);   }
 
 /* ---------- 左下 ---------- */
 #BottomLeft {
@@ -363,6 +382,7 @@ body {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+  user-select: none;
 }
 
 #AudioVisualizer {
@@ -381,7 +401,6 @@ body {
   font-size: 10px;
   line-height: 1.5;
   color: rgba(var(--ui-r), var(--ui-g), var(--ui-b), 0.85);
-  border-radius: 3px;
   visibility: hidden;
 }
 
@@ -399,7 +418,6 @@ body {
   bottom: 5px;
   background: rgba(0, 0, 0, 0.4);
   padding: 4px 8px;
-  border-radius: 6px;
 }
 
 /* ------------------------------------
