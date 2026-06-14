@@ -20,7 +20,7 @@ function styleWithPmtiles(url) {
     version: 8,
     glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
     sources: {
-      openmaptiles: {
+      protomaps: {
         type: 'vector',
         url: `pmtiles://${url}`,
       },
@@ -32,36 +32,39 @@ function styleWithPmtiles(url) {
         paint: { 'background-color': '#1a1a2e' },
       },
       {
-        id: 'water',
+        id: 'earth',
         type: 'fill',
-        source: 'openmaptiles',
-        'source-layer': 'water',
-        paint: { 'fill-color': '#1e3a5f' },
+        source: 'protomaps',
+        'source-layer': 'earth',
+        paint: { 'fill-color': '#16213e' },
       },
       {
-        id: 'landuse',
+        id: 'landcover',
         type: 'fill',
-        source: 'openmaptiles',
-        'source-layer': 'landuse',
+        source: 'protomaps',
+        'source-layer': 'landcover',
         paint: {
-          'fill-color': [
-            'match',
-            ['get', 'class'],
-            'residential', '#16213e',
-            'commercial', '#1a1a2e',
-            'industrial', '#0f3460',
+          'fill-color': ['match', ['get', 'pmap:kind'],
             'grass', '#0d2b1a',
-            'park', '#0d2b1a',
-            '#1a1a2e',
+            'forest', '#0d2b1a',
+            'sand', '#1a1206',
+            '#16213e',
           ],
         },
       },
       {
+        id: 'water',
+        type: 'fill',
+        source: 'protomaps',
+        'source-layer': 'water',
+        paint: { 'fill-color': '#1e3a5f' },
+      },
+      {
         id: 'roads-minor',
         type: 'line',
-        source: 'openmaptiles',
-        'source-layer': 'transportation',
-        filter: ['in', 'class', 'minor', 'service', 'track'],
+        source: 'protomaps',
+        'source-layer': 'roads',
+        filter: ['match', ['get', 'pmap:kind'], ['minor_road', 'path', 'track'], true, false],
         paint: {
           'line-color': '#2a2a4a',
           'line-width': ['interpolate', ['linear'], ['zoom'], 14, 0.5, 18, 2],
@@ -70,9 +73,9 @@ function styleWithPmtiles(url) {
       {
         id: 'roads-major',
         type: 'line',
-        source: 'openmaptiles',
-        'source-layer': 'transportation',
-        filter: ['in', 'class', 'primary', 'secondary', 'tertiary', 'trunk', 'motorway'],
+        source: 'protomaps',
+        'source-layer': 'roads',
+        filter: ['match', ['get', 'pmap:kind'], ['highway', 'major_road', 'medium_road'], true, false],
         paint: {
           'line-color': '#3a3a6a',
           'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 18, 4],
@@ -81,30 +84,27 @@ function styleWithPmtiles(url) {
       {
         id: 'buildings-3d',
         type: 'fill-extrusion',
-        source: 'openmaptiles',
-        'source-layer': 'building',
+        source: 'protomaps',
+        'source-layer': 'buildings',
         minzoom: BUILDING_MIN_ZOOM,
         paint: {
           'fill-extrusion-color': [
-            'interpolate',
-            ['linear'],
-            ['get', 'render_height'],
+            'interpolate', ['linear'], ['coalesce', ['get', 'height'], 0],
             0, '#1e3a5f',
             50, '#0f3460',
             200, '#16213e',
           ],
-          'fill-extrusion-height': ['coalesce', ['get', 'render_height'], ['get', 'height'], 5],
-          'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], ['get', 'min_height'], 0],
+          'fill-extrusion-height': ['coalesce', ['get', 'height'], 5],
+          'fill-extrusion-base': ['coalesce', ['get', 'min_height'], 0],
           'fill-extrusion-opacity': 0.8,
         },
       },
       {
         id: 'place-labels',
         type: 'symbol',
-        source: 'openmaptiles',
-        'source-layer': 'place',
+        source: 'protomaps',
+        'source-layer': 'places',
         minzoom: 12,
-        filter: ['in', 'class', 'city', 'town', 'village'],
         layout: {
           'text-field': ['coalesce', ['get', 'name:ja'], ['get', 'name']],
           'text-size': 11,
@@ -154,6 +154,9 @@ export function init() {
 
   droneMarker = createDroneMarker()
   droneMarker.setLngLat(DEFAULT_CENTER).addTo(map)
+
+  map.on('error', (e) => { console.error('[DroneMap] error:', e.error?.message ?? e) })
+  map.on('styledata', () => { console.log('[DroneMap] style loaded') })
 
   // ドラッグ開始でフォロー解除、ダブルクリックで再フォロー
   map.on('dragstart', () => { isFollowing = false })
