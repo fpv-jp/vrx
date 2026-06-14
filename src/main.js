@@ -121,12 +121,12 @@ Alpine.data('xSelect', ({ model, storeOptions, options: staticOpts, onChange, pl
       if (this.$el.contains(e.target)) return
       this.open = false
     }
-    window.addEventListener('scroll', this._closeOnScroll, true)
+    window.addEventListener('scroll', this._closeOnScroll)
   },
 
   /** Alpine.js ライフサイクル: スクロールリスナーを解除する */
   destroy() {
-    window.removeEventListener('scroll', this._closeOnScroll, true)
+    window.removeEventListener('scroll', this._closeOnScroll)
   },
 
   /** storeOptions または staticOpts から生のオプション配列を返す */
