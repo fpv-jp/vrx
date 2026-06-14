@@ -50,8 +50,9 @@ body {
 
 /* ---------- 左上 ---------- */
 #SearchRadarCanvas {
-  top: 55px;
-  left: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   opacity: 0.85;
   pointer-events: none;
 }
@@ -321,7 +322,7 @@ body {
 }
 
 #RadarMap {
-  top: 10px;
+  top: 55px;
   right: 10px;
   width: 480px;
   height: 360px;
