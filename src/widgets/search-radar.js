@@ -77,9 +77,10 @@ class FlyingObject {
  * @returns {{ start: Function, stop: Function, resizeCanvas: Function, clear: Function }}
  */
 export default (map) => {
+  const isCanvas = map instanceof HTMLCanvasElement
   const state = {
-    canvas: map,
-    ctx: map.getContext('2d', { alpha: true }),
+    canvas: isCanvas ? map : null,
+    ctx: isCanvas ? map.getContext('2d', { alpha: true }) : null,
 
     width: 675,
     height: 675,
@@ -320,11 +321,13 @@ export default (map) => {
 
     /** canvas 全体をクリアする */
     clear() {
+      if (!state.ctx) return
       state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height)
     },
 
     /** 航空機オブジェクトを初期化して RAF ループを開始する */
     start() {
+      if (!state.ctx) return
       this.resizeCanvas(window.innerHeight / 3)
 
       state.aircrafts = []

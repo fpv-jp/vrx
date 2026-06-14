@@ -101,13 +101,13 @@ Alpine.store('menu', {
     { value: "'VT323', monospace", text: 'VT323' },
   ],
 
-  selectedAircraft: '/image/Helion10.webp',
+  selectedAircraft: '/image/Helion10.png',
   aircraftOptions: [
-    { value: '/image/Helion10.webp',      text: 'Helion10'      },
-    { value: '/image/Protek60.webp',      text: 'Protek60'      },
+    { value: '/image/Helion10.png',      text: 'Helion10'      },
+    { value: '/image/Protek60.png',      text: 'Protek60'      },
+    { value: '/image/Rekon5-Rocket.png',  text: 'Rekon5 Rocket' },
     { value: '/image/ADF-01-Falken.png',  text: 'ADF-01 Falken' },
     { value: '/image/ADF-11F-Raven.png',  text: 'ADF-11F Raven' },
-    { value: '/image/Rekon5-Rocket.png',  text: 'Rekon5 Rocket' },
   ],
 })
 
@@ -121,12 +121,12 @@ Alpine.data('xSelect', ({ model, storeOptions, options: staticOpts, onChange, pl
       if (this.$el.contains(e.target)) return
       this.open = false
     }
-    window.addEventListener('scroll', this._closeOnScroll, true)
+    window.addEventListener('scroll', this._closeOnScroll)
   },
 
   /** Alpine.js ライフサイクル: スクロールリスナーを解除する */
   destroy() {
-    window.removeEventListener('scroll', this._closeOnScroll, true)
+    window.removeEventListener('scroll', this._closeOnScroll)
   },
 
   /** storeOptions または staticOpts から生のオプション配列を返す */
