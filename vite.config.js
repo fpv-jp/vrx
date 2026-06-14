@@ -16,9 +16,11 @@ function gcsProxyPlugin() {
   function getToken() {
     if (Date.now() < tokenExpiry) return token
     try {
-      token = execSync(`gcloud auth print-access-token --account ${GCS_SA}`, { timeout: 5000 }).toString().trim()
+      token = execSync(`/usr/local/bin/gcloud auth print-access-token --account ${GCS_SA}`, { timeout: 5000 }).toString().trim()
       tokenExpiry = Date.now() + 55 * 60 * 1000
-    } catch {
+      console.log('[gcs-proxy] token refreshed')
+    } catch (e) {
+      console.error('[gcs-proxy] gcloud failed:', e.message)
       token = null
     }
     return token
