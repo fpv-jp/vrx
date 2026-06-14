@@ -25,7 +25,7 @@ export const ReceiverState = {
   audioText: '',
   headUpDisplay: TelemetryOverlay(HeadUpDisplay),
 
-  searchRadar: SearchRadar(RadarMap),
+  searchRadar: SearchRadar(SearchRadarCanvas),
 
   cmd: null,
 }
