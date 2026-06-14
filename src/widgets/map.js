@@ -70,43 +70,19 @@ function styleWithPmtiles(url) {
         type: 'line',
         source: 'protomaps',
         'source-layer': 'physical_line',
-        filter: ['match', ['get', 'pmap:kind'], ['river', 'stream', 'canal', 'drain'], true, false],
         paint: {
           'line-color': '#2a5f8f',
           'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 16, 2],
         },
       },
       {
-        id: 'roads-minor',
+        id: 'roads-all',
         type: 'line',
         source: 'protomaps',
         'source-layer': 'roads',
-        filter: ['match', ['get', 'pmap:kind'], ['minor_road', 'path', 'track'], true, false],
-        paint: {
-          'line-color': '#4a4a7a',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 14, 0.5, 18, 2],
-        },
-      },
-      {
-        id: 'roads-medium',
-        type: 'line',
-        source: 'protomaps',
-        'source-layer': 'roads',
-        filter: ['match', ['get', 'pmap:kind'], ['medium_road'], true, false],
-        paint: {
-          'line-color': '#6a6aaa',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 18, 3],
-        },
-      },
-      {
-        id: 'roads-major',
-        type: 'line',
-        source: 'protomaps',
-        'source-layer': 'roads',
-        filter: ['match', ['get', 'pmap:kind'], ['highway', 'major_road'], true, false],
         paint: {
           'line-color': '#9090cc',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 18, 5],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 18, 3],
         },
       },
       {
@@ -176,15 +152,13 @@ export function init() {
     bearing: 0,
     antialias: true,
     attributionControl: false,
+    scrollZoom: false,
   })
-
-  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right')
 
   droneMarker = createDroneMarker()
   droneMarker.setLngLat(DEFAULT_CENTER).addTo(map)
 
   map.on('error', (e) => { console.error('[DroneMap] error:', e.error?.message ?? e) })
-  map.on('styledata', () => { console.log('[DroneMap] style loaded') })
 
   // ドラッグ開始でフォロー解除、ダブルクリックで再フォロー
   map.on('dragstart', () => { isFollowing = false })
