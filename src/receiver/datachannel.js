@@ -285,6 +285,13 @@ function openGstreamerDataChannel(channel) {
         MonitorState.wifi = wifi
       }
       break
+
+    case ChannelLabel.VTX_NOTIFY_MESSAGE:
+      VtxConsole.log('VTX_NOTIFY_MESSAGE open')
+      channel.onmessage = ({ data }) => {
+        VtxConsole.log(data.trimEnd())
+      }
+      break
   }
 }
 

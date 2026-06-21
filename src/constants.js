@@ -18,6 +18,7 @@ const Constants = {
     MSP_SONAR: 'MSP_SONAR',
     MSP_BATTERY_STATE: 'MSP_BATTERY_STATE',
     WPA_SUPPLICANT: 'WPA_SUPPLICANT',
+    VTX_NOTIFY_MESSAGE: 'VTX_NOTIFY_MESSAGE',
   }),
   Command: Object.freeze({
     HANG_UP: 0,
